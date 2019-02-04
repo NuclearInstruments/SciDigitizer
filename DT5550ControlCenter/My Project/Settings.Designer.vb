@@ -400,6 +400,18 @@ Namespace My
                 Me("parRun") = value
             End Set
         End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("")>  _
+        Public Property AFECalibration() As String
+            Get
+                Return CType(Me("AFECalibration"),String)
+            End Get
+            Set
+                Me("AFECalibration") = value
+            End Set
+        End Property
     End Class
 End Namespace
 

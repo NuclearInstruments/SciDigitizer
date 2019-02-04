@@ -36,7 +36,7 @@ Public Class pOscilloscope
     Dim Checked_id As New List(Of Integer)
     Dim MutexFile As New Mutex
     Dim objRawWriter As StreamWriter
-
+    Dim totalACQ As Integer = 0
     Dim plotS As Integer = 0
     Dim colorList() As Color = {Color.Red, Color.Yellow, Color.Lime, Color.Cyan, Color.Magenta, Color.Blue, Color.BlueViolet, Color.Violet, Color.Peru, Color.Orange, Color.White,
                                 Color.DarkRed, Color.Gold, Color.DarkGreen, Color.Teal, Color.HotPink, Color.RoyalBlue, Color.Purple, Color.Sienna, Color.Chocolate, Color.LightSlateGray,
@@ -116,11 +116,11 @@ Public Class pOscilloscope
         Pesgo1.PeGrid.MultiAxesSubsets(4) = 1
 
         Pesgo1.PeUserInterface.Allow.MultiAxesSizing = True
-        Pesgo1.PeGrid.MultiAxesProportions(0) = 0.6
-        Pesgo1.PeGrid.MultiAxesProportions(1) = 0.1
-        Pesgo1.PeGrid.MultiAxesProportions(2) = 0.1
-        Pesgo1.PeGrid.MultiAxesProportions(3) = 0.1
-        Pesgo1.PeGrid.MultiAxesProportions(4) = 0.1
+        Pesgo1.PeGrid.MultiAxesProportions(0) = 0.8
+        Pesgo1.PeGrid.MultiAxesProportions(1) = 0.05
+        Pesgo1.PeGrid.MultiAxesProportions(2) = 0.05
+        Pesgo1.PeGrid.MultiAxesProportions(3) = 0.05
+        Pesgo1.PeGrid.MultiAxesProportions(4) = 0.05
 
         Pesgo1.PeLegend.Show = False
         Pesgo1.PeLegend.SimpleLine = True
@@ -183,7 +183,8 @@ Public Class pOscilloscope
         Pesgo1.PeData.NullDataValue = Double.MinValue
         Pesgo1.PeGrid.WorkingAxis = 0
         Pesgo1.PeString.YAxisLabel = "ANALOG"
-        Pesgo1.PeGrid.WorkingAxis = 1
+
+
         If Connection.CustomFirmware Then
             Pesgo1.PeString.YAxisLabel = "Digital 0"
         Else
@@ -253,6 +254,11 @@ Public Class pOscilloscope
         Pesgo1.PeFunction.Force3dxNewColors = True
         Pesgo1.PeFunction.ReinitializeResetImage()
 
+
+        Pesgo1.PeGrid.WorkingAxis = 0
+        Pesgo1.PeGrid.Configure.ManualScaleControlY = ManualScaleControl.MinMax
+        Pesgo1.PeGrid.Configure.ManualMinY = 0
+        Pesgo1.PeGrid.Configure.ManualMaxY = 16384
     End Sub
 
     Private Sub Pesgo1_KeyPress(sender As Object, e As KeyPressEventArgs) Handles Pesgo1.KeyPress
@@ -278,7 +284,7 @@ Public Class pOscilloscope
     End Sub
 
     Public Sub StartDataCaptureOnFile(file As String)
-
+        totalACQ = 0
         MutexFile.WaitOne()
         If fileEnable = False Then
             fileName = file
@@ -311,7 +317,7 @@ Public Class pOscilloscope
         setOscilloscopeParam()
         Timer1.Enabled = True
         running = True
-        MainForm.sets.Apply.Enabled = False
+        'MainForm.sets.Apply.Enabled = False
         MainForm.plog.TextBox1.AppendText("Starting Oscilloscope Free Running Acquisition..." & vbCrLf)
 
     End Sub
@@ -388,6 +394,7 @@ Public Class pOscilloscope
 
     Public Sub SingleShotA()
 
+
         setOscilloscopeParam()
         Pesgo1.PeLegend.SubsetsToLegend.Clear()
         Dim n_ch As Integer
@@ -401,6 +408,10 @@ Public Class pOscilloscope
         Dim tt = Now
         While status <> 1
             Connection.ComClass.GetRegister(addressStatus, status)
+            Application.DoEvents()
+            If MainForm.__Running_OSC = False Then
+                Exit Sub
+            End If
             If (Now - tt).TotalMilliseconds > 2000 Then
                 Exit Sub
             End If
@@ -451,7 +462,7 @@ Public Class pOscilloscope
                         If curr > 0 Then
                             Dim k = 0
                             For i = curr To nsamples - 2
-                                AnalogArray(k + nsamples * n) = data(i + nsamples * ch) And 65535
+                                AnalogArray(k + nsamples * n) = (data(i + nsamples * ch) And 65535)
                                 Digital1Array(k + nsamples * n) = data(i + nsamples * ch) >> 16 And 1
                                 Digital2Array(k + nsamples * n) = data(i + nsamples * ch) >> 17 And 1
                                 Digital3Array(k + nsamples * n) = data(i + nsamples * ch) >> 18 And 1
@@ -459,7 +470,7 @@ Public Class pOscilloscope
                                 k += 1
                             Next
                             For i = 0 To curr - 1
-                                AnalogArray(k + nsamples * n) = data(i + nsamples * ch) And 65535
+                                AnalogArray(k + nsamples * n) = (data(i + nsamples * ch) And 65535)
                                 Digital1Array(k + nsamples * n) = data(i + nsamples * ch) >> 16 And 1
                                 Digital2Array(k + nsamples * n) = data(i + nsamples * ch) >> 17 And 1
                                 Digital3Array(k + nsamples * n) = data(i + nsamples * ch) >> 18 And 1
@@ -469,7 +480,7 @@ Public Class pOscilloscope
                         Else
                             Dim k = 0
                             For i = nsamples + curr To nsamples - 2
-                                AnalogArray(k + nsamples * n) = data(i + nsamples * ch) And 65535
+                                AnalogArray(k + nsamples * n) = (data(i + nsamples * ch) And 65535)
                                 Digital1Array(k + nsamples * n) = data(i + nsamples * ch) >> 16 And 1
                                 Digital2Array(k + nsamples * n) = data(i + nsamples * ch) >> 17 And 1
                                 Digital3Array(k + nsamples * n) = data(i + nsamples * ch) >> 18 And 1
@@ -477,7 +488,7 @@ Public Class pOscilloscope
                                 k += 1
                             Next
                             For i = 0 To nsamples + curr - 1
-                                AnalogArray(k + nsamples * n) = data(i + nsamples * ch) And 65535
+                                AnalogArray(k + nsamples * n) = (data(i + nsamples * ch) And 65535)
                                 Digital1Array(k + nsamples * n) = data(i + nsamples * ch) >> 16 And 1
                                 Digital2Array(k + nsamples * n) = data(i + nsamples * ch) >> 17 And 1
                                 Digital3Array(k + nsamples * n) = data(i + nsamples * ch) >> 18 And 1
@@ -538,6 +549,8 @@ Public Class pOscilloscope
                     Pesgo1.PeFunction.Reinitialize()
                     Pesgo1.PeFunction.ResetImage(0, 0)
                 End If
+                totalACQ += 1
+                Pesgo1.PeString.MainTitle = "Real Time Oscilloscope (" & totalACQ & ")"
                 Pesgo1.Invalidate()
                 Pesgo1.PeFunction.ReinitializeResetImage()
             End If

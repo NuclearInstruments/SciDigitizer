@@ -27,14 +27,9 @@ Partial Class MainForm
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(MainForm))
         Me.MenuStrip = New System.Windows.Forms.MenuStrip()
         Me.FileMenu = New System.Windows.Forms.ToolStripMenuItem()
-        Me.NewToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.OpenToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripSeparator3 = New System.Windows.Forms.ToolStripSeparator()
-        Me.SaveToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.SaveAsToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripSeparator4 = New System.Windows.Forms.ToolStripSeparator()
-        Me.PrintToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.PrintPreviewToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.PrintSetupToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripSeparator5 = New System.Windows.Forms.ToolStripSeparator()
         Me.ExitToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
@@ -45,11 +40,24 @@ Partial Class MainForm
         Me.OptionsToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.HelpMenu = New System.Windows.Forms.ToolStripMenuItem()
         Me.ContentsToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.IndexToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.SearchToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripSeparator8 = New System.Windows.Forms.ToolStripSeparator()
         Me.AboutToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStrip = New System.Windows.Forms.ToolStrip()
+        Me.ToolStripSeparator6 = New System.Windows.Forms.ToolStripSeparator()
+        Me.ToolStripLabel3 = New System.Windows.Forms.ToolStripLabel()
+        Me.ToolStripSeparator1 = New System.Windows.Forms.ToolStripSeparator()
+        Me.ToolStripLabel1 = New System.Windows.Forms.ToolStripLabel()
+        Me.ToolStripSeparator2 = New System.Windows.Forms.ToolStripSeparator()
+        Me.ToolStripLabel2 = New System.Windows.Forms.ToolStripLabel()
+        Me.ToolStripSeparator7 = New System.Windows.Forms.ToolStripSeparator()
+        Me.ProgressBar = New System.Windows.Forms.ToolStripProgressBar()
+        Me.ToolStripLabel4 = New System.Windows.Forms.ToolStripLabel()
+        Me.ToolStripSeparator9 = New System.Windows.Forms.ToolStripSeparator()
+        Me.StatusStrip = New System.Windows.Forms.StatusStrip()
+        Me.ToolStripStatusLabel = New System.Windows.Forms.ToolStripStatusLabel()
+        Me.ToolTip = New System.Windows.Forms.ToolTip(Me.components)
+        Me.Timer1 = New System.Windows.Forms.Timer(Me.components)
+        Me.SaveFileDialog1 = New System.Windows.Forms.SaveFileDialog()
         Me.ToolStripDropDownButton1 = New System.Windows.Forms.ToolStripDropDownButton()
         Me.SpectrumToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.LogLinToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
@@ -85,33 +93,26 @@ Partial Class MainForm
         Me.PrintToolStripMenuItem1 = New System.Windows.Forms.ToolStripMenuItem()
         Me.OscilloscopeToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.SpectrumToolStripMenuItem1 = New System.Windows.Forms.ToolStripMenuItem()
-        Me.ToolStripSeparator6 = New System.Windows.Forms.ToolStripSeparator()
-        Me.ToolStripLabel3 = New System.Windows.Forms.ToolStripLabel()
         Me.OpenToolStripButton = New System.Windows.Forms.ToolStripButton()
         Me.SaveToolStripButton = New System.Windows.Forms.ToolStripButton()
-        Me.ToolStripSeparator1 = New System.Windows.Forms.ToolStripSeparator()
-        Me.ToolStripLabel1 = New System.Windows.Forms.ToolStripLabel()
         Me.FreeRunStart = New System.Windows.Forms.ToolStripButton()
         Me.FreeRunStop = New System.Windows.Forms.ToolStripButton()
         Me.SingleShot = New System.Windows.Forms.ToolStripButton()
-        Me.ToolStripSeparator2 = New System.Windows.Forms.ToolStripSeparator()
-        Me.ToolStripLabel2 = New System.Windows.Forms.ToolStripLabel()
         Me.StartSpectrum = New System.Windows.Forms.ToolStripButton()
         Me.StopSpectrum = New System.Windows.Forms.ToolStripButton()
         Me.FittingSpectrum = New System.Windows.Forms.ToolStripButton()
         Me.ResetSpectrum = New System.Windows.Forms.ToolStripButton()
         Me.SaveSpectrum = New System.Windows.Forms.ToolStripButton()
-        Me.ToolStripSeparator7 = New System.Windows.Forms.ToolStripSeparator()
-        Me.ProgressBar = New System.Windows.Forms.ToolStripProgressBar()
-        Me.ToolStripLabel4 = New System.Windows.Forms.ToolStripLabel()
         Me.SaveData = New System.Windows.Forms.ToolStripButton()
         Me.StopSaveData = New System.Windows.Forms.ToolStripButton()
-        Me.ToolStripSeparator9 = New System.Windows.Forms.ToolStripSeparator()
-        Me.StatusStrip = New System.Windows.Forms.StatusStrip()
-        Me.ToolStripStatusLabel = New System.Windows.Forms.ToolStripStatusLabel()
-        Me.ToolTip = New System.Windows.Forms.ToolTip(Me.components)
-        Me.Timer1 = New System.Windows.Forms.Timer(Me.components)
-        Me.SaveFileDialog1 = New System.Windows.Forms.SaveFileDialog()
+        Me.NewToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.OpenToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.SaveToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.PrintToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.PrintPreviewToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.IndexToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.SearchToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.OffsetCalibrationToolToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.MenuStrip.SuspendLayout()
         Me.ToolStrip.SuspendLayout()
         Me.StatusStrip.SuspendLayout()
@@ -137,37 +138,10 @@ Partial Class MainForm
         Me.FileMenu.Size = New System.Drawing.Size(37, 22)
         Me.FileMenu.Text = "&File"
         '
-        'NewToolStripMenuItem
-        '
-        Me.NewToolStripMenuItem.Image = CType(resources.GetObject("NewToolStripMenuItem.Image"), System.Drawing.Image)
-        Me.NewToolStripMenuItem.ImageTransparentColor = System.Drawing.Color.Black
-        Me.NewToolStripMenuItem.Name = "NewToolStripMenuItem"
-        Me.NewToolStripMenuItem.ShortcutKeys = CType((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.N), System.Windows.Forms.Keys)
-        Me.NewToolStripMenuItem.Size = New System.Drawing.Size(185, 22)
-        Me.NewToolStripMenuItem.Text = "&Nuovo"
-        '
-        'OpenToolStripMenuItem
-        '
-        Me.OpenToolStripMenuItem.Image = CType(resources.GetObject("OpenToolStripMenuItem.Image"), System.Drawing.Image)
-        Me.OpenToolStripMenuItem.ImageTransparentColor = System.Drawing.Color.Black
-        Me.OpenToolStripMenuItem.Name = "OpenToolStripMenuItem"
-        Me.OpenToolStripMenuItem.ShortcutKeys = CType((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.O), System.Windows.Forms.Keys)
-        Me.OpenToolStripMenuItem.Size = New System.Drawing.Size(185, 22)
-        Me.OpenToolStripMenuItem.Text = "&Apri"
-        '
         'ToolStripSeparator3
         '
         Me.ToolStripSeparator3.Name = "ToolStripSeparator3"
         Me.ToolStripSeparator3.Size = New System.Drawing.Size(182, 6)
-        '
-        'SaveToolStripMenuItem
-        '
-        Me.SaveToolStripMenuItem.Image = CType(resources.GetObject("SaveToolStripMenuItem.Image"), System.Drawing.Image)
-        Me.SaveToolStripMenuItem.ImageTransparentColor = System.Drawing.Color.Black
-        Me.SaveToolStripMenuItem.Name = "SaveToolStripMenuItem"
-        Me.SaveToolStripMenuItem.ShortcutKeys = CType((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.S), System.Windows.Forms.Keys)
-        Me.SaveToolStripMenuItem.Size = New System.Drawing.Size(185, 22)
-        Me.SaveToolStripMenuItem.Text = "&Salva"
         '
         'SaveAsToolStripMenuItem
         '
@@ -179,23 +153,6 @@ Partial Class MainForm
         '
         Me.ToolStripSeparator4.Name = "ToolStripSeparator4"
         Me.ToolStripSeparator4.Size = New System.Drawing.Size(182, 6)
-        '
-        'PrintToolStripMenuItem
-        '
-        Me.PrintToolStripMenuItem.Image = CType(resources.GetObject("PrintToolStripMenuItem.Image"), System.Drawing.Image)
-        Me.PrintToolStripMenuItem.ImageTransparentColor = System.Drawing.Color.Black
-        Me.PrintToolStripMenuItem.Name = "PrintToolStripMenuItem"
-        Me.PrintToolStripMenuItem.ShortcutKeys = CType((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.P), System.Windows.Forms.Keys)
-        Me.PrintToolStripMenuItem.Size = New System.Drawing.Size(185, 22)
-        Me.PrintToolStripMenuItem.Text = "&Stampa"
-        '
-        'PrintPreviewToolStripMenuItem
-        '
-        Me.PrintPreviewToolStripMenuItem.Image = CType(resources.GetObject("PrintPreviewToolStripMenuItem.Image"), System.Drawing.Image)
-        Me.PrintPreviewToolStripMenuItem.ImageTransparentColor = System.Drawing.Color.Black
-        Me.PrintPreviewToolStripMenuItem.Name = "PrintPreviewToolStripMenuItem"
-        Me.PrintPreviewToolStripMenuItem.Size = New System.Drawing.Size(185, 22)
-        Me.PrintPreviewToolStripMenuItem.Text = "Anteprima &di stampa"
         '
         'PrintSetupToolStripMenuItem
         '
@@ -266,22 +223,6 @@ Partial Class MainForm
         Me.ContentsToolStripMenuItem.Size = New System.Drawing.Size(175, 22)
         Me.ContentsToolStripMenuItem.Text = "&Sommario"
         '
-        'IndexToolStripMenuItem
-        '
-        Me.IndexToolStripMenuItem.Image = CType(resources.GetObject("IndexToolStripMenuItem.Image"), System.Drawing.Image)
-        Me.IndexToolStripMenuItem.ImageTransparentColor = System.Drawing.Color.Black
-        Me.IndexToolStripMenuItem.Name = "IndexToolStripMenuItem"
-        Me.IndexToolStripMenuItem.Size = New System.Drawing.Size(175, 22)
-        Me.IndexToolStripMenuItem.Text = "&Indice"
-        '
-        'SearchToolStripMenuItem
-        '
-        Me.SearchToolStripMenuItem.Image = CType(resources.GetObject("SearchToolStripMenuItem.Image"), System.Drawing.Image)
-        Me.SearchToolStripMenuItem.ImageTransparentColor = System.Drawing.Color.Black
-        Me.SearchToolStripMenuItem.Name = "SearchToolStripMenuItem"
-        Me.SearchToolStripMenuItem.Size = New System.Drawing.Size(175, 22)
-        Me.SearchToolStripMenuItem.Text = "&Cerca"
-        '
         'ToolStripSeparator8
         '
         Me.ToolStripSeparator8.Name = "ToolStripSeparator8"
@@ -304,6 +245,87 @@ Partial Class MainForm
         Me.ToolStrip.TabIndex = 6
         Me.ToolStrip.Text = "ToolStrip"
         '
+        'ToolStripSeparator6
+        '
+        Me.ToolStripSeparator6.Name = "ToolStripSeparator6"
+        Me.ToolStripSeparator6.Size = New System.Drawing.Size(6, 37)
+        '
+        'ToolStripLabel3
+        '
+        Me.ToolStripLabel3.Name = "ToolStripLabel3"
+        Me.ToolStripLabel3.Size = New System.Drawing.Size(49, 34)
+        Me.ToolStripLabel3.Text = "Settings"
+        '
+        'ToolStripSeparator1
+        '
+        Me.ToolStripSeparator1.Name = "ToolStripSeparator1"
+        Me.ToolStripSeparator1.Size = New System.Drawing.Size(6, 37)
+        '
+        'ToolStripLabel1
+        '
+        Me.ToolStripLabel1.Name = "ToolStripLabel1"
+        Me.ToolStripLabel1.Size = New System.Drawing.Size(74, 34)
+        Me.ToolStripLabel1.Text = "Oscilloscope"
+        '
+        'ToolStripSeparator2
+        '
+        Me.ToolStripSeparator2.Name = "ToolStripSeparator2"
+        Me.ToolStripSeparator2.Size = New System.Drawing.Size(6, 37)
+        '
+        'ToolStripLabel2
+        '
+        Me.ToolStripLabel2.Name = "ToolStripLabel2"
+        Me.ToolStripLabel2.Size = New System.Drawing.Size(58, 34)
+        Me.ToolStripLabel2.Text = "Spectrum"
+        '
+        'ToolStripSeparator7
+        '
+        Me.ToolStripSeparator7.Name = "ToolStripSeparator7"
+        Me.ToolStripSeparator7.Size = New System.Drawing.Size(6, 37)
+        '
+        'ProgressBar
+        '
+        Me.ProgressBar.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right
+        Me.ProgressBar.ForeColor = System.Drawing.Color.DodgerBlue
+        Me.ProgressBar.Name = "ProgressBar"
+        Me.ProgressBar.Size = New System.Drawing.Size(100, 34)
+        '
+        'ToolStripLabel4
+        '
+        Me.ToolStripLabel4.Name = "ToolStripLabel4"
+        Me.ToolStripLabel4.Size = New System.Drawing.Size(67, 34)
+        Me.ToolStripLabel4.Text = "Acquisition"
+        '
+        'ToolStripSeparator9
+        '
+        Me.ToolStripSeparator9.Name = "ToolStripSeparator9"
+        Me.ToolStripSeparator9.Size = New System.Drawing.Size(6, 37)
+        '
+        'StatusStrip
+        '
+        Me.StatusStrip.ImageScalingSize = New System.Drawing.Size(20, 20)
+        Me.StatusStrip.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ToolStripStatusLabel})
+        Me.StatusStrip.Location = New System.Drawing.Point(0, 859)
+        Me.StatusStrip.Name = "StatusStrip"
+        Me.StatusStrip.Size = New System.Drawing.Size(1384, 19)
+        Me.StatusStrip.TabIndex = 7
+        Me.StatusStrip.Text = "StatusStrip"
+        Me.StatusStrip.Visible = False
+        '
+        'ToolStripStatusLabel
+        '
+        Me.ToolStripStatusLabel.Name = "ToolStripStatusLabel"
+        Me.ToolStripStatusLabel.Size = New System.Drawing.Size(34, 14)
+        Me.ToolStripStatusLabel.Text = "Stato"
+        '
+        'Timer1
+        '
+        Me.Timer1.Enabled = True
+        '
+        'SaveFileDialog1
+        '
+        Me.SaveFileDialog1.Filter = "CSV File (*.csv)|*.csv"
+        '
         'ToolStripDropDownButton1
         '
         Me.ToolStripDropDownButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image
@@ -318,20 +340,20 @@ Partial Class MainForm
         '
         Me.SpectrumToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.LogLinToolStripMenuItem, Me.PlotModeToolStripMenuItem, Me.RebinToolStripMenuItem})
         Me.SpectrumToolStripMenuItem.Name = "SpectrumToolStripMenuItem"
-        Me.SpectrumToolStripMenuItem.Size = New System.Drawing.Size(125, 22)
+        Me.SpectrumToolStripMenuItem.Size = New System.Drawing.Size(152, 22)
         Me.SpectrumToolStripMenuItem.Text = "Spectrum"
         '
         'LogLinToolStripMenuItem
         '
         Me.LogLinToolStripMenuItem.Name = "LogLinToolStripMenuItem"
-        Me.LogLinToolStripMenuItem.Size = New System.Drawing.Size(129, 22)
+        Me.LogLinToolStripMenuItem.Size = New System.Drawing.Size(152, 22)
         Me.LogLinToolStripMenuItem.Text = "Log/Lin"
         '
         'PlotModeToolStripMenuItem
         '
         Me.PlotModeToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.StepToolStripMenuItem, Me.LineToolStripMenuItem, Me.LineWithInterpolationToolStripMenuItem, Me.DotToolStripMenuItem, Me.DotWithLineToolStripMenuItem, Me.DotWithInterpolationToolStripMenuItem, Me.AreaToolStripMenuItem, Me.AreaWithInterpolationToolStripMenuItem, Me.BarToolStripMenuItem})
         Me.PlotModeToolStripMenuItem.Name = "PlotModeToolStripMenuItem"
-        Me.PlotModeToolStripMenuItem.Size = New System.Drawing.Size(129, 22)
+        Me.PlotModeToolStripMenuItem.Size = New System.Drawing.Size(152, 22)
         Me.PlotModeToolStripMenuItem.Text = "Plot Mode"
         '
         'StepToolStripMenuItem
@@ -392,7 +414,7 @@ Partial Class MainForm
         '
         Me.RebinToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ToolStripMenuItem2, Me.ToolStripMenuItem3, Me.ToolStripMenuItem4, Me.ToolStripMenuItem5, Me.ToolStripMenuItem6, Me.ToolStripMenuItem7, Me.ToolStripMenuItem8, Me.ToolStripMenuItem9, Me.ToolStripMenuItem10})
         Me.RebinToolStripMenuItem.Name = "RebinToolStripMenuItem"
-        Me.RebinToolStripMenuItem.Size = New System.Drawing.Size(129, 22)
+        Me.RebinToolStripMenuItem.Size = New System.Drawing.Size(152, 22)
         Me.RebinToolStripMenuItem.Text = "Rebin"
         '
         'ToolStripMenuItem2
@@ -453,45 +475,45 @@ Partial Class MainForm
         '
         Me.ViewToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.AreaToolStripMenuItem1, Me.HorizontalToolStripMenuItem, Me.VerticalToolStripMenuItem, Me.UnzoomToolStripMenuItem})
         Me.ViewToolStripMenuItem.Name = "ViewToolStripMenuItem"
-        Me.ViewToolStripMenuItem.Size = New System.Drawing.Size(125, 22)
+        Me.ViewToolStripMenuItem.Size = New System.Drawing.Size(152, 22)
         Me.ViewToolStripMenuItem.Text = "View"
         '
         'AreaToolStripMenuItem1
         '
         Me.AreaToolStripMenuItem1.Name = "AreaToolStripMenuItem1"
-        Me.AreaToolStripMenuItem1.Size = New System.Drawing.Size(129, 22)
+        Me.AreaToolStripMenuItem1.Size = New System.Drawing.Size(152, 22)
         Me.AreaToolStripMenuItem1.Text = "Area"
         '
         'HorizontalToolStripMenuItem
         '
         Me.HorizontalToolStripMenuItem.Name = "HorizontalToolStripMenuItem"
-        Me.HorizontalToolStripMenuItem.Size = New System.Drawing.Size(129, 22)
+        Me.HorizontalToolStripMenuItem.Size = New System.Drawing.Size(152, 22)
         Me.HorizontalToolStripMenuItem.Text = "Horizontal"
         '
         'VerticalToolStripMenuItem
         '
         Me.VerticalToolStripMenuItem.Name = "VerticalToolStripMenuItem"
-        Me.VerticalToolStripMenuItem.Size = New System.Drawing.Size(129, 22)
+        Me.VerticalToolStripMenuItem.Size = New System.Drawing.Size(152, 22)
         Me.VerticalToolStripMenuItem.Text = "Vertical"
         '
         'UnzoomToolStripMenuItem
         '
         Me.UnzoomToolStripMenuItem.Name = "UnzoomToolStripMenuItem"
-        Me.UnzoomToolStripMenuItem.Size = New System.Drawing.Size(129, 22)
+        Me.UnzoomToolStripMenuItem.Size = New System.Drawing.Size(152, 22)
         Me.UnzoomToolStripMenuItem.Text = "Unzoom"
         '
         'FieToolStripMenuItem
         '
-        Me.FieToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ExportToolStripMenuItem, Me.PrintToolStripMenuItem1})
+        Me.FieToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ExportToolStripMenuItem, Me.PrintToolStripMenuItem1, Me.OffsetCalibrationToolToolStripMenuItem})
         Me.FieToolStripMenuItem.Name = "FieToolStripMenuItem"
-        Me.FieToolStripMenuItem.Size = New System.Drawing.Size(125, 22)
+        Me.FieToolStripMenuItem.Size = New System.Drawing.Size(152, 22)
         Me.FieToolStripMenuItem.Text = "File"
         '
         'ExportToolStripMenuItem
         '
         Me.ExportToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.OscilloscopeImageToolStripMenuItem, Me.SpectrumImageToolStripMenuItem})
         Me.ExportToolStripMenuItem.Name = "ExportToolStripMenuItem"
-        Me.ExportToolStripMenuItem.Size = New System.Drawing.Size(107, 22)
+        Me.ExportToolStripMenuItem.Size = New System.Drawing.Size(193, 22)
         Me.ExportToolStripMenuItem.Text = "Export"
         '
         'OscilloscopeImageToolStripMenuItem
@@ -510,7 +532,7 @@ Partial Class MainForm
         '
         Me.PrintToolStripMenuItem1.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.OscilloscopeToolStripMenuItem, Me.SpectrumToolStripMenuItem1})
         Me.PrintToolStripMenuItem1.Name = "PrintToolStripMenuItem1"
-        Me.PrintToolStripMenuItem1.Size = New System.Drawing.Size(107, 22)
+        Me.PrintToolStripMenuItem1.Size = New System.Drawing.Size(193, 22)
         Me.PrintToolStripMenuItem1.Text = "Print"
         '
         'OscilloscopeToolStripMenuItem
@@ -524,17 +546,6 @@ Partial Class MainForm
         Me.SpectrumToolStripMenuItem1.Name = "SpectrumToolStripMenuItem1"
         Me.SpectrumToolStripMenuItem1.Size = New System.Drawing.Size(141, 22)
         Me.SpectrumToolStripMenuItem1.Text = "Spectrum"
-        '
-        'ToolStripSeparator6
-        '
-        Me.ToolStripSeparator6.Name = "ToolStripSeparator6"
-        Me.ToolStripSeparator6.Size = New System.Drawing.Size(6, 37)
-        '
-        'ToolStripLabel3
-        '
-        Me.ToolStripLabel3.Name = "ToolStripLabel3"
-        Me.ToolStripLabel3.Size = New System.Drawing.Size(49, 34)
-        Me.ToolStripLabel3.Text = "Settings"
         '
         'OpenToolStripButton
         '
@@ -555,17 +566,6 @@ Partial Class MainForm
         Me.SaveToolStripButton.Size = New System.Drawing.Size(34, 34)
         Me.SaveToolStripButton.Text = "Save Configuration"
         Me.SaveToolStripButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText
-        '
-        'ToolStripSeparator1
-        '
-        Me.ToolStripSeparator1.Name = "ToolStripSeparator1"
-        Me.ToolStripSeparator1.Size = New System.Drawing.Size(6, 37)
-        '
-        'ToolStripLabel1
-        '
-        Me.ToolStripLabel1.Name = "ToolStripLabel1"
-        Me.ToolStripLabel1.Size = New System.Drawing.Size(74, 34)
-        Me.ToolStripLabel1.Text = "Oscilloscope"
         '
         'FreeRunStart
         '
@@ -596,17 +596,6 @@ Partial Class MainForm
         Me.SingleShot.Name = "SingleShot"
         Me.SingleShot.Size = New System.Drawing.Size(34, 34)
         Me.SingleShot.Text = "Single Acquisition"
-        '
-        'ToolStripSeparator2
-        '
-        Me.ToolStripSeparator2.Name = "ToolStripSeparator2"
-        Me.ToolStripSeparator2.Size = New System.Drawing.Size(6, 37)
-        '
-        'ToolStripLabel2
-        '
-        Me.ToolStripLabel2.Name = "ToolStripLabel2"
-        Me.ToolStripLabel2.Size = New System.Drawing.Size(58, 34)
-        Me.ToolStripLabel2.Text = "Spectrum"
         '
         'StartSpectrum
         '
@@ -654,24 +643,6 @@ Partial Class MainForm
         Me.SaveSpectrum.Size = New System.Drawing.Size(34, 34)
         Me.SaveSpectrum.Text = "Save Data"
         '
-        'ToolStripSeparator7
-        '
-        Me.ToolStripSeparator7.Name = "ToolStripSeparator7"
-        Me.ToolStripSeparator7.Size = New System.Drawing.Size(6, 37)
-        '
-        'ProgressBar
-        '
-        Me.ProgressBar.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right
-        Me.ProgressBar.ForeColor = System.Drawing.Color.DodgerBlue
-        Me.ProgressBar.Name = "ProgressBar"
-        Me.ProgressBar.Size = New System.Drawing.Size(100, 34)
-        '
-        'ToolStripLabel4
-        '
-        Me.ToolStripLabel4.Name = "ToolStripLabel4"
-        Me.ToolStripLabel4.Size = New System.Drawing.Size(67, 34)
-        Me.ToolStripLabel4.Text = "Acquisition"
-        '
         'SaveData
         '
         Me.SaveData.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image
@@ -692,35 +663,71 @@ Partial Class MainForm
         Me.StopSaveData.Size = New System.Drawing.Size(34, 34)
         Me.StopSaveData.Text = "Stop Data Record"
         '
-        'ToolStripSeparator9
+        'NewToolStripMenuItem
         '
-        Me.ToolStripSeparator9.Name = "ToolStripSeparator9"
-        Me.ToolStripSeparator9.Size = New System.Drawing.Size(6, 37)
+        Me.NewToolStripMenuItem.Image = CType(resources.GetObject("NewToolStripMenuItem.Image"), System.Drawing.Image)
+        Me.NewToolStripMenuItem.ImageTransparentColor = System.Drawing.Color.Black
+        Me.NewToolStripMenuItem.Name = "NewToolStripMenuItem"
+        Me.NewToolStripMenuItem.ShortcutKeys = CType((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.N), System.Windows.Forms.Keys)
+        Me.NewToolStripMenuItem.Size = New System.Drawing.Size(185, 22)
+        Me.NewToolStripMenuItem.Text = "&Nuovo"
         '
-        'StatusStrip
+        'OpenToolStripMenuItem
         '
-        Me.StatusStrip.ImageScalingSize = New System.Drawing.Size(20, 20)
-        Me.StatusStrip.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ToolStripStatusLabel})
-        Me.StatusStrip.Location = New System.Drawing.Point(0, 859)
-        Me.StatusStrip.Name = "StatusStrip"
-        Me.StatusStrip.Size = New System.Drawing.Size(1384, 19)
-        Me.StatusStrip.TabIndex = 7
-        Me.StatusStrip.Text = "StatusStrip"
-        Me.StatusStrip.Visible = False
+        Me.OpenToolStripMenuItem.Image = CType(resources.GetObject("OpenToolStripMenuItem.Image"), System.Drawing.Image)
+        Me.OpenToolStripMenuItem.ImageTransparentColor = System.Drawing.Color.Black
+        Me.OpenToolStripMenuItem.Name = "OpenToolStripMenuItem"
+        Me.OpenToolStripMenuItem.ShortcutKeys = CType((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.O), System.Windows.Forms.Keys)
+        Me.OpenToolStripMenuItem.Size = New System.Drawing.Size(185, 22)
+        Me.OpenToolStripMenuItem.Text = "&Apri"
         '
-        'ToolStripStatusLabel
+        'SaveToolStripMenuItem
         '
-        Me.ToolStripStatusLabel.Name = "ToolStripStatusLabel"
-        Me.ToolStripStatusLabel.Size = New System.Drawing.Size(34, 14)
-        Me.ToolStripStatusLabel.Text = "Stato"
+        Me.SaveToolStripMenuItem.Image = CType(resources.GetObject("SaveToolStripMenuItem.Image"), System.Drawing.Image)
+        Me.SaveToolStripMenuItem.ImageTransparentColor = System.Drawing.Color.Black
+        Me.SaveToolStripMenuItem.Name = "SaveToolStripMenuItem"
+        Me.SaveToolStripMenuItem.ShortcutKeys = CType((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.S), System.Windows.Forms.Keys)
+        Me.SaveToolStripMenuItem.Size = New System.Drawing.Size(185, 22)
+        Me.SaveToolStripMenuItem.Text = "&Salva"
         '
-        'Timer1
+        'PrintToolStripMenuItem
         '
-        Me.Timer1.Enabled = True
+        Me.PrintToolStripMenuItem.Image = CType(resources.GetObject("PrintToolStripMenuItem.Image"), System.Drawing.Image)
+        Me.PrintToolStripMenuItem.ImageTransparentColor = System.Drawing.Color.Black
+        Me.PrintToolStripMenuItem.Name = "PrintToolStripMenuItem"
+        Me.PrintToolStripMenuItem.ShortcutKeys = CType((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.P), System.Windows.Forms.Keys)
+        Me.PrintToolStripMenuItem.Size = New System.Drawing.Size(185, 22)
+        Me.PrintToolStripMenuItem.Text = "&Stampa"
         '
-        'SaveFileDialog1
+        'PrintPreviewToolStripMenuItem
         '
-        Me.SaveFileDialog1.Filter = "CSV File (*.csv)|*.csv"
+        Me.PrintPreviewToolStripMenuItem.Image = CType(resources.GetObject("PrintPreviewToolStripMenuItem.Image"), System.Drawing.Image)
+        Me.PrintPreviewToolStripMenuItem.ImageTransparentColor = System.Drawing.Color.Black
+        Me.PrintPreviewToolStripMenuItem.Name = "PrintPreviewToolStripMenuItem"
+        Me.PrintPreviewToolStripMenuItem.Size = New System.Drawing.Size(185, 22)
+        Me.PrintPreviewToolStripMenuItem.Text = "Anteprima &di stampa"
+        '
+        'IndexToolStripMenuItem
+        '
+        Me.IndexToolStripMenuItem.Image = CType(resources.GetObject("IndexToolStripMenuItem.Image"), System.Drawing.Image)
+        Me.IndexToolStripMenuItem.ImageTransparentColor = System.Drawing.Color.Black
+        Me.IndexToolStripMenuItem.Name = "IndexToolStripMenuItem"
+        Me.IndexToolStripMenuItem.Size = New System.Drawing.Size(175, 22)
+        Me.IndexToolStripMenuItem.Text = "&Indice"
+        '
+        'SearchToolStripMenuItem
+        '
+        Me.SearchToolStripMenuItem.Image = CType(resources.GetObject("SearchToolStripMenuItem.Image"), System.Drawing.Image)
+        Me.SearchToolStripMenuItem.ImageTransparentColor = System.Drawing.Color.Black
+        Me.SearchToolStripMenuItem.Name = "SearchToolStripMenuItem"
+        Me.SearchToolStripMenuItem.Size = New System.Drawing.Size(175, 22)
+        Me.SearchToolStripMenuItem.Text = "&Cerca"
+        '
+        'OffsetCalibrationToolToolStripMenuItem
+        '
+        Me.OffsetCalibrationToolToolStripMenuItem.Name = "OffsetCalibrationToolToolStripMenuItem"
+        Me.OffsetCalibrationToolToolStripMenuItem.Size = New System.Drawing.Size(193, 22)
+        Me.OffsetCalibrationToolToolStripMenuItem.Text = "Offset Calibration Tool"
         '
         'MainForm
         '
@@ -731,6 +738,7 @@ Partial Class MainForm
         Me.Controls.Add(Me.ToolStrip)
         Me.Controls.Add(Me.MenuStrip)
         Me.Controls.Add(Me.StatusStrip)
+        Me.DoubleBuffered = True
         Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
         Me.IsMdiContainer = True
         Me.MainMenuStrip = Me.MenuStrip
@@ -833,4 +841,5 @@ Partial Class MainForm
     Friend WithEvents ToolStripMenuItem8 As ToolStripMenuItem
     Friend WithEvents ToolStripMenuItem9 As ToolStripMenuItem
     Friend WithEvents ToolStripMenuItem10 As ToolStripMenuItem
+    Friend WithEvents OffsetCalibrationToolToolStripMenuItem As ToolStripMenuItem
 End Class

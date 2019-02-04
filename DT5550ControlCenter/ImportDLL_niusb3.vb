@@ -106,10 +106,17 @@ Module ImportDLL_niusb3
         Return result
     End Function
 
+    Dim mMutex As System.Threading.Mutex = New System.Threading.Mutex(False, "Applicazione Singleton")
+
+
     Public Function USB3_WriteReg(data As UInt32,
                               address As UInt32,
                               handle As IntPtr) As UInteger
-        Return NI_USB3_WriteReg(data, address, handle)
+
+        mMutex.WaitOne()
+        Dim result = NI_USB3_WriteReg(data, address, handle)
+        mMutex.ReleaseMutex()
+        Return result
     End Function
 
     Public Function USB3_ReadReg(ByRef data As UInt32,
@@ -118,9 +125,10 @@ Module ImportDLL_niusb3
 
         '  Dim sizes = Marshal.SizeOf(GetType(UInt32))
         ' Dim ptr As IntPtr = Marshal.AllocHGlobal(sizes * 2)
-
-        Return NI_USB3_ReadReg(data, address, handle)
-
+        mMutex.WaitOne()
+        Dim result = NI_USB3_ReadReg(data, address, handle)
+        mMutex.ReleaseMutex()
+        Return result
         ' Marshal.Copy(ptr, data, 0, 1)
         ' Marshal.FreeHGlobal(ptr)
 
@@ -137,6 +145,8 @@ Module ImportDLL_niusb3
                                timeout As UInt32,
                                handle As IntPtr,
                                ByRef written_data As UInt32) As UInteger
+
+        mMutex.WaitOne()
         Dim datab(count * 4) As Byte
         Buffer.BlockCopy(data, 0, datab, 0, count * 4)
 
@@ -146,6 +156,7 @@ Module ImportDLL_niusb3
         Dim status = NI_USB3_WriteData(ptr, count, address, bus_mode, timeout, handle, written_data)
 
         Marshal.FreeHGlobal(ptr)
+        mMutex.ReleaseMutex()
         Return status
 
     End Function
@@ -158,6 +169,7 @@ Module ImportDLL_niusb3
                                handle As IntPtr,
                                ByRef read_data As UInt32,
                                ByRef valid_data As UInt32) As UInteger
+        mMutex.WaitOne()
         Dim datab(count * 4) As Byte
         Dim sizes = Marshal.SizeOf(GetType(UInt32))
         Dim ptr As IntPtr = Marshal.AllocHGlobal(sizes * count * 2)
@@ -165,7 +177,7 @@ Module ImportDLL_niusb3
         Marshal.Copy(ptr, datab, 0, count * 4)
         Marshal.FreeHGlobal(ptr)
         Buffer.BlockCopy(datab, 0, data, 0, count * 4)
-
+        mMutex.ReleaseMutex()
         Return status
 
     End Function
@@ -174,7 +186,11 @@ Module ImportDLL_niusb3
     Function USB3_SetHV(ByVal Enable As Boolean,
                          ByVal voltage As Single,
                          handle As IntPtr) As UInteger
-        Return NI_USB3_SetHV(Enable, voltage, handle)
+        mMutex.WaitOne()
+        Dim result = NI_USB3_SetHV(Enable, voltage, handle)
+        mMutex.ReleaseMutex()
+        Return result
+
     End Function
 
 
@@ -182,20 +198,29 @@ Module ImportDLL_niusb3
                          ByVal voltage As UInt32,
                          handle As IntPtr) As UInteger
 
-        Return NI_USB3_SetOffset(Top, voltage, handle) 'Xor\
+        mMutex.WaitOne()
+        Dim result = NI_USB3_SetOffset(Top, voltage, handle) 'Xor\
+        mMutex.ReleaseMutex()
+        Return result
     End Function
 
 
     Function USB3_SetImpedance(ByVal R50 As Boolean,
                          handle As IntPtr) As UInteger
 
-        Return NI_USB3_SetImpedance(R50, handle)
+        mMutex.WaitOne()
+        Dim result = NI_USB3_SetImpedance(R50, handle)
+        mMutex.ReleaseMutex()
+        Return result
     End Function
 
     Function USB3_SetIICControllerBaseAddress(ByVal ControlAddress As UInt32,
                            ByVal StatusAddress As UInt32,
                            handle As IntPtr) As UInteger
-        Return NI_USB3_SetIICControllerBaseAddress(ControlAddress, StatusAddress, handle)
+        mMutex.WaitOne()
+        Dim result = NI_USB3_SetIICControllerBaseAddress(ControlAddress, StatusAddress, handle)
+        mMutex.ReleaseMutex()
+        Return result
     End Function
 
 

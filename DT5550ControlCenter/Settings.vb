@@ -1,4 +1,5 @@
-﻿Imports DT5550ControlCenter.AcquisitionClass
+﻿Imports System.Reflection
+Imports DT5550ControlCenter.AcquisitionClass
 
 Public Class Settings
 
@@ -146,7 +147,7 @@ Public Class Settings
     End Sub
 
     Public Sub Grid_ReLoad()
-
+        SetDoubleBuffered(DataGridView1)
         n = MainForm.acquisition.CHList.Count
         DataGridView1.Rows.Clear()
         For i = 0 To n - 1
@@ -355,11 +356,13 @@ Public Class Settings
             MainForm.plog.TextBox1.AppendText("Signal Impedence Set Register Error!" & vbCrLf)
         End If
 
-        If Connection.ComClass.AFE_SetOffset(False, (MainForm.acquisition.General_settings.AFEOffset + 2) / 4 * (4095 - 1650) + 1650) = 0 Then
+        Dim offsetLSB = (MainForm.acquisition.General_settings.AFEOffset + 2) / 4 * (4095 - 1650) + 1650
+
+        If Connection.ComClass.AFE_SetOffset(False, offsetLSB) = 0 Then
         Else
             MainForm.plog.TextBox1.AppendText("Signal Offset Set Register Error!" & vbCrLf)
         End If
-        If Connection.ComClass.AFE_SetOffset(True, (MainForm.acquisition.General_settings.AFEOffset + 2) / 4 * (4095 - 1650) + 1650) = 0 Then
+        If Connection.ComClass.AFE_SetOffset(True, offsetLSB) = 0 Then
         Else
             MainForm.plog.TextBox1.AppendText("Signal Offset Set Register Error!" & vbCrLf)
         End If
@@ -411,6 +414,10 @@ Public Class Settings
             End If
         End If
 
+        Dim jjj As New ClassCalibration(My.Settings.AFECalibration)
+        Dim coor = jjj.GetCorrectionFactors(offsetLSB)
+
+
 
         For i = 0 To MainForm.acquisition.CHList.Count - 1
             Dim index = MainForm.acquisition.CHList.Count - MainForm.acquisition.CHList(i).id
@@ -427,7 +434,8 @@ Public Class Settings
             Dim GainAddress As New UInt32
             Dim TRHoldOffAddress As New UInt32
             Dim PileUpAddress As New UInt32
-
+            Dim ANOFS As New UInt32
+            ANOFS = 0
             For Each r In MainForm.CurrentRegisterList
                 If r.Name = "POL_" & index Then
                     PolarityAddress = r.Address
@@ -471,9 +479,17 @@ Public Class Settings
                 If r.Name = "PUP_" & index Then
                     PileUpAddress = r.Address
                 End If
-            Next
 
-            If Connection.ComClass.SetRegister(PolarityAddress, MainForm.acquisition.CHList(i).polarity) = 0 Then
+                If r.Name = "ANOFS_" & index Then
+                    ANOFS = r.Address
+                End If
+            Next
+            If ANOFS > 0 Then
+                Connection.ComClass.SetRegister(ANOFS, coor(i))
+
+            End If
+
+                If Connection.ComClass.SetRegister(PolarityAddress, MainForm.acquisition.CHList(i).polarity) = 0 Then
                 If Connection.ComClass.SetRegister(TriggerAddress, MainForm.acquisition.CHList(i).trigger_level) = 0 Then
                     If Connection.ComClass.SetRegister(BaselineAddress, Math.Log(MainForm.acquisition.CHList(i).baseline_sample) / Math.Log(2)) = 0 Then
                         If Connection.ComClass.SetRegister(BaseHoldAddress, MainForm.acquisition.CHList(i).baseline_inhibit * 80 / 1000) = 0 Then
@@ -585,6 +601,18 @@ Public Class Settings
             End If
         End If
 
+    End Sub
+
+    Private Sub DataGridView1_CellContentClick(sender As Object, e As DataGridViewCellEventArgs) Handles DataGridView1.CellContentClick
+
+    End Sub
+
+    Private Sub GroupBox1_Enter(sender As Object, e As EventArgs) Handles GroupBox1.Enter
+
+    End Sub
+
+    Public Shared Sub SetDoubleBuffered(ByVal control As Control)
+        GetType(Control).InvokeMember("DoubleBuffered", BindingFlags.SetProperty Or BindingFlags.Instance Or BindingFlags.NonPublic, Nothing, control, New Object() {True})
     End Sub
 
 End Class

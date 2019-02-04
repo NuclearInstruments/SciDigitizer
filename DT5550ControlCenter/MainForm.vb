@@ -27,10 +27,14 @@ Public Class MainForm
     Public map As New Mapping
     Public sets As New Settings
     Public scope As New pOscilloscope
+    Public ofsc As New OffsetCalibration
     Public pImm1 As New pImmediate(True)
     Public pImm2 As New pImmediate(False)
     Public Shared acquisition As New AcquisitionClass(32)
     Public isSpectra = False
+
+    Public __Running_OSC As Boolean = False
+    Public __Running_SPE As Boolean = False
 
     Public Sub AppendToLog(text As String)
         msgcoda.Enqueue(text)
@@ -71,24 +75,31 @@ Public Class MainForm
                 For Each r In CurrentOscilloscope.Registers
                     If r.Name = "CONFIG_DECIMATOR" Then
                         scope.addressDecimator = r.Address
+                        ofsc.addressDecimator = r.Address
                     End If
                     If r.Name = "CONFIG_PRETRIGGER" Then
                         scope.addressPre = r.Address
+                        ofsc.addressPre = r.Address
                     End If
                     If r.Name = "CONFIG_TRIGGER_MODE" Then
                         scope.addressMode = r.Address
+                        ofsc.addressMode = r.Address
                     End If
                     If r.Name = "CONFIG_TRIGGER_LEVEL" Then
                         scope.addressLevel = r.Address
+                        ofsc.addressLevel = r.Address
                     End If
                     If r.Name = "CONFIG_ARM" Then
                         scope.addressArm = r.Address
+                        ofsc.addressArm = r.Address
                     End If
                     If r.Name = "READ_STATUS" Then
                         scope.addressStatus = r.Address
+                        ofsc.addressStatus = r.Address
                     End If
                     If r.Name = "READ_POSITION" Then
                         scope.addressPosition = r.Address
+                        ofsc.addressPosition = r.Address
                     End If
                 Next
             End If
@@ -405,7 +416,7 @@ Public Class MainForm
     End Sub
 
     Private Sub FreeRunStart_Click(sender As Object, e As EventArgs) Handles FreeRunStart.Click
-
+        __Running_OSC = True
         If IsNothing(scope) Then
         Else
             scope.StartFreeRunningMultiAcquisition()
@@ -421,7 +432,7 @@ Public Class MainForm
     End Sub
 
     Private Sub FreeRunStop_Click(sender As Object, e As EventArgs) Handles FreeRunStop.Click
-
+        __Running_OSC = False
         If scope.fileEnable = True Then
             scope.StopDataCaptureOnFile()
         End If
@@ -437,7 +448,7 @@ Public Class MainForm
     End Sub
 
     Private Sub SingleShot_Click(sender As Object, e As EventArgs) Handles SingleShot.Click
-
+        __Running_OSC = True
         If IsNothing(scope) Then
         Else
             If scope.running = False Then
@@ -450,7 +461,7 @@ Public Class MainForm
     End Sub
 
     Private Sub StartSpectrum_Click(sender As Object, e As EventArgs) Handles StartSpectrum.Click
-
+        __Running_SPE = True
         If IsNothing(spect) Then
         Else
             spect.startspectrum()
@@ -478,7 +489,7 @@ Public Class MainForm
     End Sub
 
     Private Sub StopSpectrum_Click(sender As Object, e As EventArgs) Handles StopSpectrum.Click
-
+        __Running_SPE = False
         If spect.fileEnable Then
             spect.StopDataCaptureOnFile()
         End If
@@ -942,5 +953,15 @@ Public Class MainForm
 
     Private Sub FieToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles FieToolStripMenuItem.Click
 
+    End Sub
+
+    Private Sub Timer1_Tick(sender As Object, e As EventArgs) Handles Timer1.Tick
+
+    End Sub
+
+    Private Sub OffsetCalibrationToolToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles OffsetCalibrationToolToolStripMenuItem.Click
+
+
+        ofsc.ShowDialog()
     End Sub
 End Class
