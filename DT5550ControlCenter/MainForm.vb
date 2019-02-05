@@ -7,6 +7,8 @@ Imports System.Xml
 Imports Gigasoft.ProEssentials
 Imports Gigasoft.ProEssentials.Enums
 Imports DT5550ControlCenter.AcquisitionClass
+Imports System.Globalization
+Imports System.Threading
 
 Public Class MainForm
 
@@ -41,6 +43,7 @@ Public Class MainForm
     End Sub
 
     Public Sub MDIParent_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+
         Me.Text = "SCI-5550 Readout Software (NI - CAEN ) "
         Dim file As String = Connection.Jsonfile
         Create(file)
@@ -512,6 +515,7 @@ Public Class MainForm
         Dim g As New WaveformCaptureSelect
         If g.ShowDialog = DialogResult.OK Then
             If isSpectra Then
+                __Running_SPE = True
                 If IsNothing(spect) Then
                 Else
                     For i = 0 To g.ChList.Items.Count - 1
@@ -551,6 +555,7 @@ Public Class MainForm
                     StopSaveData.Enabled = True
                 End If
             Else
+                __Running_OSC = True
                 If IsNothing(scope) Then
                 Else
                     For i = 0 To g.ChList.Items.Count - 1
@@ -596,19 +601,18 @@ Public Class MainForm
     End Sub
 
     Private Sub MainForm_Closed(sender As Object, e As EventArgs) Handles Me.Closed
-        End
+
     End Sub
 
     Private Sub MainForm_Closing(sender As Object, e As CancelEventArgs) Handles Me.Closing
-
-        spect.Pesgo1.Dispose()
         spect.Timer1.Enabled = False
+        spect.Pesgo1.Dispose()
         spect.Dispose()
-        scope.Pesgo1.Dispose()
         scope.Timer1.Enabled = False
+        scope.Pesgo1.Dispose()
         scope.Dispose()
         System.Threading.Thread.Sleep(1000)
-
+        End
     End Sub
 
     Private Sub FittingSpectrum_Click(sender As Object, e As EventArgs) Handles FittingSpectrum.Click

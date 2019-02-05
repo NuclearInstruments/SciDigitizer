@@ -394,7 +394,10 @@ Public Class pOscilloscope
 
     Public Sub SingleShotA()
 
-
+        Dim offsetLSB = (MainForm.acquisition.General_settings.AFEOffset + 2) / 4 * (4095 - 1650) + 1650
+        Dim jjj As New ClassCalibration() 'My.Settings.AFECalibration)
+        Dim coor = jjj.GetCorrectionFactors(offsetLSB)
+        copyOscilloscopeParam()
         setOscilloscopeParam()
         Pesgo1.PeLegend.SubsetsToLegend.Clear()
         Dim n_ch As Integer
@@ -462,7 +465,7 @@ Public Class pOscilloscope
                         If curr > 0 Then
                             Dim k = 0
                             For i = curr To nsamples - 2
-                                AnalogArray(k + nsamples * n) = (data(i + nsamples * ch) And 65535)
+                                AnalogArray(k + nsamples * n) = (data(i + nsamples * ch) And 65535) + coor(ch)
                                 Digital1Array(k + nsamples * n) = data(i + nsamples * ch) >> 16 And 1
                                 Digital2Array(k + nsamples * n) = data(i + nsamples * ch) >> 17 And 1
                                 Digital3Array(k + nsamples * n) = data(i + nsamples * ch) >> 18 And 1
@@ -470,7 +473,7 @@ Public Class pOscilloscope
                                 k += 1
                             Next
                             For i = 0 To curr - 1
-                                AnalogArray(k + nsamples * n) = (data(i + nsamples * ch) And 65535)
+                                AnalogArray(k + nsamples * n) = (data(i + nsamples * ch) And 65535) + coor(ch)
                                 Digital1Array(k + nsamples * n) = data(i + nsamples * ch) >> 16 And 1
                                 Digital2Array(k + nsamples * n) = data(i + nsamples * ch) >> 17 And 1
                                 Digital3Array(k + nsamples * n) = data(i + nsamples * ch) >> 18 And 1
@@ -480,7 +483,7 @@ Public Class pOscilloscope
                         Else
                             Dim k = 0
                             For i = nsamples + curr To nsamples - 2
-                                AnalogArray(k + nsamples * n) = (data(i + nsamples * ch) And 65535)
+                                AnalogArray(k + nsamples * n) = (data(i + nsamples * ch) And 65535) + coor(ch)
                                 Digital1Array(k + nsamples * n) = data(i + nsamples * ch) >> 16 And 1
                                 Digital2Array(k + nsamples * n) = data(i + nsamples * ch) >> 17 And 1
                                 Digital3Array(k + nsamples * n) = data(i + nsamples * ch) >> 18 And 1
@@ -488,7 +491,7 @@ Public Class pOscilloscope
                                 k += 1
                             Next
                             For i = 0 To nsamples + curr - 1
-                                AnalogArray(k + nsamples * n) = (data(i + nsamples * ch) And 65535)
+                                AnalogArray(k + nsamples * n) = (data(i + nsamples * ch) And 65535) + coor(ch)
                                 Digital1Array(k + nsamples * n) = data(i + nsamples * ch) >> 16 And 1
                                 Digital2Array(k + nsamples * n) = data(i + nsamples * ch) >> 17 And 1
                                 Digital3Array(k + nsamples * n) = data(i + nsamples * ch) >> 18 And 1

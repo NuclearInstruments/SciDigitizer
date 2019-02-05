@@ -22,6 +22,7 @@ Partial Class OffsetCalibration
     'Do not modify it using the code editor.
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
+        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(OffsetCalibration))
         Me.DGW1 = New System.Windows.Forms.DataGridView()
         Me.Button1 = New System.Windows.Forms.Button()
         Me.Button2 = New System.Windows.Forms.Button()
@@ -72,8 +73,9 @@ Partial Class OffsetCalibration
         Me.Controls.Add(Me.Button2)
         Me.Controls.Add(Me.Button1)
         Me.Controls.Add(Me.DGW1)
+        Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
         Me.Name = "OffsetCalibration"
-        Me.Text = "DT5550AFE Offset Calibration"
+        Me.Text = "Automatic Offset Calibration"
         CType(Me.DGW1, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)
 

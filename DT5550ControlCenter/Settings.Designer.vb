@@ -40,6 +40,7 @@ Partial Class Settings
         Me.Label14 = New System.Windows.Forms.Label()
         Me.GroupBox1 = New System.Windows.Forms.GroupBox()
         Me.Panel2 = New System.Windows.Forms.Panel()
+        Me.Button1 = New System.Windows.Forms.Button()
         Me.SignalOffset = New System.Windows.Forms.NumericUpDown()
         Me.Label1 = New System.Windows.Forms.Label()
         Me.Label9 = New System.Windows.Forms.Label()
@@ -271,6 +272,7 @@ Partial Class Settings
         'Panel2
         '
         Me.Panel2.AutoScroll = True
+        Me.Panel2.Controls.Add(Me.Button1)
         Me.Panel2.Controls.Add(Me.SignalOffset)
         Me.Panel2.Controls.Add(Me.Label1)
         Me.Panel2.Controls.Add(Me.Label9)
@@ -291,12 +293,21 @@ Partial Class Settings
         Me.Panel2.Size = New System.Drawing.Size(1006, 86)
         Me.Panel2.TabIndex = 0
         '
+        'Button1
+        '
+        Me.Button1.Location = New System.Drawing.Point(533, 6)
+        Me.Button1.Name = "Button1"
+        Me.Button1.Size = New System.Drawing.Size(184, 23)
+        Me.Button1.TabIndex = 40
+        Me.Button1.Text = "Automatic Offset Calibration"
+        Me.Button1.UseVisualStyleBackColor = True
+        '
         'SignalOffset
         '
         Me.SignalOffset.Anchor = System.Windows.Forms.AnchorStyles.Top
         Me.SignalOffset.BackColor = System.Drawing.Color.White
         Me.SignalOffset.Increment = New Decimal(New Integer() {1000, 0, 0, 0})
-        Me.SignalOffset.Location = New System.Drawing.Point(621, 9)
+        Me.SignalOffset.Location = New System.Drawing.Point(895, 9)
         Me.SignalOffset.Maximum = New Decimal(New Integer() {65536, 0, 0, 0})
         Me.SignalOffset.Name = "SignalOffset"
         Me.SignalOffset.Size = New System.Drawing.Size(96, 20)
@@ -306,11 +317,11 @@ Partial Class Settings
         'Label1
         '
         Me.Label1.Anchor = System.Windows.Forms.AnchorStyles.Top
-        Me.Label1.Location = New System.Drawing.Point(530, 11)
+        Me.Label1.Location = New System.Drawing.Point(792, 11)
         Me.Label1.Name = "Label1"
         Me.Label1.Size = New System.Drawing.Size(91, 13)
         Me.Label1.TabIndex = 38
-        Me.Label1.Text = "Charge Offset (lsb)"
+        Me.Label1.Text = "Spectrum Offset (lsb)"
         '
         'Label9
         '
@@ -392,12 +403,11 @@ Partial Class Settings
         Me.Offset.DecimalPlaces = 3
         Me.Offset.Increment = New Decimal(New Integer() {5, 0, 0, 131072})
         Me.Offset.Location = New System.Drawing.Point(365, 9)
-        Me.Offset.Maximum = New Decimal(New Integer() {2, 0, 0, 0})
-        Me.Offset.Minimum = New Decimal(New Integer() {2, 0, 0, -2147483648})
+        Me.Offset.Maximum = New Decimal(New Integer() {9, 0, 0, 65536})
+        Me.Offset.Minimum = New Decimal(New Integer() {9, 0, 0, -2147418112})
         Me.Offset.Name = "Offset"
         Me.Offset.Size = New System.Drawing.Size(96, 20)
         Me.Offset.TabIndex = 25
-        Me.Offset.Value = New Decimal(New Integer() {155, 0, 0, 131072})
         '
         'Label3
         '
@@ -503,4 +513,5 @@ Partial Class Settings
     Friend WithEvents Impedance As ComboBox
     Friend WithEvents SignalOffset As NumericUpDown
     Friend WithEvents Label1 As Label
+    Friend WithEvents Button1 As Button
 End Class

@@ -1,4 +1,6 @@
-﻿Imports System.Reflection
+﻿Imports System.ComponentModel
+Imports System.Globalization
+Imports System.Reflection
 Imports DT5550ControlCenter.AcquisitionClass
 
 Public Class Settings
@@ -8,6 +10,7 @@ Public Class Settings
     Dim n As Integer
 
     Private Sub Settings_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+
 
         Impedance.Items.Clear()
         Impedance.Items.Add("50 Ohm")
@@ -147,7 +150,7 @@ Public Class Settings
     End Sub
 
     Public Sub Grid_ReLoad()
-        SetDoubleBuffered(DataGridView1)
+        '  SetDoubleBuffered(DataGridView1)
         n = MainForm.acquisition.CHList.Count
         DataGridView1.Rows.Clear()
         For i = 0 To n - 1
@@ -356,7 +359,7 @@ Public Class Settings
             MainForm.plog.TextBox1.AppendText("Signal Impedence Set Register Error!" & vbCrLf)
         End If
 
-        Dim offsetLSB = (MainForm.acquisition.General_settings.AFEOffset + 2) / 4 * (4095 - 1650) + 1650
+        Dim offsetLSB = (MainForm.acquisition.General_settings.AFEOffset + 2) / 4 * 4095 '* (4095 - 1650) + 1650
 
         If Connection.ComClass.AFE_SetOffset(False, offsetLSB) = 0 Then
         Else
@@ -417,7 +420,20 @@ Public Class Settings
         Dim jjj As New ClassCalibration(My.Settings.AFECalibration)
         Dim coor = jjj.GetCorrectionFactors(offsetLSB)
 
+        Dim ANOFS As New UInt32
+        ANOFS = 0
+        For i = 0 To MainForm.acquisition.CHList.Count - 1
+            For Each r In MainForm.CurrentRegisterList
+                If r.Name = "ANOFS_" & i Then
+                    ANOFS = r.Address
+                End If
 
+            Next
+            If ANOFS > 0 Then
+                Connection.ComClass.SetRegister(ANOFS, IIf(coor(31 - i) >= 0, coor(31 - i), &HFFFFFFFF& + coor(31 - i)))
+
+            End If
+        Next
 
         For i = 0 To MainForm.acquisition.CHList.Count - 1
             Dim index = MainForm.acquisition.CHList.Count - MainForm.acquisition.CHList(i).id
@@ -434,8 +450,7 @@ Public Class Settings
             Dim GainAddress As New UInt32
             Dim TRHoldOffAddress As New UInt32
             Dim PileUpAddress As New UInt32
-            Dim ANOFS As New UInt32
-            ANOFS = 0
+
             For Each r In MainForm.CurrentRegisterList
                 If r.Name = "POL_" & index Then
                     PolarityAddress = r.Address
@@ -480,16 +495,11 @@ Public Class Settings
                     PileUpAddress = r.Address
                 End If
 
-                If r.Name = "ANOFS_" & index Then
-                    ANOFS = r.Address
-                End If
+
             Next
-            If ANOFS > 0 Then
-                Connection.ComClass.SetRegister(ANOFS, coor(i))
 
-            End If
 
-                If Connection.ComClass.SetRegister(PolarityAddress, MainForm.acquisition.CHList(i).polarity) = 0 Then
+            If Connection.ComClass.SetRegister(PolarityAddress, MainForm.acquisition.CHList(i).polarity) = 0 Then
                 If Connection.ComClass.SetRegister(TriggerAddress, MainForm.acquisition.CHList(i).trigger_level) = 0 Then
                     If Connection.ComClass.SetRegister(BaselineAddress, Math.Log(MainForm.acquisition.CHList(i).baseline_sample) / Math.Log(2)) = 0 Then
                         If Connection.ComClass.SetRegister(BaseHoldAddress, MainForm.acquisition.CHList(i).baseline_inhibit * 80 / 1000) = 0 Then
@@ -615,4 +625,27 @@ Public Class Settings
         GetType(Control).InvokeMember("DoubleBuffered", BindingFlags.SetProperty Or BindingFlags.Instance Or BindingFlags.NonPublic, Nothing, control, New Object() {True})
     End Sub
 
+    Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
+        MainForm.ofsc.ShowDialog()
+    End Sub
+
+    Private Sub Offset_ValueChanged(sender As Object, e As EventArgs) Handles Offset.ValueChanged
+        'If System.Globalization.CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator = "," Then
+        '    sender.value = sender.Text.Replace(".", ",")
+        'End If
+
+        'If System.Globalization.CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator = "." Then
+        '    sender.Text = sender.Text.Replace(",", ".")
+        'End If
+
+
+    End Sub
+
+    Private Sub Offset_Validating(sender As Object, e As CancelEventArgs) Handles Offset.Validating
+
+    End Sub
+
+    Private Sub Panel3_Paint(sender As Object, e As PaintEventArgs) Handles Panel3.Paint
+
+    End Sub
 End Class

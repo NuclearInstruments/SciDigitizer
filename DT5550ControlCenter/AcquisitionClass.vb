@@ -152,7 +152,7 @@
         General_settings.TriggerSource = trigger_source.INTERNAL
         General_settings.Sampling = sampling_method.COMMON
         General_settings.TriggerDelay = 0
-        General_settings.TriggerSourceOscilloscope = trigger_source.INTERNAL
+        General_settings.TriggerSourceOscilloscope = trigger_source.FREE
         General_settings.TriggerChannelOscilloscope = 0
         General_settings.TriggerOscilloscopeEdges = edge.RISING
         General_settings.TriggerOscilloscopeLevel = 10000

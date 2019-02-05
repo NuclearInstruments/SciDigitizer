@@ -16,8 +16,8 @@ Public Class OffsetCalibration
     Dim length As Integer
     Dim position As UInt32
     Dim osc_ch As Integer
-    Const basedac = 2000
-    Const baseStep = 500
+    Const basedac = 1248
+    Const baseStep = 400
     Const totStep = 5
     Private Sub OffsetCalibration_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         DGW1.Columns.Clear()
@@ -41,7 +41,23 @@ Public Class OffsetCalibration
     End Sub
 
     Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
+        If MsgBox("Disconnect all input to the Digitizer/AFE and press OK to start calibrartion. The process will require about 10 seconds", vbOKCancel + vbInformation) = vbCancel Then
+            Exit Sub
+        End If
+        Dim ANOFS As New UInt32
+        ANOFS = 0
+        For i = 0 To MainForm.acquisition.CHList.Count - 1
+            For Each r In MainForm.CurrentRegisterList
+                If r.Name = "ANOFS_" & i Then
+                    ANOFS = r.Address
+                End If
 
+            Next
+            If ANOFS > 0 Then
+                Connection.ComClass.SetRegister(ANOFS, 0)
+
+            End If
+        Next
 
 
         Dim AnalogArray(nsamples * 32) As Single
@@ -175,5 +191,6 @@ Public Class OffsetCalibration
         My.Settings.AFECalibration = jsOut
 
         MsgBox("Calibration has been saved in application setitng. Apply configuration to transfer calibration on the board", vbOKOnly + vbInformation)
+        Me.Close()
     End Sub
 End Class
