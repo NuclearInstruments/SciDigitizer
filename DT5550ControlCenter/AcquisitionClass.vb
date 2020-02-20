@@ -1,5 +1,6 @@
 ﻿Public Class AcquisitionClass
 
+
     Public General_settings As New GeneralSettings
     Public CHList As New List(Of Channel)
     Public fit_list As New List(Of Fitting)
@@ -94,10 +95,15 @@
 
         Public name As String
         Public id As Integer
+        Public ch_id As Integer
+        Public board_number As Integer
         Public x_position As Integer
         Public y_position As Integer
         Public polarity As signal_polarity
+        Public offset As Double
         Public trigger_level As Double
+        Public trigger_peaking As Double
+        Public trigger_flat As Double
         Public trigger_inhibit As Double
         Public energy_filter As energy_filter_mode
         Public decay_constant As Double
@@ -114,56 +120,108 @@
         Public spectra_checked As Boolean
         Public scope_checked As Boolean
 
-        Public Sub New(name As String, afe_ch_id As Integer, x As Integer, y As Integer)
+        Public Sub New(name As String, id As Integer, ch_id As Integer, x As Integer, y As Integer, board_type As communication.tModel, board_number As Integer)
 
-            Me.name = name
-            Me.id = id
-            Me.id = afe_ch_id
-            Me.x_position = x
-            Me.y_position = y
-            Me.polarity = signal_polarity.POSITIVE
-            Me.trigger_level = 10000
-            Me.trigger_inhibit = 1000
-            Me.energy_filter = energy_filter_mode.INTEGRATION
-            Me.decay_constant = 700
-            Me.peaking_time = 1300
-            Me.flat_top = 100
-            Me.energy_sample = 1600
-            Me.gain = 10
-            Me.integration_time = 1000.0
-            Me.pre_gate = 200
-            Me.pileup_enable = True
-            Me.pileup_time = 1000
-            Me.baseline_inhibit = 2500
-            Me.baseline_sample = 256
-            spectra_checked = False
-            scope_checked = False
-
+            If board_type = communication.tModel.DT5550 Then
+                Me.name = name
+                Me.id = id
+                Me.id = ch_id
+                Me.ch_id = ch_id
+                Me.board_number = board_number
+                Me.x_position = x
+                Me.y_position = y
+                Me.polarity = signal_polarity.POSITIVE
+                Me.offset = 0
+                Me.trigger_level = 10000
+                Me.trigger_peaking = 0
+                Me.trigger_flat = 0
+                Me.trigger_inhibit = 1000
+                Me.energy_filter = energy_filter_mode.INTEGRATION
+                Me.decay_constant = 700
+                Me.peaking_time = 1300
+                Me.flat_top = 100
+                Me.energy_sample = 1600
+                Me.gain = 10
+                Me.integration_time = 1000.0
+                Me.pre_gate = 200
+                Me.pileup_enable = True
+                Me.pileup_time = 1000
+                Me.baseline_inhibit = 2500
+                Me.baseline_sample = 256
+                spectra_checked = False
+                scope_checked = False
+            ElseIf board_type = communication.tModel.R5560 Then
+                Me.name = name
+                Me.id = id
+                Me.ch_id = ch_id
+                Me.board_number = board_number
+                Me.x_position = x
+                Me.y_position = y
+                Me.polarity = signal_polarity.POSITIVE
+                Me.offset = 0
+                Me.trigger_level = 20
+                Me.trigger_peaking = 40
+                Me.trigger_flat = 8
+                Me.trigger_inhibit = 0
+                Me.energy_filter = energy_filter_mode.TRAPEZOIDAL
+                Me.decay_constant = 1000
+                Me.peaking_time = 800
+                Me.flat_top = 80
+                Me.energy_sample = 864
+                Me.gain = 2
+                Me.integration_time = 0
+                Me.pre_gate = 200
+                Me.pileup_enable = False
+                Me.pileup_time = 0
+                Me.baseline_inhibit = 8000
+                Me.baseline_sample = 256
+                spectra_checked = False
+                scope_checked = False
+            End If
         End Sub
 
     End Class
 
-    Public Sub New(nch As Integer)
+    Public Sub New(nch As Integer, board_type As communication.tModel, nBoard As Integer)
 
-        General_settings.AFEImpedance = True
-        General_settings.AFEOffset = 0
-        General_settings.SignalOffset = 0
-        General_settings.TriggerMode = trigger_mode.THRESHOLD
-        General_settings.TriggerSource = trigger_source.INTERNAL
-        General_settings.Sampling = sampling_method.COMMON
-        General_settings.TriggerDelay = 0
-        General_settings.TriggerSourceOscilloscope = trigger_source.FREE
-        General_settings.TriggerChannelOscilloscope = 0
-        General_settings.TriggerOscilloscopeEdges = edge.RISING
-        General_settings.TriggerOscilloscopeLevel = 10000
-        General_settings.OscilloscopeDecimator = 1
-        General_settings.OscilloscopePreTrigger = 20
-        For i = 0 To nch - 1
-            FindPosition(16, i + 1, x, y)
-            Dim ch = New Channel("CHANNEL " + (i + 1).ToString, i + 1, x, y)
-            CHList.Add(ch)
-        Next
-        currentMAP = New MAP(2, 16, nch)
+        If board_type = communication.tModel.DT5550 Then
+
+            General_settings.AFEImpedance = True
+            General_settings.AFEOffset = 0
+            General_settings.SignalOffset = 0
+            General_settings.TriggerMode = trigger_mode.THRESHOLD
+            General_settings.TriggerSource = trigger_source.INTERNAL
+            General_settings.Sampling = sampling_method.COMMON
+            General_settings.TriggerDelay = 0
+            General_settings.TriggerSourceOscilloscope = trigger_source.FREE
+            General_settings.TriggerChannelOscilloscope = 0
+            General_settings.TriggerOscilloscopeEdges = edge.RISING
+            General_settings.TriggerOscilloscopeLevel = 10000
+            General_settings.OscilloscopeDecimator = 1
+            General_settings.OscilloscopePreTrigger = 20
+            For i = 0 To nch - 1
+                FindPosition(16, i + 1, x, y)
+                Dim ch = New Channel("CHANNEL " + (i + 1).ToString, i + 1, i + 1, x, y, board_type, 1)
+                CHList.Add(ch)
+            Next
+            currentMAP = New MAP(2, 16, nch)
+        ElseIf board_type = communication.tModel.R5560 Then
+            General_settings.TriggerSourceOscilloscope = trigger_source.FREE
+            General_settings.TriggerChannelOscilloscope = 0
+            General_settings.TriggerOscilloscopeEdges = edge.RISING
+            General_settings.TriggerOscilloscopeLevel = 10000
+            General_settings.OscilloscopeDecimator = 1
+            General_settings.OscilloscopePreTrigger = 20
+
+            For b = 0 To nBoard - 1
+                For i = 0 To nch - 1
+                    FindPosition(16, (i + 1) + (b * nch), x, y)
+                    Dim ch = New Channel("CHANNEL " + ((i + 1) + (b * nch)).ToString, (i + 1) + (b * nch), i + 1, x, y, board_type, b)
+                    CHList.Add(ch)
+                Next
+            Next
+            currentMAP = New MAP(2 * nBoard, 16, nch * nBoard)
+        End If
 
     End Sub
 
@@ -191,5 +249,6 @@
         Public channel_number As String
 
     End Class
+
 
 End Class

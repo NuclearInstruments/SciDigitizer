@@ -18,7 +18,14 @@ Public Class pSpectra
     Public addressArm As UInt32
     Public addressStatus As UInt32
     Public addressSync As UInt32
+
+    'Public addressDataR As New List(Of UInt32)
+    'Public addressArmR As New List(Of UInt32)
+    'Public addressStatusR As New List(Of UInt32)
+    'Public addressSyncR As New List(Of UInt32)
+
     Public n_ch As Integer
+    Dim _n_ch As Integer
     Dim MutexSpe As New Mutex
     Dim MutexCumulative As New Mutex
     Dim MutexFile As New Mutex
@@ -52,28 +59,40 @@ Public Class pSpectra
 
     Class Evento
         Public timecode As UInt64
-        Public energy(31) As Double
+        Public energy() As Double
         Public valid As Boolean
         Public eventId As UInt32
         Public size
         Public ValidEvent As UInt32
+        Public SingleChannelTriggerId As UInt32
         Public Sub New(_size As Integer)
             size = _size
+            ReDim energy(size)
         End Sub
     End Class
+
 
     Private Sub pSpectra_Load(sender As Object, e As EventArgs) Handles MyBase.Load
 
         DisegnaGrafico(Pesgo1, SGraphPlottingMethod.Step)
-        addressData = MainForm.CurrentMCA.Address
+        If Connection.ComClass._boardModel = communication.tModel.DT5550 Then
+            addressData = MainForm.CurrentMCA.Address
+        ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Then
+            addressData = (MainForm.CurrentCP.Address)
+            _n_ch = Connection.ComClass._n_ch
+            n_ch = MainForm.acquisition.CHList.Count
+            MaxNumberOfChannel = _n_ch * Connection.ComClass._nBoard
+            ReDim spectra(MaxNumberOfChannel, MaxSpectrumLength)
+            ReDim Rebinned_spectra(MaxNumberOfChannel, MaxSpectrumLength)
+            ReDim realtimeimage(MaxNumberOfChannel)
+            ReDim integralimage(MaxNumberOfChannel)
+        End If
 
         reload()
 
     End Sub
 
     Public Sub reload()
-
-        n_ch = MainForm.acquisition.CHList.Count
         CheckedListBox1.Items.Clear()
         ChList_name.Clear()
         ReDim EnabledChannel(n_ch - 1)
@@ -91,20 +110,41 @@ Public Class pSpectra
 
         While StopT_spect = False
             Dim npacket = 100
-            Dim lenght = (n_ch + 9) * npacket
-            Dim data(lenght) As UInt32
             Dim read_data As UInt32
             Dim valid_data As UInt32
             Dim status As UInt32
-            Dim status_error = Connection.ComClass.GetRegister(addressStatus, status)
-            If status_error = 0 And status = 2 Then
-                If Connection.ComClass.ReadData(addressData, data, lenght, 1, 1000, read_data, valid_data) = 0 Then
-                    UnpackDataPacket(data, lenght, n_ch)
-                Else
-                    MainForm.plog.TextBox1.AppendText("Communication error" & vbCrLf)
-                    Exit Sub
+
+            If Connection.ComClass._boardModel = communication.tModel.DT5550 Then
+                Dim lenght = (n_ch + 9) * npacket
+                Dim data(lenght) As UInt32
+
+                Dim status_error = Connection.ComClass.GetRegister(addressStatus, status, 0)
+                If status_error = 0 And status = 2 Then
+                    If Connection.ComClass.ReadData(addressData, data, lenght, 1, 1000, read_data, valid_data, 0) = 0 Then
+                        UnpackDataPacket(data, lenght, n_ch)
+                    Else
+                        MainForm.plog.TextBox1.AppendText("Communication error" & vbCrLf)
+                        Exit Sub
+                    End If
                 End If
+
+            ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Then
+                Dim lenght = (_n_ch + 3) * npacket
+                Dim data(lenght) As UInt32
+                For cp = 0 To Connection.ComClass._nBoard - 1
+                    Dim status_error = Connection.ComClass.GetRegister(addressStatus, status, cp)
+                    If status_error = 0 And status <> 3 Then
+
+                        If Connection.ComClass.ReadDataFifo(addressData, Data, lenght, addressStatus, 1, 1000, read_data, valid_data, cp) = 0 Then
+                            UnpackDataPacketR(Data, lenght, cp)
+                        Else
+                            MainForm.plog.TextBox1.AppendText("Communication error" & vbCrLf)
+                            Exit Sub
+                        End If
+                    End If
+                Next
             End If
+
         End While
 
     End Sub
@@ -209,35 +249,55 @@ Public Class pSpectra
             Application.DoEvents()
             System.Threading.Thread.Sleep(10)
         End While
-        If Connection.ComClass.SetRegister(addressArm, 0) = 0 Then
-            Timer1.Enabled = False
-            MainForm.plog.TextBox1.AppendText("Stopping Spectrum Acquisition." & vbCrLf)
-        Else
-            MainForm.plog.TextBox1.AppendText("Error on CONFIG_ARM" & vbCrLf)
+
+        If Connection.ComClass._boardModel = communication.tModel.DT5550 Then
+            If Connection.ComClass.SetRegister(addressArm, 0, 0) = 0 Then
+                Timer1.Enabled = False
+                MainForm.plog.TextBox1.AppendText("Stopping Spectrum Acquisition." & vbCrLf)
+            Else
+                MainForm.plog.TextBox1.AppendText("Error on CONFIG_ARM" & vbCrLf)
+            End If
+        ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Then
+            For cp = 0 To Connection.ComClass._nBoard - 1
+                If Connection.ComClass.SetRegister(addressArm, 0, cp) = 0 Then
+                    Timer1.Enabled = False
+                    MainForm.plog.TextBox1.AppendText("Stopping Spectrum Acquisition." & vbCrLf)
+                Else
+                    MainForm.plog.TextBox1.AppendText("Error on CONFIG_ARM" & vbCrLf)
+                End If
+            Next
         End If
+
+
         running = False
         MainForm.sets.Apply.Enabled = True
 
     End Sub
 
     Public Sub startspectrum()
-
-        If Connection.ComClass.SetRegister(addressSync, 0) = 0 Then
-            If Connection.ComClass.SetRegister(addressWait, 0) = 0 Then
-                Dim mode_value As UInt32
-                If MainForm.acquisition.General_settings.TriggerSource = 1 Then
-                    mode_value = Convert.ToInt32("010", 2)
-                ElseIf MainForm.acquisition.General_settings.TriggerSource = 0 Then
-                    mode_value = Convert.ToInt32("001", 2)
-                End If
-                If Connection.ComClass.SetRegister(addressMode, mode_value) = 0 Then
-                    If Connection.ComClass.SetRegister(addressMask, &HFFFFFFFF&) = 0 Then
-                        If Connection.ComClass.SetRegister(addressArm, 2) = 0 Then
-                            If Connection.ComClass.SetRegister(addressArm, 0) = 0 Then
-                                If Connection.ComClass.SetRegister(addressArm, 1) = 0 Then
-                                    StartSpectraReceiverThread()
-                                    Timer1.Enabled = True
-                                    MainForm.plog.TextBox1.AppendText("Starting Spectrum Acquisition..." & vbCrLf)
+        Dim _start = False
+        If Connection.ComClass._boardModel = communication.tModel.DT5550 Then
+            If Connection.ComClass.SetRegister(addressSync, 0, 0) = 0 Then
+                If Connection.ComClass.SetRegister(addressWait, 0, 0) = 0 Then
+                    Dim mode_value As UInt32
+                    If MainForm.acquisition.General_settings.TriggerSource = 1 Then
+                        mode_value = Convert.ToInt32("010", 2)
+                    ElseIf MainForm.acquisition.General_settings.TriggerSource = 0 Then
+                        mode_value = Convert.ToInt32("001", 2)
+                    End If
+                    If Connection.ComClass.SetRegister(addressMode, mode_value, 0) = 0 Then
+                        If Connection.ComClass.SetRegister(addressMask, &HFFFFFFFF&, 0) = 0 Then
+                            If Connection.ComClass.SetRegister(addressArm, 2, 0) = 0 Then
+                                If Connection.ComClass.SetRegister(addressArm, 0, 0) = 0 Then
+                                    If Connection.ComClass.SetRegister(addressArm, 1, 0) = 0 Then
+                                        StartSpectraReceiverThread()
+                                        Timer1.Enabled = True
+                                        MainForm.plog.TextBox1.AppendText("Starting Spectrum Acquisition..." & vbCrLf)
+                                        running = True
+                                        MainForm.sets.Apply.Enabled = False
+                                    Else
+                                        MainForm.plog.TextBox1.AppendText("Error on CONFIG_ARM!" & vbCrLf)
+                                    End If
                                 Else
                                     MainForm.plog.TextBox1.AppendText("Error on CONFIG_ARM!" & vbCrLf)
                                 End If
@@ -245,22 +305,40 @@ Public Class pSpectra
                                 MainForm.plog.TextBox1.AppendText("Error on CONFIG_ARM!" & vbCrLf)
                             End If
                         Else
-                            MainForm.plog.TextBox1.AppendText("Error on CONFIG_ARM!" & vbCrLf)
+                            MainForm.plog.TextBox1.AppendText("Error on CONFIG_T0_MASK!" & vbCrLf)
                         End If
                     Else
-                        MainForm.plog.TextBox1.AppendText("Error on CONFIG_T0_MASK!" & vbCrLf)
+                        MainForm.plog.TextBox1.AppendText("Error on CONFIG_TRIGGER_MODE!" & vbCrLf)
                     End If
                 Else
-                    MainForm.plog.TextBox1.AppendText("Error on CONFIG_TRIGGER_MODE!" & vbCrLf)
+                    MainForm.plog.TextBox1.AppendText("Error on CONFIG_WAIT!" & vbCrLf)
                 End If
             Else
-                MainForm.plog.TextBox1.AppendText("Error on CONFIG_WAIT!" & vbCrLf)
+                MainForm.plog.TextBox1.AppendText("Error on CONFIG_SYNC!" & vbCrLf)
             End If
-        Else
-            MainForm.plog.TextBox1.AppendText("Error on CONFIG_SYNC!" & vbCrLf)
+        ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Then
+            For cp = 0 To Connection.ComClass._nBoard - 1
+                If Connection.ComClass.SetRegister(addressArm, 0, cp) = 0 Then
+                    If Connection.ComClass.SetRegister(addressArm, 1, cp) = 0 Then
+                        _start = True
+                    Else
+                        MainForm.plog.TextBox1.AppendText("Error on CONFIG_ARM!" & vbCrLf)
+                    End If
+                Else
+                    MainForm.plog.TextBox1.AppendText("Error on CONFIG_ARM!" & vbCrLf)
+                End If
+            Next
+            If _start Then
+                StartSpectraReceiverThread()
+                Timer1.Enabled = True
+                MainForm.plog.TextBox1.AppendText("Starting Spectrum Acquisition..." & vbCrLf)
+                running = True
+                MainForm.sets.Apply.Enabled = False
+            End If
+
         End If
-        running = True
-        MainForm.sets.Apply.Enabled = False
+
+
 
     End Sub
 
@@ -599,10 +677,10 @@ Public Class pSpectra
                         insync = 0
                     End If
                 Case 2
-                    ev.timecode += mpe << 32
+                    ev.timecode = mpe << 32
                     insync = 3
                 Case 3
-                    ev.timecode = mpe
+                    ev.timecode += mpe
                     insync = 4
                 Case 4
                     insync = 5
@@ -681,6 +759,77 @@ Public Class pSpectra
         Next
 
     End Sub
+
+    Public Sub UnpackDataPacketR(ByRef data As UInt32(), ssize As Integer, cp As Integer)
+
+        Dim ev As Evento
+        Dim insync = 0
+        Dim pxcnt As Integer = 0
+        Dim packid
+        Dim mpe
+        Dim discard As Boolean = False
+        For iiii = 0 To ssize - 1
+            mpe = data(iiii)
+            Select Case insync
+                Case 0
+                    If mpe = &H80000000& Then
+                        ev = New Evento(1)
+
+                        ev.energy(0) = 0
+                        discard = False
+                        insync = 1
+                    End If
+                Case 1
+                    ev.energy(0) = mpe
+
+                    insync = 2
+                Case 2
+                    ev.timecode = mpe
+                    insync = 3
+                Case 3
+                    ev.timecode += mpe << 32L
+                    insync = 4
+                Case 4
+                    Dim trigger_id As UInt32 = mpe
+
+                    trigger_id = trigger_id >> 24
+                    ev.SingleChannelTriggerId = trigger_id
+                    ev.valid = True
+                    ' If (ev.ValidEvent >> pxcnt) And &H1 Then
+                    MutexSpe.WaitOne()
+                    spectra(trigger_id + (cp * _n_ch), ev.energy(0)) += 1
+                    MutexSpe.ReleaseMutex()
+                    MutexCumulative.WaitOne()
+                    realtimeimage(trigger_id + (cp * _n_ch)) = ev.energy(0)
+                    integralimage(trigger_id + (cp * _n_ch)) += ev.energy(0)
+
+
+                    If fileEnable Then
+                        spectracount += 1
+                        Try
+                            If Array.IndexOf(EnabledChannel_id, trigger_id + (cp * _n_ch)) Then
+                                If (TargetMode = 1 And spectracount <= TargetEvent) Or (TargetMode = 2 And (T / freq <= TargetEvent)) Or TargetMode = 0 Then
+                                    objRawWriter.WriteLine(trigger_id + (cp * _n_ch) & ";" & ev.timecode.ToString & ";" & String.Join(";", ev.energy(0)).Replace(",", "."))
+                                End If
+                            End If
+                        Catch ex As Exception
+
+                        End Try
+                    End If
+
+                    MutexCumulative.ReleaseMutex()
+
+                    insync = 0
+
+
+            End Select
+        Next
+
+    End Sub
+
+
+
+
 
     Private Sub DisegnaGrafico(ByRef grafico As Pesgo, Gtyle As SGraphPlottingMethod)
 

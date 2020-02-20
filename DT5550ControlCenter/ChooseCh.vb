@@ -18,7 +18,7 @@
         'Next
         'Array.Sort(listch)
         ComboBox1.Items.Add("NC")
-        For i = 1 To MainForm.CurrentOscilloscope.Channels
+        For i = 1 To MainForm.CurrentOscilloscopes(0).Channels
             ComboBox1.Items.Add(i.ToString)
         Next
         ComboBox1.SelectedIndex = 0

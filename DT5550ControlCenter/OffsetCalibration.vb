@@ -33,8 +33,8 @@ Public Class OffsetCalibration
             DGW1.Rows.Add(i, 0, 0, 0, 0, 0, 0, 0, 0)
         Next
 
-        addressData = MainForm.CurrentOscilloscope.Address
-        nsamples = MainForm.CurrentOscilloscope.nsamples
+        addressData = MainForm.CurrentOscilloscopes(0).Address
+        nsamples = MainForm.CurrentOscilloscopes(0).nsamples
         tot_points = 5 * nsamples
         osc_ch = MainForm.acquisition.CHList.Count
         length = nsamples * osc_ch
@@ -54,7 +54,7 @@ Public Class OffsetCalibration
 
             Next
             If ANOFS > 0 Then
-                Connection.ComClass.SetRegister(ANOFS, 0)
+                Connection.ComClass.SetRegister(ANOFS, 0, 0)
 
             End If
         Next
@@ -75,12 +75,12 @@ Public Class OffsetCalibration
             Dim status As UInt32 = 0
             Dim tt = Now
             For zzz = 0 To 3
-                If Connection.ComClass.SetRegister(addressDecimator, 0) = 0 Then
-                    If Connection.ComClass.SetRegister(addressPre, 1) = 0 Then
-                        If Connection.ComClass.SetRegister(addressMode, Convert.ToInt32("1000" & MainForm.acquisition.General_settings.TriggerOscilloscopeEdges & "010", 2)) = 0 Then
-                            If Connection.ComClass.SetRegister(addressLevel, 0) = 0 Then
-                                If Connection.ComClass.SetRegister(addressArm, 0) = 0 Then
-                                    If Connection.ComClass.SetRegister(addressArm, 1) = 0 Then
+                If Connection.ComClass.SetRegister(addressDecimator, 0, 0) = 0 Then
+                    If Connection.ComClass.SetRegister(addressPre, 1, 0) = 0 Then
+                        If Connection.ComClass.SetRegister(addressMode, Convert.ToInt32("1000" & MainForm.acquisition.General_settings.TriggerOscilloscopeEdges & "010", 2), 0) = 0 Then
+                            If Connection.ComClass.SetRegister(addressLevel, 0, 0) = 0 Then
+                                If Connection.ComClass.SetRegister(addressArm, 0, 0) = 0 Then
+                                    If Connection.ComClass.SetRegister(addressArm, 1, 0) = 0 Then
                                     Else
                                         MainForm.plog.TextBox1.AppendText("Error on CONFIG_ARM!" & vbCrLf)
                                     End If
@@ -103,17 +103,17 @@ Public Class OffsetCalibration
                 End If
 
                 While status <> 1
-                    Connection.ComClass.GetRegister(addressStatus, status)
+                    Connection.ComClass.GetRegister(addressStatus, status, 0)
                     If (Now - tt).TotalMilliseconds > 1000 Then
                         Exit Sub
                     End If
                 End While
 
                 Dim position As UInt32
-                Connection.ComClass.GetRegister(addressPosition, position)
+                Connection.ComClass.GetRegister(addressPosition, position, 0)
             Next
 
-            If Connection.ComClass.ReadData(addressData, data, length, 0, 1000, read_data, valid_data) = 0 Then
+            If Connection.ComClass.ReadData(addressData, data, length, 0, 1000, read_data, valid_data, 0) = 0 Then
                 Dim curr As Integer = position - Math.Floor(1 * nsamples / 100)
                 Dim n = 0
 

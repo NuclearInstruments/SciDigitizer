@@ -15,17 +15,21 @@
 
 
     Private Sub Mapping_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        MainForm.acquisition.currentMAP.cols = COLS
-        MainForm.acquisition.currentMAP.rows = ROWS
+        If Connection.ComClass._boardModel = communication.tModel.DT5550 Then
+            MainForm.acquisition.currentMAP.cols = COLS
+            MainForm.acquisition.currentMAP.rows = ROWS
 
-        AddHandler numeric_col.ValueChanged, AddressOf COL_VALUE_CHANGE
-        AddHandler numeric_row.ValueChanged, AddressOf ROW_VALUE_CHANGE
-        AddHandler button1.Click, AddressOf CLICK_EVENT_BUTTON
-        inhibit = False
+            AddHandler numeric_col.ValueChanged, AddressOf COL_VALUE_CHANGE
+            AddHandler numeric_row.ValueChanged, AddressOf ROW_VALUE_CHANGE
+            AddHandler button1.Click, AddressOf CLICK_EVENT_BUTTON
+            inhibit = False
+        End If
     End Sub
 
     Private Sub Mapping_Resize(sender As Object, e As EventArgs) Handles Me.Resize
-        ResizeMaps(ROWS, COLS)
+        If Connection.ComClass._boardModel = communication.tModel.DT5550 Then
+            ResizeMaps(ROWS, COLS)
+        End If
     End Sub
 
     Public Sub ResizeMaps(ROWS As Integer, COLS As Integer)
@@ -279,7 +283,7 @@
                 Dim y = 0
                 MainForm.acquisition.FindPosition(COLS, i + 1, x, y)
                 If l(i) <> "NC" Then
-                    MainForm.acquisition.CHList.Add(New AcquisitionClass.Channel("CHANNEL " + (i + 1).ToString, l(i), x, y))
+                    MainForm.acquisition.CHList.Add(New AcquisitionClass.Channel("CHANNEL " + (i + 1).ToString, l(i), i + 1, x, y, communication.tModel.DT5550, 1))
                 End If
             Next
 

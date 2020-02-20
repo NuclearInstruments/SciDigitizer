@@ -34,8 +34,8 @@ Partial Class pOscilloscope
         '
         Me.TableLayoutPanel1.BackColor = System.Drawing.Color.White
         Me.TableLayoutPanel1.ColumnCount = 2
-        Me.TableLayoutPanel1.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 100.0!))
-        Me.TableLayoutPanel1.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
+        Me.TableLayoutPanel1.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 12.0!))
+        Me.TableLayoutPanel1.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 88.0!))
         Me.TableLayoutPanel1.Controls.Add(Me.Pesgo1, 0, 0)
         Me.TableLayoutPanel1.Controls.Add(Me.CheckedListBox1, 0, 0)
         Me.TableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill
@@ -49,10 +49,10 @@ Partial Class pOscilloscope
         'Pesgo1
         '
         Me.Pesgo1.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.Pesgo1.Location = New System.Drawing.Point(102, 2)
+        Me.Pesgo1.Location = New System.Drawing.Point(96, 2)
         Me.Pesgo1.Margin = New System.Windows.Forms.Padding(2)
         Me.Pesgo1.Name = "Pesgo1"
-        Me.Pesgo1.Size = New System.Drawing.Size(683, 589)
+        Me.Pesgo1.Size = New System.Drawing.Size(689, 589)
         Me.Pesgo1.TabIndex = 2
         Me.Pesgo1.Text = "Pesgo1"
         '
@@ -65,7 +65,7 @@ Partial Class pOscilloscope
         Me.CheckedListBox1.Location = New System.Drawing.Point(2, 3)
         Me.CheckedListBox1.Margin = New System.Windows.Forms.Padding(2, 3, 2, 3)
         Me.CheckedListBox1.Name = "CheckedListBox1"
-        Me.CheckedListBox1.Size = New System.Drawing.Size(96, 587)
+        Me.CheckedListBox1.Size = New System.Drawing.Size(90, 587)
         Me.CheckedListBox1.TabIndex = 1
         '
         'Timer1

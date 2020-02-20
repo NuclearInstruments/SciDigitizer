@@ -15,8 +15,10 @@ Public Class MainForm
     Public Ts As Double = 12.5
     Dim msgcoda As New Queue
     Dim CurrentResources As SciCompilerExportClass
-    Public CurrentOscilloscope As New Oscilloscope
+    Dim CurrentResources2019 As SciCompiler2019ExportClass
+    Public CurrentOscilloscopes As New List(Of Oscilloscope)
     Public CurrentMCA As New FrameTransfers
+    Public CurrentCP As New CustomPackets
     Public CurrentI2C As New IdueC
     Public CurrentRegisterList As New List(Of Register)
     Public fit_enabled = False
@@ -32,8 +34,8 @@ Public Class MainForm
     Public ofsc As New OffsetCalibration
     Public pImm1 As New pImmediate(True)
     Public pImm2 As New pImmediate(False)
-    Public Shared acquisition As New AcquisitionClass(32)
     Public isSpectra = False
+    Public Shared acquisition As New AcquisitionClass()
 
     Public __Running_OSC As Boolean = False
     Public __Running_SPE As Boolean = False
@@ -44,14 +46,18 @@ Public Class MainForm
 
     Public Sub MDIParent_Load(sender As Object, e As EventArgs) Handles MyBase.Load
 
-        Me.Text = "SCI-5550 Readout Software (NI - CAEN ) "
+        Me.Text = "SCI-55X0 Readout Software (NI - CAEN)"
         Dim file As String = Connection.Jsonfile
         Create(file)
 
-        acquisition = New AcquisitionClass(CurrentOscilloscope.Channels)
+        acquisition = New AcquisitionClass(Connection.ComClass._n_ch, Connection.ComClass._boardModel, Connection.ComClass._nBoard)
 
-        If Connection.CustomFirmware = False Then
+        If Connection.ComClass._boardModel = communication.tModel.DT5550 And Connection.CustomFirmware = False Then
             DefaultFirmwareMapping()
+        End If
+
+        If Connection.ComClass._boardModel = communication.tModel.R5560 Then
+            OffsetCalibrationToolToolStripMenuItem.Visible = False
         End If
 
         CreateGUI()
@@ -60,119 +66,301 @@ Public Class MainForm
 
     Public Sub Create(file As String)
 
-        Dim sr As New IO.StreamReader(file)
         CurrentResources = Nothing
-        CurrentResources = JsonConvert.DeserializeObject(Of SciCompilerExportClass)(sr.ReadToEnd)
-        sr.Close()
+        CurrentResources2019 = Nothing
+        Try
+            Dim sr As New IO.StreamReader(file)
+            CurrentResources = JsonConvert.DeserializeObject(Of SciCompilerExportClass)(sr.ReadToEnd)
+            sr.Close()
+        Catch
+            Dim sr As New IO.StreamReader(file)
+            CurrentResources2019 = JsonConvert.DeserializeObject(Of SciCompiler2019ExportClass)(sr.ReadToEnd)
+            sr.Close()
+        End Try
 
-        If Connection.ComClass.IsFileCompatible(CurrentResources.Device) Then
+        If CurrentResources IsNot Nothing Then
+            If Connection.ComClass.IsFileCompatible(CurrentResources.Device) Then
+                For o = 0 To Connection.ComClass._n_oscilloscope - 1
+                    If CurrentResources.MMCComponents.Oscilloscopes IsNot Nothing Then
+                        Dim osc = New Oscilloscope
+                        osc.Name = CurrentResources.MMCComponents.Oscilloscopes(o).Name
+                        osc.Address = CurrentResources.MMCComponents.Oscilloscopes(o).Address
+                        osc.Channels = CurrentResources.MMCComponents.Oscilloscopes(o).Channels
+                        osc.Version = CurrentResources.MMCComponents.Oscilloscopes(o).Version
+                        osc.nsamples = CurrentResources.MMCComponents.Oscilloscopes(o).nsamples
+                        osc.Registers = CurrentResources.MMCComponents.Oscilloscopes(o).Registers
 
-            If CurrentResources.MMCComponents.Oscilloscopes IsNot Nothing Then
-                CurrentOscilloscope.Name = CurrentResources.MMCComponents.Oscilloscopes(0).Name
-                CurrentOscilloscope.Address = CurrentResources.MMCComponents.Oscilloscopes(0).Address
-                CurrentOscilloscope.Channels = CurrentResources.MMCComponents.Oscilloscopes(0).Channels
-                CurrentOscilloscope.Version = CurrentResources.MMCComponents.Oscilloscopes(0).Version
-                CurrentOscilloscope.nsamples = CurrentResources.MMCComponents.Oscilloscopes(0).nsamples
-                CurrentOscilloscope.Registers = CurrentResources.MMCComponents.Oscilloscopes(0).Registers
-
-                For Each r In CurrentOscilloscope.Registers
-                    If r.Name = "CONFIG_DECIMATOR" Then
-                        scope.addressDecimator = r.Address
-                        ofsc.addressDecimator = r.Address
-                    End If
-                    If r.Name = "CONFIG_PRETRIGGER" Then
-                        scope.addressPre = r.Address
-                        ofsc.addressPre = r.Address
-                    End If
-                    If r.Name = "CONFIG_TRIGGER_MODE" Then
-                        scope.addressMode = r.Address
-                        ofsc.addressMode = r.Address
-                    End If
-                    If r.Name = "CONFIG_TRIGGER_LEVEL" Then
-                        scope.addressLevel = r.Address
-                        ofsc.addressLevel = r.Address
-                    End If
-                    If r.Name = "CONFIG_ARM" Then
-                        scope.addressArm = r.Address
-                        ofsc.addressArm = r.Address
-                    End If
-                    If r.Name = "READ_STATUS" Then
-                        scope.addressStatus = r.Address
-                        ofsc.addressStatus = r.Address
-                    End If
-                    If r.Name = "READ_POSITION" Then
-                        scope.addressPosition = r.Address
-                        ofsc.addressPosition = r.Address
+                        For Each r In osc.Registers
+                            If r.Name = "CONFIG_DECIMATOR" Then
+                                scope.addressDecimator.Add(r.Address)
+                                ofsc.addressDecimator = r.Address
+                            End If
+                            If r.Name = "CONFIG_PRETRIGGER" Then
+                                scope.addressPre.Add(r.Address)
+                                ofsc.addressPre = r.Address
+                            End If
+                            If r.Name = "CONFIG_TRIGGER_MODE" Then
+                                scope.addressMode.Add(r.Address)
+                                ofsc.addressMode = r.Address
+                            End If
+                            If r.Name = "CONFIG_TRIGGER_LEVEL" Then
+                                scope.addressLevel.Add(r.Address)
+                                ofsc.addressLevel = r.Address
+                            End If
+                            If r.Name = "CONFIG_ARM" Then
+                                scope.addressArm.Add(r.Address)
+                                ofsc.addressArm = r.Address
+                            End If
+                            If r.Name = "READ_STATUS" Then
+                                scope.addressStatus.Add(r.Address)
+                                ofsc.addressStatus = r.Address
+                            End If
+                            If r.Name = "READ_POSITION" Then
+                                scope.addressPosition.Add(r.Address)
+                                ofsc.addressPosition = r.Address
+                            End If
+                        Next
+                        CurrentOscilloscopes.Add(osc)
                     End If
                 Next
-            End If
 
-            For Each r In CurrentResources.Registers
-                CurrentRegisterList.Add(r)
-                If r.Name = "IS_CHARGE_INT" Then
-                    Dim value As Integer
-                    If Connection.ComClass.GetRegister(r.Address, value) = 0 Then
-                        If value = 0 Then
-                            isChargeIntegration = False
-                        Else
-                            isChargeIntegration = True
+                For Each r In CurrentResources.Registers
+                    CurrentRegisterList.Add(r)
+                    If Connection.ComClass._boardModel = communication.tModel.DT5550 Then
+
+                        If r.Name = "IS_CHARGE_INT" Then
+                            Dim value As Integer
+                            If Connection.ComClass.GetRegister(r.Address, value, 0) = 0 Then
+                                If value = 0 Then
+                                    isChargeIntegration = False
+                                Else
+                                    isChargeIntegration = True
+                                End If
+                            End If
                         End If
                     End If
+
+                Next
+
+                If CurrentResources.MMCComponents.FrameTransfer IsNot Nothing Then
+                    CurrentMCA.Name = CurrentResources.MMCComponents.FrameTransfer(0).Name
+                    CurrentMCA.Address = CurrentResources.MMCComponents.FrameTransfer(0).Address
+                    CurrentMCA.Channels = CurrentResources.MMCComponents.FrameTransfer(0).Channels
+                    CurrentMCA.Version = CurrentResources.MMCComponents.FrameTransfer(0).Version
+                    CurrentMCA.Registers = CurrentResources.MMCComponents.FrameTransfer(0).Registers
+
+                    For Each r In CurrentMCA.Registers
+                        If r.Name = "CONFIG_T0_MASK" Then
+                            spect.addressMask = r.Address
+                        End If
+                        If r.Name = "CONFIG_WAIT" Then
+                            spect.addressWait = r.Address
+                        End If
+                        If r.Name = "CONFIG_TRIGGER_MODE" Then
+                            spect.addressMode = r.Address
+                        End If
+                        If r.Name = "CONFIG_ARM" Then
+                            spect.addressArm = r.Address
+                        End If
+                        If r.Name = "READ_STATUS" Then
+                            spect.addressStatus = r.Address
+                        End If
+                        If r.Name = "CONFIG_SYNC" Then
+                            spect.addressSync = r.Address
+                        End If
+                    Next
                 End If
-            Next
 
-            If CurrentResources.MMCComponents.FrameTransfer IsNot Nothing Then
-                CurrentMCA.Name = CurrentResources.MMCComponents.FrameTransfer(0).Name
-                CurrentMCA.Address = CurrentResources.MMCComponents.FrameTransfer(0).Address
-                CurrentMCA.Channels = CurrentResources.MMCComponents.FrameTransfer(0).Channels
-                CurrentMCA.Version = CurrentResources.MMCComponents.FrameTransfer(0).Version
-                CurrentMCA.Registers = CurrentResources.MMCComponents.FrameTransfer(0).Registers
+                If CurrentResources.MMCComponents.CustomPacket IsNot Nothing Then
 
-                For Each r In CurrentMCA.Registers
-                    If r.Name = "CONFIG_T0_MASK" Then
-                        spect.addressMask = r.Address
-                    End If
-                    If r.Name = "CONFIG_WAIT" Then
-                        spect.addressWait = r.Address
-                    End If
-                    If r.Name = "CONFIG_TRIGGER_MODE" Then
-                        spect.addressMode = r.Address
-                    End If
-                    If r.Name = "CONFIG_ARM" Then
-                        spect.addressArm = r.Address
-                    End If
-                    If r.Name = "READ_STATUS" Then
-                        spect.addressStatus = r.Address
-                    End If
-                    If r.Name = "CONFIG_SYNC" Then
-                        spect.addressSync = r.Address
-                    End If
-                Next
-            End If
+                    CurrentCP.Name = CurrentResources.MMCComponents.CustomPacket(0).Name
+                    CurrentCP.Address = CurrentResources.MMCComponents.CustomPacket(0).Address
+                    CurrentCP.Channels = CurrentResources.MMCComponents.CustomPacket(0).Channels
+                    CurrentCP.Version = CurrentResources.MMCComponents.CustomPacket(0).Version
+                    CurrentCP.Registers = CurrentResources.MMCComponents.CustomPacket(0).Registers
 
-            If CurrentResources.MMCComponents.i2c IsNot Nothing Then
-                CurrentI2C.Name = CurrentResources.MMCComponents.i2c(0).Name
-                CurrentI2C.Address = CurrentResources.MMCComponents.i2c(0).Address
-                CurrentI2C.Version = CurrentResources.MMCComponents.i2c(0).Version
-                CurrentI2C.Registers = CurrentResources.MMCComponents.i2c(0).Registers
-                Dim regstatus As New UInt32
-                Dim regcontrol As New UInt32
+                    For Each r In CurrentCP.Registers
+                        If r.Name = "CONFIG" Then
+                            spect.addressArm = r.Address
+                        End If
+                        If r.Name = "READ_STATUS" Then
+                            spect.addressStatus = r.Address
+                        End If
+                        If r.Name = "READ_VALID_WORDS" Then
+                            spect.addressSync = r.Address
+                        End If
+                    Next
+                End If
+                If Connection.ComClass._boardModel = communication.tModel.DT5550 Then
+                    If CurrentResources.MMCComponents.i2c IsNot Nothing Then
+                        CurrentI2C.Name = CurrentResources.MMCComponents.i2c(0).Name
+                        CurrentI2C.Address = CurrentResources.MMCComponents.i2c(0).Address
+                        CurrentI2C.Version = CurrentResources.MMCComponents.i2c(0).Version
+                        CurrentI2C.Registers = CurrentResources.MMCComponents.i2c(0).Registers
+                        Dim regstatus As New UInt32
+                        Dim regcontrol As New UInt32
 
-                For Each r In CurrentI2C.Registers
-                    If r.Name = "REG_CTRL" Then
-                        regcontrol = r.Address
+                        For Each r In CurrentI2C.Registers
+                            If r.Name = "REG_CTRL" Then
+                                regcontrol = r.Address
+                            End If
+                            If r.Name = "REG_MON" Then
+                                regstatus = r.Address
+                            End If
+                        Next
+                        Connection.ComClass.AFE_SetIICBaseAddress(regcontrol, regstatus)
+                    Else
+                        plog.TextBox1.AppendText(vbCrLf & "I2C missing!" & vbCrLf)
                     End If
-                    If r.Name = "REG_MON" Then
-                        regstatus = r.Address
-                    End If
-                Next
-                Connection.ComClass.AFE_SetIICBaseAddress(regcontrol, regstatus)
+                End If
             Else
-                plog.TextBox1.AppendText(vbCrLf & "I2C missing!" & vbCrLf)
+                MsgBox("The file is not compatible with the selected board!", vbCritical + vbOKOnly)
+                Exit Sub
             End If
-        Else
-            MsgBox("The file is not compatible with the selected board!", vbCritical + vbOKOnly)
-            Exit Sub
+
+        ElseIf CurrentResources2019 IsNot Nothing Then
+            If Connection.ComClass.IsFileCompatible(CurrentResources2019.Device) Then
+                For Each r In CurrentResources2019.Registers
+                    CurrentRegisterList.Add(r)
+                    If Connection.ComClass._boardModel = communication.tModel.DT5550 Then
+
+                        If r.Name = "IS_CHARGE_INT" Then
+                            Dim value As Integer
+                            If Connection.ComClass.GetRegister(r.Address, value, 0) = 0 Then
+                                If value = 0 Then
+                                    isChargeIntegration = False
+                                Else
+                                    isChargeIntegration = True
+                                End If
+                            End If
+                        End If
+                    End If
+
+                Next
+
+                For o = 0 To Connection.ComClass._n_oscilloscope - 1
+                    CurrentOscilloscopes.Add(New Oscilloscope)
+                Next
+
+                For Each mmcc In CurrentResources2019.MMCComponents
+                    If mmcc.Type = "CustomPacket" Then
+                        CurrentCP.Name = mmcc.Name
+                        CurrentCP.Address = mmcc.Address
+                        CurrentCP.Channels = mmcc.Channels
+                        CurrentCP.Version = mmcc.Version
+                        CurrentCP.Registers = mmcc.Registers
+
+                        For Each r In CurrentCP.Registers
+                            If r.Name = "CONFIG" Then
+                                spect.addressArm = r.Address
+                            End If
+                            If r.Name = "READ_STATUS" Then
+                                spect.addressStatus = r.Address
+                            End If
+                            If r.Name = "READ_VALID_WORDS" Then
+                                spect.addressSync = r.Address
+                            End If
+                        Next
+                    End If
+
+                    If mmcc.Type = "Oscilloscope" Then
+                        Dim ind = CInt(mmcc.Name.Replace("Oscilloscope_", ""))
+                        CurrentOscilloscopes(ind).Name = mmcc.Name
+                        CurrentOscilloscopes(ind).Address = mmcc.Address
+                        CurrentOscilloscopes(ind).Channels = mmcc.Channels
+                        CurrentOscilloscopes(ind).Version = mmcc.Version
+                        CurrentOscilloscopes(ind).nsamples = mmcc.nsamples
+                        CurrentOscilloscopes(ind).Registers = mmcc.Registers
+
+
+
+                    End If
+
+                    If mmcc.Type = "FrameTransfer" Then
+                        CurrentMCA.Name = mmcc.Name
+                        CurrentMCA.Address = mmcc.Address
+                        CurrentMCA.Channels = mmcc.Channels
+                        CurrentMCA.Version = mmcc.Version
+                        CurrentMCA.Registers = mmcc.Registers
+
+                        For Each r In CurrentMCA.Registers
+                            If r.Name = "CONFIG_T0_MASK" Then
+                                spect.addressMask = r.Address
+                            End If
+                            If r.Name = "CONFIG_WAIT" Then
+                                spect.addressWait = r.Address
+                            End If
+                            If r.Name = "CONFIG_TRIGGER_MODE" Then
+                                spect.addressMode = r.Address
+                            End If
+                            If r.Name = "CONFIG_ARM" Then
+                                spect.addressArm = r.Address
+                            End If
+                            If r.Name = "READ_STATUS" Then
+                                spect.addressStatus = r.Address
+                            End If
+                            If r.Name = "CONFIG_SYNC" Then
+                                spect.addressSync = r.Address
+                            End If
+                        Next
+                    End If
+
+                    If mmcc.Type = "I2CMaster" Then
+                        CurrentI2C.Name = mmcc.Name
+                        CurrentI2C.Address = mmcc.Address
+                        CurrentI2C.Version = mmcc.Version
+                        CurrentI2C.Registers = mmcc.Registers
+                        Dim regstatus As New UInt32
+                        Dim regcontrol As New UInt32
+
+                        For Each r In CurrentI2C.Registers
+                            If r.Name = "REG_CTRL" Then
+                                regcontrol = r.Address
+                            End If
+                            If r.Name = "REG_MON" Then
+                                regstatus = r.Address
+                            End If
+                        Next
+                        Connection.ComClass.AFE_SetIICBaseAddress(regcontrol, regstatus)
+                    End If
+                Next
+                For o = 0 To Connection.ComClass._n_oscilloscope - 1
+
+                    For Each r In CurrentOscilloscopes(o).Registers
+                        If r.Name = "CONFIG_DECIMATOR" Then
+                            scope.addressDecimator.Add(r.Address)
+                            ofsc.addressDecimator = r.Address
+                        End If
+                        If r.Name = "CONFIG_PRETRIGGER" Then
+                            scope.addressPre.Add(r.Address)
+                            ofsc.addressPre = r.Address
+                        End If
+                        If r.Name = "CONFIG_TRIGGER_MODE" Then
+                            scope.addressMode.Add(r.Address)
+                            ofsc.addressMode = r.Address
+                        End If
+                        If r.Name = "CONFIG_TRIGGER_LEVEL" Then
+                            scope.addressLevel.Add(r.Address)
+                            ofsc.addressLevel = r.Address
+                        End If
+                        If r.Name = "CONFIG_ARM" Then
+                            scope.addressArm.Add(r.Address)
+                            ofsc.addressArm = r.Address
+                        End If
+                        If r.Name = "READ_STATUS" Then
+                            scope.addressStatus.Add(r.Address)
+                            ofsc.addressStatus = r.Address
+                        End If
+                        If r.Name = "READ_POSITION" Then
+                            scope.addressPosition.Add(r.Address)
+                            ofsc.addressPosition = r.Address
+                        End If
+                    Next
+                Next
+            Else
+                MsgBox("The file is not compatible with the selected board!", vbCritical + vbOKOnly)
+                Exit Sub
+            End If
         End If
 
     End Sub
@@ -203,14 +391,14 @@ Public Class MainForm
             spect.Dock = DockStyle.Fill
             list_dockPanel.Add(content1a)
         End If
-        If CurrentOscilloscope IsNot Nothing Then
-            Dim content1b As DockContent = GetDockContentForm("Oscilloscope", DockState.Document, Color.White)
+        'If CurrentOscilloscope IsNot Nothing Then
+        Dim content1b As DockContent = GetDockContentForm("Oscilloscope", DockState.Document, Color.White)
             content1b.Show(dockPanel)
             content1b.CloseButtonVisible = False
             content1b.Controls.Add(scope)
             scope.Dock = DockStyle.Fill
             list_dockPanel.Add(content1b)
-        End If
+        ' End If
         Dim content1c As DockContent = GetDockContentForm("Settings", DockState.Document, Color.White)
         content1c.Show(dockPanel)
         content1c.CloseButtonVisible = False
@@ -261,59 +449,85 @@ Public Class MainForm
                 'Dim xmlnode As XmlNodeList
                 'Dim i As Integer
                 'Dim str As String
+                Dim isChargeIntegrationCurrent = False
                 Dim fs As New FileStream(oDialog.FileName, FileMode.Open, FileAccess.Read)
                 xmldoc.Load(fs)
-                acquisition.General_settings.AFEImpedance = IIf(xmldoc.SelectSingleNode("Settings/General_Settings/AFE_Impedance").InnerText.ToString = "50 Ohm", True, False)
-                acquisition.General_settings.AFEOffset = xmldoc.SelectSingleNode("Settings/General_Settings/AFE_Offset").InnerText
-                acquisition.General_settings.SignalOffset = xmldoc.SelectSingleNode("Settings/General_Settings/Signal_Offset").InnerText
-                acquisition.General_settings.TriggerSource = IIf(xmldoc.SelectSingleNode("Settings/General_Settings/Trigger_Source").InnerText = "Internal", trigger_source.INTERNAL, trigger_source.EXTERNAL)
-                acquisition.General_settings.TriggerDelay = xmldoc.SelectSingleNode("Settings/General_Settings/Trigger_Delay").InnerText
-                acquisition.General_settings.TriggerMode = IIf(xmldoc.SelectSingleNode("Settings/General_Settings/Trigger_Mode").InnerText = "Threshold", trigger_mode.THRESHOLD, trigger_mode.DERIVATIVE)
-                acquisition.General_settings.Sampling = IIf(xmldoc.SelectSingleNode("Settings/General_Settings/Sampling_Method").InnerText = "Common", sampling_method.COMMON, sampling_method.INDIPENDENT)
-                Dim isChargeIntegrationCurrent = xmldoc.SelectSingleNode("Settings/General_Settings/IsChargeIntegrator").InnerText
+                If Connection.ComClass._boardModel = communication.tModel.DT5550 Then
+                    acquisition.General_settings.AFEImpedance = IIf(xmldoc.SelectSingleNode("Settings/General_Settings/AFE_Impedance").InnerText.ToString = "50 Ohm", True, False)
+                    acquisition.General_settings.AFEOffset = xmldoc.SelectSingleNode("Settings/General_Settings/AFE_Offset").InnerText
+                    acquisition.General_settings.SignalOffset = xmldoc.SelectSingleNode("Settings/General_Settings/Signal_Offset").InnerText
+                    acquisition.General_settings.TriggerSource = IIf(xmldoc.SelectSingleNode("Settings/General_Settings/Trigger_Source").InnerText = "Internal", trigger_source.INTERNAL, trigger_source.EXTERNAL)
+                    acquisition.General_settings.TriggerDelay = xmldoc.SelectSingleNode("Settings/General_Settings/Trigger_Delay").InnerText
+                    acquisition.General_settings.TriggerMode = IIf(xmldoc.SelectSingleNode("Settings/General_Settings/Trigger_Mode").InnerText = "Threshold", trigger_mode.THRESHOLD, trigger_mode.DERIVATIVE)
+                    acquisition.General_settings.Sampling = IIf(xmldoc.SelectSingleNode("Settings/General_Settings/Sampling_Method").InnerText = "Common", sampling_method.COMMON, sampling_method.INDIPENDENT)
+                    isChargeIntegrationCurrent = xmldoc.SelectSingleNode("Settings/General_Settings/IsChargeIntegrator").InnerText
+                End If
                 If xmldoc.SelectSingleNode("Settings/Oscilloscope_Settings/Oscilloscope_Trigger_Source").InnerText = "Internal" Then
                     acquisition.General_settings.TriggerSourceOscilloscope = trigger_source.INTERNAL
-                ElseIf xmldoc.SelectSingleNode("Settings/Oscilloscope_Settings/Oscilloscope_Trigger_Source").InnerText = "External" Then
+                ElseIf xmldoc.SelectSingleNode("Settings/Oscilloscope_Settings/Oscilloscope_Trigger_Source").InnerText = "External" Or xmldoc.SelectSingleNode("Settings/Oscilloscope_Settings/Oscilloscope_Trigger_Source").InnerText = "MCA Trigger" Then
                     acquisition.General_settings.TriggerSourceOscilloscope = trigger_source.EXTERNAL
+                ElseIf xmldoc.SelectSingleNode("Settings/Oscilloscope_Settings/Oscilloscope_Trigger_Source").InnerText = "Free Running" Then
+                    acquisition.General_settings.TriggerSourceOscilloscope = trigger_source.FREE
                 Else
                     acquisition.General_settings.TriggerSourceOscilloscope = trigger_source.LEVEL
-                    acquisition.General_settings.TriggerChannelOscilloscope = xmldoc.SelectSingleNode("Settings/Oscilloscope_Settings/Oscilloscope_Trigger_Source").InnerText.Replace("CHANNEL ", "") - 1
+                    If Connection.ComClass._boardModel = communication.tModel.DT5550 Then
+                        acquisition.General_settings.TriggerChannelOscilloscope = xmldoc.SelectSingleNode("Settings/Oscilloscope_Settings/Oscilloscope_Trigger_Source").InnerText.Replace("CHANNEL ", "") - 1
+                    ElseIf Connection.ComClass._boardModel = communication.tModel.DT5550 Then
+                        acquisition.General_settings.TriggerChannelOscilloscope = 0
+                    End If
                 End If
-                acquisition.General_settings.TriggerOscilloscopeEdges = IIf(xmldoc.SelectSingleNode("Settings/Oscilloscope_Settings/Oscilloscope_Trigger_Edge").InnerText = "Rising", edge.RISING, edge.FALLING)
+                    acquisition.General_settings.TriggerOscilloscopeEdges = IIf(xmldoc.SelectSingleNode("Settings/Oscilloscope_Settings/Oscilloscope_Trigger_Edge").InnerText = "Rising", edge.RISING, edge.FALLING)
                 acquisition.General_settings.TriggerOscilloscopeLevel = xmldoc.SelectSingleNode("Settings/Oscilloscope_Settings/Oscilloscope_Trigger_Level").InnerText
                 acquisition.General_settings.OscilloscopePreTrigger = xmldoc.SelectSingleNode("Settings/Oscilloscope_Settings/Oscilloscope_Pre_Trigger").InnerText
                 acquisition.General_settings.OscilloscopeDecimator = CType(xmldoc.SelectSingleNode("Settings/Oscilloscope_Settings/Oscilloscope_Trigger_Decimator").InnerText, Double) / 12.5
                 Dim k = 0
                 For Each node In xmldoc.SelectSingleNode("Settings").LastChild.ChildNodes
                     acquisition.CHList(k).polarity = IIf(node.ChildNodes.Item(0).innertext = "Positive", signal_polarity.POSITIVE, signal_polarity.NEGATIVE)
-                    acquisition.CHList(k).trigger_level = node.ChildNodes.Item(1).innertext
-                    acquisition.CHList(k).trigger_inhibit = node.ChildNodes.Item(2).innertext
-                    If isChargeIntegrationCurrent Then
-                        acquisition.CHList(k).integration_time = node.ChildNodes.Item(3).innertext
-                        acquisition.CHList(k).pre_gate = node.ChildNodes.Item(4).innertext
-                        acquisition.CHList(k).gain = node.ChildNodes.Item(5).innertext
-                        acquisition.CHList(k).pileup_enable = CBool(node.ChildNodes.Item(6).innertext)
-                        acquisition.CHList(k).pileup_time = node.ChildNodes.Item(7).innertext
-                        acquisition.CHList(k).baseline_inhibit = node.ChildNodes.Item(8).innertext
-                        acquisition.CHList(k).baseline_sample = node.ChildNodes.Item(9).innertext
-                    Else
-                        acquisition.CHList(k).decay_constant = node.ChildNodes.Item(3).innertext
-                        acquisition.CHList(k).peaking_time = node.ChildNodes.Item(4).innertext
-                        acquisition.CHList(k).flat_top = node.ChildNodes.Item(5).innertext
-                        acquisition.CHList(k).energy_sample = node.ChildNodes.Item(6).innertext
-                        acquisition.CHList(k).gain = node.ChildNodes.Item(7).innertext
-                        acquisition.CHList(k).pileup_enable = node.ChildNodes.Item(8).innertext
-                        acquisition.CHList(k).pileup_time = node.ChildNodes.Item(9).innertext
+                    If Connection.ComClass._boardModel = communication.tModel.DT5550 Then
+                        acquisition.CHList(k).trigger_level = node.ChildNodes.Item(1).innertext
+                        acquisition.CHList(k).trigger_inhibit = node.ChildNodes.Item(2).innertext
+                        If isChargeIntegrationCurrent Then
+                            acquisition.CHList(k).integration_time = node.ChildNodes.Item(3).innertext
+                            acquisition.CHList(k).pre_gate = node.ChildNodes.Item(4).innertext
+                            acquisition.CHList(k).gain = node.ChildNodes.Item(5).innertext
+                            acquisition.CHList(k).pileup_enable = CBool(node.ChildNodes.Item(6).innertext)
+                            acquisition.CHList(k).pileup_time = node.ChildNodes.Item(7).innertext
+                            acquisition.CHList(k).baseline_inhibit = node.ChildNodes.Item(8).innertext
+                            acquisition.CHList(k).baseline_sample = node.ChildNodes.Item(9).innertext
+                        Else
+                            acquisition.CHList(k).decay_constant = node.ChildNodes.Item(3).innertext
+                            acquisition.CHList(k).peaking_time = node.ChildNodes.Item(4).innertext
+                            acquisition.CHList(k).flat_top = node.ChildNodes.Item(5).innertext
+                            acquisition.CHList(k).energy_sample = node.ChildNodes.Item(6).innertext
+                            acquisition.CHList(k).gain = node.ChildNodes.Item(7).innertext
+                            acquisition.CHList(k).pileup_enable = node.ChildNodes.Item(8).innertext
+                            acquisition.CHList(k).pileup_time = node.ChildNodes.Item(9).innertext
+                            acquisition.CHList(k).baseline_inhibit = node.ChildNodes.Item(10).innertext
+                            acquisition.CHList(k).baseline_sample = node.ChildNodes.Item(11).innertext
+                        End If
+
+                    ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Then
+                        acquisition.CHList(k).offset = node.ChildNodes.Item(1).innertext
+                        acquisition.CHList(k).trigger_level = node.ChildNodes.Item(2).innertext
+                        acquisition.CHList(k).trigger_peaking = node.ChildNodes.Item(3).innertext
+                        acquisition.CHList(k).trigger_flat = node.ChildNodes.Item(4).innertext
+                        acquisition.CHList(k).decay_constant = node.ChildNodes.Item(5).innertext
+                        acquisition.CHList(k).peaking_time = node.ChildNodes.Item(6).innertext
+                        acquisition.CHList(k).flat_top = node.ChildNodes.Item(7).innertext
+                        acquisition.CHList(k).energy_sample = node.ChildNodes.Item(8).innertext
+                        acquisition.CHList(k).gain = node.ChildNodes.Item(9).innertext
                         acquisition.CHList(k).baseline_inhibit = node.ChildNodes.Item(10).innertext
                         acquisition.CHList(k).baseline_sample = node.ChildNodes.Item(11).innertext
                     End If
+
+
                     k += 1
                 Next
                 fs.Close()
-                sets.Settings_reload()
-                sets.Grid_ReLoad()
-                plog.TextBox1.AppendText("Settings loaded from file." & vbCrLf)
-            End If
+                    sets.Settings_reload()
+                    sets.Grid_ReLoad()
+                    plog.TextBox1.AppendText("Settings loaded from file." & vbCrLf)
+                End If
         Catch ex As Exception
             plog.TextBox1.AppendText("Error: " & ex.Message & vbCrLf)
         End Try
@@ -334,16 +548,18 @@ Public Class MainForm
                 writer.Formatting = Xml.Formatting.Indented
                 writer.Indentation = 2
                 writer.WriteStartElement("Settings")
-                writer.WriteStartElement("General_Settings")
-                writer.WriteElementString("AFE_Impedance", sets.Impedance.SelectedItem)
-                writer.WriteElementString("AFE_Offset", sets.Offset.Value)
-                writer.WriteElementString("Signal_Offset", sets.SignalOffset.Value)
-                writer.WriteElementString("Trigger_Source", sets.TriggerSource.SelectedItem)
-                writer.WriteElementString("Trigger_Delay", sets.TriggerDelay.Value)
-                writer.WriteElementString("Trigger_Mode", sets.TriggerMode.SelectedItem)
-                writer.WriteElementString("Sampling_Method", sets.sampling.SelectedItem)
-                writer.WriteElementString("IsChargeIntegrator", isChargeIntegration)
-                writer.WriteEndElement()
+                If Connection.ComClass._boardModel = communication.tModel.DT5550 Then
+                    writer.WriteStartElement("General_Settings")
+                    writer.WriteElementString("AFE_Impedance", sets.Impedance.SelectedItem)
+                    writer.WriteElementString("AFE_Offset", sets.Offset.Value)
+                    writer.WriteElementString("Signal_Offset", sets.SignalOffset.Value)
+                    writer.WriteElementString("Trigger_Source", sets.TriggerSource.SelectedItem)
+                    writer.WriteElementString("Trigger_Delay", sets.TriggerDelay.Value)
+                    writer.WriteElementString("Trigger_Mode", sets.TriggerMode.SelectedItem)
+                    writer.WriteElementString("Sampling_Method", sets.sampling.SelectedItem)
+                    writer.WriteElementString("IsChargeIntegrator", isChargeIntegration)
+                    writer.WriteEndElement()
+                End If
                 writer.WriteStartElement("Oscilloscope_Settings")
                 writer.WriteElementString("Oscilloscope_Trigger_Source", sets.TriggerSourceOscilloscope.SelectedItem)
                 writer.WriteElementString("Oscilloscope_Trigger_Edge", sets.TriggerEdge.SelectedItem)
@@ -351,26 +567,42 @@ Public Class MainForm
                 writer.WriteElementString("Oscilloscope_Trigger_Decimator", sets.Horizontal.Text)
                 writer.WriteElementString("Oscilloscope_Pre_Trigger", sets.PreTrigger.Text)
                 writer.WriteEndElement()
+
                 writer.WriteStartElement("Channels_Settings")
-                For i = 0 To CurrentOscilloscope.Channels - 1
+                For i = 0 To acquisition.CHList.Count - 1
                     writer.WriteStartElement(sets.DataGridView1.Rows(i).Cells("Channel").Value.Replace(" ", "_"))
-                    writer.WriteElementString("Polarity", sets.DataGridView1.Rows(i).Cells("Polarity").Value)
-                    writer.WriteElementString("Trigger_Level", sets.DataGridView1.Rows(i).Cells("Trigger Level").Value)
-                    writer.WriteElementString("Trigger_Hold-Off", sets.DataGridView1.Rows(i).Cells("Trigger Hold-Off").Value)
-                    If isChargeIntegration Then
-                        writer.WriteElementString("Integration_Time", sets.DataGridView1.Rows(i).Cells("Integration Time").Value)
-                        writer.WriteElementString("Pre-gate", sets.DataGridView1.Rows(i).Cells("Pre-gate").Value)
-                    Else
+                    If Connection.ComClass._boardModel = communication.tModel.DT5550 Then
+                        writer.WriteElementString("Polarity", sets.DataGridView1.Rows(i).Cells("Polarity").Value)
+                        writer.WriteElementString("Trigger_Level", sets.DataGridView1.Rows(i).Cells("Trigger Level").Value)
+                        writer.WriteElementString("Trigger_Hold-Off", sets.DataGridView1.Rows(i).Cells("Trigger Hold-Off").Value)
+                        If isChargeIntegration Then
+                            writer.WriteElementString("Integration_Time", sets.DataGridView1.Rows(i).Cells("Integration Time").Value)
+                            writer.WriteElementString("Pre-gate", sets.DataGridView1.Rows(i).Cells("Pre-gate").Value)
+                        Else
+                            writer.WriteElementString("Decay_Constant", sets.DataGridView1.Rows(i).Cells("Decay Constant").Value)
+                            writer.WriteElementString("Peaking_Time", sets.DataGridView1.Rows(i).Cells("Peaking Time").Value)
+                            writer.WriteElementString("Flat_Top", sets.DataGridView1.Rows(i).Cells("Flat Top").Value)
+                            writer.WriteElementString("Energy_Sample", sets.DataGridView1.Rows(i).Cells("Energy Sample").Value)
+                        End If
+                        writer.WriteElementString("Gain", sets.DataGridView1.Rows(i).Cells("Gain").Value)
+                        writer.WriteElementString("Pileup_Rejection", sets.DataGridView1.Rows(i).Cells("Pileup Rejection").Value)
+                        writer.WriteElementString("Pileup_Rejection_Time", sets.DataGridView1.Rows(i).Cells("Pileup Rejection Time").Value)
+                        writer.WriteElementString("Baseline_Inhibit_Time", sets.DataGridView1.Rows(i).Cells("Baseline Inhibit Time").Value)
+                        writer.WriteElementString("Baseline_Lenght", sets.DataGridView1.Rows(i).Cells("Baseline Lenght").Value)
+                    ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Then
+                        writer.WriteElementString("Polarity", sets.DataGridView1.Rows(i).Cells("Polarity").Value)
+                        writer.WriteElementString("Offset", sets.DataGridView1.Rows(i).Cells("Offset").Value)
+                        writer.WriteElementString("Trigger_Level", sets.DataGridView1.Rows(i).Cells("Trigger Level").Value)
+                        writer.WriteElementString("Trigger_Peaking_Time", sets.DataGridView1.Rows(i).Cells("Trigger Peaking").Value)
+                        writer.WriteElementString("Trigger_Flat_Top", sets.DataGridView1.Rows(i).Cells("Trigger Flat").Value)
                         writer.WriteElementString("Decay_Constant", sets.DataGridView1.Rows(i).Cells("Decay Constant").Value)
                         writer.WriteElementString("Peaking_Time", sets.DataGridView1.Rows(i).Cells("Peaking Time").Value)
                         writer.WriteElementString("Flat_Top", sets.DataGridView1.Rows(i).Cells("Flat Top").Value)
                         writer.WriteElementString("Energy_Sample", sets.DataGridView1.Rows(i).Cells("Energy Sample").Value)
+                        writer.WriteElementString("Gain", sets.DataGridView1.Rows(i).Cells("Gain").Value)
+                        writer.WriteElementString("Baseline_Inhibit_Time", sets.DataGridView1.Rows(i).Cells("Baseline Inhibit Time").Value)
+                        writer.WriteElementString("Baseline_Lenght", sets.DataGridView1.Rows(i).Cells("Baseline Lenght").Value)
                     End If
-                    writer.WriteElementString("Gain", sets.DataGridView1.Rows(i).Cells("Gain").Value)
-                    writer.WriteElementString("Pileup_Rejection", sets.DataGridView1.Rows(i).Cells("Pileup Rejection").Value)
-                    writer.WriteElementString("Pileup_Rejection_Time", sets.DataGridView1.Rows(i).Cells("Pileup Rejection Time").Value)
-                    writer.WriteElementString("Baseline_Inhibit_Time", sets.DataGridView1.Rows(i).Cells("Baseline Inhibit Time").Value)
-                    writer.WriteElementString("Baseline_Lenght", sets.DataGridView1.Rows(i).Cells("Baseline Lenght").Value)
                     writer.WriteEndElement()
                 Next
                 writer.WriteEndElement()
@@ -562,7 +794,7 @@ Public Class MainForm
                         scope.EnabledChannel(i) = g.ChList.GetItemCheckState(i)
                         scope.EnabledChannel_id(i) = acquisition.CHList(i).id
                     Next
-                    scope.wavecount = 0
+                    scope.totalACQ = 0
                     scope.TargetMode = g.TargetMode.SelectedIndex
                     If scope.TargetMode = 1 Then
                         scope.TargetEvent = g.TargetValue.Text
@@ -929,7 +1161,7 @@ Public Class MainForm
                         scope.EnabledChannel(i) = g.ChList.GetItemCheckState(i)
                         scope.EnabledChannel_id(i) = acquisition.CHList(i).id
                     Next
-                    scope.wavecount = 0
+                    scope.totalACQ = 0
                     scope.TargetMode = g.TargetMode.SelectedIndex
                     If scope.TargetMode = 1 Then
                         scope.TargetEvent = g.TargetValue.Text

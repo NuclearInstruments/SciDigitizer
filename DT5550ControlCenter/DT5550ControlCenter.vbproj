@@ -132,6 +132,7 @@
     </Compile>
     <Compile Include="FPGA_FX3.vb" />
     <Compile Include="I2C.vb" />
+    <Compile Include="ImportDLL_R5560.vb" />
     <Compile Include="logwin.Designer.vb">
       <DependentUpon>logwin.vb</DependentUpon>
     </Compile>
@@ -187,15 +188,14 @@
     <Compile Include="pScope.Designer.vb">
       <DependentUpon>pScope.vb</DependentUpon>
     </Compile>
-    <Compile Include="pScope.vb">
-      <SubType>UserControl</SubType>
-    </Compile>
+    <Compile Include="pScope.vb" />
     <Compile Include="pSpectra.Designer.vb">
       <DependentUpon>pSpectra.vb</DependentUpon>
     </Compile>
     <Compile Include="pSpectra.vb">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Include="SciCompiler2019ExportClass.vb" />
     <Compile Include="SciCompilerExportClass.vb" />
     <Compile Include="Settings.Designer.vb">
       <DependentUpon>Settings.vb</DependentUpon>
@@ -299,6 +299,8 @@
   <ItemGroup>
     <Content Include="fava_grossa.ico" />
     <Content Include="icon.ico" />
+    <None Include="Resources\remove2.png" />
+    <None Include="Resources\add-icon.png" />
     <None Include="Resources\SPLASH_con1.png" />
     <None Include="Resources\SPLASH1.png" />
     <None Include="Resources\SPLASH_con.png" />

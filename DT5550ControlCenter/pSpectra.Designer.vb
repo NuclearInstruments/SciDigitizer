@@ -34,8 +34,8 @@ Partial Class pSpectra
         '
         Me.TableLayoutPanel1.BackColor = System.Drawing.Color.White
         Me.TableLayoutPanel1.ColumnCount = 2
-        Me.TableLayoutPanel1.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 100.0!))
-        Me.TableLayoutPanel1.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
+        Me.TableLayoutPanel1.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 12.0!))
+        Me.TableLayoutPanel1.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 88.0!))
         Me.TableLayoutPanel1.Controls.Add(Me.CheckedListBox1, 0, 0)
         Me.TableLayoutPanel1.Controls.Add(Me.Pesgo1, 1, 0)
         Me.TableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill
@@ -56,16 +56,16 @@ Partial Class pSpectra
         Me.CheckedListBox1.Location = New System.Drawing.Point(2, 3)
         Me.CheckedListBox1.Margin = New System.Windows.Forms.Padding(2, 3, 2, 3)
         Me.CheckedListBox1.Name = "CheckedListBox1"
-        Me.CheckedListBox1.Size = New System.Drawing.Size(96, 420)
+        Me.CheckedListBox1.Size = New System.Drawing.Size(70, 420)
         Me.CheckedListBox1.TabIndex = 0
         '
         'Pesgo1
         '
         Me.Pesgo1.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.Pesgo1.Location = New System.Drawing.Point(102, 2)
+        Me.Pesgo1.Location = New System.Drawing.Point(76, 2)
         Me.Pesgo1.Margin = New System.Windows.Forms.Padding(2)
         Me.Pesgo1.Name = "Pesgo1"
-        Me.Pesgo1.Size = New System.Drawing.Size(518, 422)
+        Me.Pesgo1.Size = New System.Drawing.Size(544, 422)
         Me.Pesgo1.TabIndex = 1
         Me.Pesgo1.Text = "Pesgo1"
         '

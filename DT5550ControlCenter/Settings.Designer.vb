@@ -77,9 +77,9 @@ Partial Class Settings
         Me.TableLayoutPanel1.AutoScrollMinSize = New System.Drawing.Size(1000, 500)
         Me.TableLayoutPanel1.ColumnCount = 1
         Me.TableLayoutPanel1.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
-        Me.TableLayoutPanel1.Controls.Add(Me.DataGridView1, 0, 1)
         Me.TableLayoutPanel1.Controls.Add(Me.Panel1, 0, 0)
         Me.TableLayoutPanel1.Controls.Add(Me.Panel3, 0, 2)
+        Me.TableLayoutPanel1.Controls.Add(Me.DataGridView1, 0, 1)
         Me.TableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill
         Me.TableLayoutPanel1.Location = New System.Drawing.Point(0, 0)
         Me.TableLayoutPanel1.Name = "TableLayoutPanel1"
@@ -87,7 +87,7 @@ Partial Class Settings
         Me.TableLayoutPanel1.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 214.0!))
         Me.TableLayoutPanel1.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100.0!))
         Me.TableLayoutPanel1.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30.0!))
-        Me.TableLayoutPanel1.Size = New System.Drawing.Size(1018, 684)
+        Me.TableLayoutPanel1.Size = New System.Drawing.Size(1036, 751)
         Me.TableLayoutPanel1.TabIndex = 0
         '
         'DataGridView1
@@ -106,7 +106,7 @@ Partial Class Settings
         Me.DataGridView1.Name = "DataGridView1"
         Me.DataGridView1.RowHeadersVisible = False
         Me.DataGridView1.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders
-        Me.DataGridView1.Size = New System.Drawing.Size(1012, 434)
+        Me.DataGridView1.Size = New System.Drawing.Size(1012, 684)
         Me.DataGridView1.TabIndex = 0
         '
         'Panel1
@@ -132,7 +132,7 @@ Partial Class Settings
         'GroupBox2
         '
         Me.GroupBox2.Controls.Add(Me.Panel4)
-        Me.GroupBox2.Dock = System.Windows.Forms.DockStyle.Bottom
+        Me.GroupBox2.Dock = System.Windows.Forms.DockStyle.Top
         Me.GroupBox2.Location = New System.Drawing.Point(0, 105)
         Me.GroupBox2.Name = "GroupBox2"
         Me.GroupBox2.Size = New System.Drawing.Size(1012, 103)
@@ -439,7 +439,7 @@ Partial Class Settings
         '
         Me.Panel3.Controls.Add(Me.Apply)
         Me.Panel3.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.Panel3.Location = New System.Drawing.Point(3, 657)
+        Me.Panel3.Location = New System.Drawing.Point(3, 907)
         Me.Panel3.Name = "Panel3"
         Me.Panel3.Size = New System.Drawing.Size(1012, 24)
         Me.Panel3.TabIndex = 2
@@ -461,7 +461,7 @@ Partial Class Settings
         Me.BackColor = System.Drawing.Color.White
         Me.Controls.Add(Me.TableLayoutPanel1)
         Me.Name = "Settings"
-        Me.Size = New System.Drawing.Size(1018, 684)
+        Me.Size = New System.Drawing.Size(1036, 751)
         Me.TableLayoutPanel1.ResumeLayout(False)
         CType(Me.DataGridView1, System.ComponentModel.ISupportInitialize).EndInit()
         Me.Panel1.ResumeLayout(False)

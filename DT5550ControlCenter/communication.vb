@@ -3,12 +3,14 @@
     Public Enum tConnectionMode
         USB = 0
         ETHERNET = 1
-        VME = 2
+        ETHERNET2 = 2
+        VME = 3
     End Enum
 
     Public Enum tModel
         V2495 = 0
         DT5550 = 1
+        R5560 = 2
     End Enum
 
     Public Enum tError
@@ -36,10 +38,16 @@
         WRITE_FAILED = 21
     End Enum
 
-    Private _boardModel As tModel
-    Private _isconnected As Boolean
+    Public _boardModel As tModel
+    Private _isconnected As New List(Of Boolean)
+    Public _nBoard As Integer
+    Public _n_ch As Integer
+    Public _n_oscilloscope As Integer
+    Public _n_ch_oscilloscope As Integer
     Private V2495Handle As UInt32
     Private DT5550Handle As New IntPtr
+    Private R5560Handle As New List(Of IntPtr)
+
     Dim mtx As New Threading.Mutex
 
     Public Sub New()
@@ -56,6 +64,8 @@
             modelcode = tModel.V2495
         ElseIf model = "DT5550" Then
             modelcode = tModel.DT5550
+        ElseIf model = "R5560" Then
+            modelcode = tModel.R5560
         End If
         If modelcode = _boardModel Then
             Return True
@@ -64,10 +74,19 @@
         End If
     End Function
 
-    Public Function Connect(ConnectionMode As tConnectionMode, model As tModel, param0 As String) As tError
-        If _isconnected = True Then
-            Return tError.ALREADY_CONNECTED
-        End If
+    Public Sub StartConnection(n As Integer, model As tModel)
+        _isconnected.Clear()
+        R5560Handle.Clear()
+
+        For i = 0 To n - 1
+            _isconnected.Add(False)
+            If model = tModel.R5560 Then
+                R5560Handle.Add(0)
+            End If
+        Next
+    End Sub
+    Public Function Connect(ConnectionMode As tConnectionMode, model As tModel, param0 As String, ind As Integer) As tError
+
         Select Case model
             'Case tModel.V2495
             '    V2495_Startup()
@@ -101,6 +120,7 @@
 
             '    End Select
             Case tModel.DT5550
+
                 USB3_Init()
                 Select Case ConnectionMode
                     Case tConnectionMode.USB
@@ -110,13 +130,41 @@
                         Dim error_t = IErrorDT5550ToNETError(ierror)
                         If error_t = tError.OK Then
                             _boardModel = model
-                            _isconnected = True
+                            _isconnected(ind) = True
                         Else
-                            _isconnected = False
+                            _isconnected(ind) = False
                         End If
                         Return error_t
                     Case tConnectionMode.ETHERNET
                         Return tError.ERROR_GENERIC
+                    Case tConnectionMode.ETHERNET2
+                        Return tError.ERROR_GENERIC
+                    Case tConnectionMode.VME
+                        Return tError.ERROR_GENERIC
+                End Select
+            Case tModel.R5560
+
+                Select Case ConnectionMode
+                    Case tConnectionMode.USB
+                    Case tConnectionMode.ETHERNET
+                        Return tError.ERROR_GENERIC
+                    Case tConnectionMode.ETHERNET2
+
+                        R5560_Init()
+                        mtx.WaitOne()
+                        Dim R5560_Handle As IntPtr
+                        Dim ierror = R5560_ConnectDevice(param0, 8888, R5560_Handle)
+                        mtx.ReleaseMutex()
+                        Dim error_t = IErrorDT5550ToNETError(ierror)
+                        If error_t = tError.OK Then
+                            R5560Handle(ind) = R5560_Handle
+                            _boardModel = model
+                            _isconnected(ind) = True
+                        Else
+                            _isconnected(ind) = False
+                        End If
+                        Return error_t
+
                     Case tConnectionMode.VME
                         Return tError.ERROR_GENERIC
                 End Select
@@ -127,7 +175,7 @@
     End Function
 
     Public Function Disconnect() As tError
-        If _isconnected = False Then
+        If _isconnected.Count = 0 Then
             Return tError.ALREADY_DISCONNECTED
         End If
         Select Case _boardModel
@@ -138,14 +186,25 @@
             '    _isconnected = False
             '    Return IErrorV2495ToNETError(ierror)
             Case tModel.DT5550
+                If _isconnected(0) = False Then
+                    Return tError.ALREADY_DISCONNECTED
+                End If
                 mtx.WaitOne()
                 Dim ierror = USB3_CloseConnection(DT5550Handle)
                 If ierror = 0 Then
-                    _isconnected = False
+                    _isconnected(0) = False
                     Return tError.OK
                 Else
                     Return tError.ALREADY_DISCONNECTED
                 End If
+            Case tModel.R5560
+                mtx.WaitOne()
+                For r = 0 To R5560Handle.Count - 1
+                    R5560_CloseConnection(R5560Handle(r))
+                    _isconnected(r) = False
+                Next
+
+                Return tError.OK
             Case Else
                 Return tError.UNSUPPORTED_DEVICE
         End Select
@@ -153,14 +212,11 @@
 
     Public Function ListDevices(ConnectionMode As tConnectionMode, model As tModel, ByRef ListOfDevice As String, ByRef DeviceCount As Integer) As tError
 
-        If _isconnected = True Then
-            Return tError.ALREADY_CONNECTED
-        End If
-
         Select Case model
             Case tModel.V2495
 
             Case tModel.DT5550
+
                 USB3_Init()
                 Select Case ConnectionMode
                     Case tConnectionMode.USB
@@ -299,10 +355,8 @@
         End If
     End Sub
 
-    Public Function SetRegister(address As UInt32, value As UInt32) As tError
-        If _isconnected = False Then
-            Return tError.NOT_CONNECTED
-        End If
+    Public Function SetRegister(address As UInt32, value As UInt32, Handle_indx As UInt32) As tError
+
         Select Case _boardModel
             'Case tModel.V2495
             '    mtx.WaitOne()
@@ -310,8 +364,23 @@
             '    mtx.ReleaseMutex()
             '    Return IErrorV2495ToNETError(ierror)
             Case tModel.DT5550
+                If _isconnected(0) = False Then
+                    Return tError.NOT_CONNECTED
+                End If
                 mtx.WaitOne()
                 Dim ierror = USB3_WriteReg(value, address, DT5550Handle)
+                mtx.ReleaseMutex()
+                If ierror < &HFFFFFFFF& Then
+                    Return ierror
+                Else
+                    Return tError.ERROR_FPGA
+                End If
+            Case tModel.R5560
+                If _isconnected(Handle_indx) = False Then
+                    Return tError.NOT_CONNECTED
+                End If
+                mtx.WaitOne()
+                Dim ierror = R5560_WriteReg(value, address, R5560Handle(Handle_indx))
                 mtx.ReleaseMutex()
                 If ierror < &HFFFFFFFF& Then
                     Return ierror
@@ -323,10 +392,32 @@
         End Select
     End Function
 
-    Public Function GetRegister(address As UInt32, ByRef value As UInt32) As tError
-        If _isconnected = False Then
-            Return tError.NOT_CONNECTED
-        End If
+    'Public Function SetRegisterR(address As UInt32, value As UInt32, Handle_indx As UInt32) As tError
+    '    If _isconnected = False Then
+    '        Return tError.NOT_CONNECTED
+    '    End If
+    '    Select Case _boardModel
+    '        'Case tModel.V2495
+    '        '    mtx.WaitOne()
+    '        '    Dim ierror = V2495_DHA_WriteReg(value, address, V2495Handle, 0)
+    '        '    mtx.ReleaseMutex()
+    '        '    Return IErrorV2495ToNETError(ierror)
+    '        Case tModel.R5560
+    '            mtx.WaitOne()
+    '            Dim ierror = R5560_WriteReg(value, address, R5560Handle(Handle_indx))
+    '            mtx.ReleaseMutex()
+    '            If ierror < &HFFFFFFFF& Then
+    '                Return ierror
+    '            Else
+    '                Return tError.ERROR_FPGA
+    '            End If
+    '        Case Else
+    '            Return tError.UNSUPPORTED_DEVICE
+    '    End Select
+    'End Function
+
+    Public Function GetRegister(address As UInt32, ByRef value As UInt32, Handle_indx As UInt32) As tError
+
         Select Case _boardModel
             'Case tModel.V2495
             '    mtx.WaitOne()
@@ -334,8 +425,23 @@
             '    mtx.ReleaseMutex()
             '    Return IErrorV2495ToNETError(ierror)
             Case tModel.DT5550
+                If _isconnected(0) = False Then
+                    Return tError.NOT_CONNECTED
+                End If
                 mtx.WaitOne()
                 Dim ierror = USB3_ReadReg(value, address, DT5550Handle)
+                mtx.ReleaseMutex()
+                If ierror < &HFFFFFFFF& Then
+                    Return ierror
+                Else
+                    Return tError.ERROR_FPGA
+                End If
+            Case tModel.R5560
+                If _isconnected(Handle_indx) = False Then
+                    Return tError.NOT_CONNECTED
+                End If
+                mtx.WaitOne()
+                Dim ierror = R5560_ReadReg(value, address, R5560Handle(Handle_indx))
                 mtx.ReleaseMutex()
                 If ierror < &HFFFFFFFF& Then
                     Return ierror
@@ -346,6 +452,30 @@
                 Return tError.UNSUPPORTED_DEVICE
         End Select
     End Function
+
+    'Public Function GetRegisterR(address As UInt32, ByRef value As UInt32, Handle_indx As UInt32) As tError
+    '    If _isconnected = False Then
+    '        Return tError.NOT_CONNECTED
+    '    End If
+    '    Select Case _boardModel
+    '        'Case tModel.V2495
+    '        '    mtx.WaitOne()
+    '        '    Dim ierror = V2495_DHA_ReadReg(value, address, V2495Handle, 0)
+    '        '    mtx.ReleaseMutex()
+    '        '    Return IErrorV2495ToNETError(ierror)
+    '        Case tModel.R5560
+    '            mtx.WaitOne()
+    '            Dim ierror = R5560_ReadReg(value, address, R5560Handle(Handle_indx))
+    '            mtx.ReleaseMutex()
+    '            If ierror < &HFFFFFFFF& Then
+    '                Return ierror
+    '            Else
+    '                Return tError.ERROR_FPGA
+    '            End If
+    '        Case Else
+    '            Return tError.UNSUPPORTED_DEVICE
+    '    End Select
+    'End Function
 
     Public Function AFE_SetIICBaseAddress(cntrl As UInt32, status As UInt32)
         Return USB3_SetIICControllerBaseAddress(cntrl, status, DT5550Handle)
@@ -431,21 +561,54 @@
     '    ' Return tError.OK
     'End Function
 
-    Public Function ReadData(address As UInt32, ByRef value() As UInt32, lenght As Integer, bus_mode As Integer, timeout As UInt32, ByRef read_data As UInt32, ByRef valid_data As UInt32) As tError
-        If _isconnected = False Then
-            Return tError.NOT_CONNECTED
-        End If
+    Public Function ReadData(address As UInt32, ByRef value() As UInt32, lenght As Integer, bus_mode As Integer, timeout As UInt32, ByRef read_data As UInt32, ByRef valid_data As UInt32, ByVal Handle_indx As Integer) As tError
+
         Select Case _boardModel
            ' Case tModel.V2495
             Case tModel.DT5550
+                If _isconnected(0) = False Then
+                    Return terror.NOT_CONNECTED
+                End If
                 mtx.WaitOne()
                 Dim ierror = USB3_ReadData(value, lenght, address, bus_mode, timeout, DT5550Handle, read_data, valid_data)
                 mtx.ReleaseMutex()
-                Dim terror = IErrorDT5550ToNETError(ierror)
-                Return terror
+                Dim _terror = IErrorDT5550ToNETError(ierror)
+                Return _terror
+            Case tModel.R5560
+                If _isconnected(Handle_indx) = False Then
+                    Return terror.NOT_CONNECTED
+                End If
+                mtx.WaitOne()
+                Dim ierror = R5560_ReadData(value, lenght, address, R5560Handle(Handle_indx), read_data)
+                mtx.ReleaseMutex()
+                Dim _terror = IErrorDT5550ToNETError(ierror)
+                Return _terror
+
             Case Else
                 Return tError.UNSUPPORTED_DEVICE
         End Select
     End Function
+
+    Public Function ReadDataFifo(address As UInt32, ByRef value() As UInt32, ByRef lenght As Integer, ByVal address_status As Integer, ByVal bus_mode As Integer, timeout_ms As Integer, ByRef read_data As UInt32, ByRef valid_data As UInt32, ByVal Handle_indx As Integer) As tError
+
+        Select Case _boardModel
+           ' Case tModel.V2495
+            Case tModel.DT5550
+
+            Case tModel.R5560
+                If _isconnected(Handle_indx) = False Then
+                    Return terror.NOT_CONNECTED
+                End If
+                mtx.WaitOne()
+                Dim ierror = R5560_ReadFifo(value, lenght, address, address_status, bus_mode, timeout_ms, R5560Handle(Handle_indx), read_data)
+                mtx.ReleaseMutex()
+                Dim _terror = IErrorDT5550ToNETError(ierror)
+                Return _terror
+
+            Case Else
+                Return tError.UNSUPPORTED_DEVICE
+        End Select
+    End Function
+
 
 End Class

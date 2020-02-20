@@ -22,6 +22,8 @@ Public Class MMCComponent
     Public Property Oscilloscopes As Oscilloscope()
     Public Property i2c As IdueC()
     Public Property FrameTransfer As FrameTransfers()
+
+    Public Property CustomPacket As CustomPackets()
 End Class
 
 Public Class ListModule
@@ -68,6 +70,16 @@ Public Class FrameTransfers
     Public Property Version As String
     Public Property Channels As Integer
     Public Property Registers As Register()
+End Class
+
+Public Class CustomPackets
+    Public Property Name As String
+    Public Property Type As String
+    Public Property Address As UInt32
+    Public Property Version As String
+    Public Property Channels As Integer
+    Public Property Registers As Register()
+    Public Property UseDMA As Boolean
 End Class
 
 Public Class Channel
