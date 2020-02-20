@@ -503,7 +503,7 @@ Public Class pOscilloscope
 
 
         If Connection.ComClass._boardModel = communication.tModel.DT5550 Then
-            Pesgo1.PeLegend.SubsetsToLegend.Clear()
+            'Pesgo1.PeLegend.SubsetsToLegend.Clear()
 
             Dim status As UInt32 = 0
             Dim tt = Now

@@ -28,7 +28,6 @@ Public Class MainForm
     Public fit As fit_win
     Public isChargeIntegration As Boolean = False
     Public spect As New pSpectra
-    Public map As New Mapping
     Public sets As New Settings
     Public scope As New pOscilloscope
     Public ofsc As New OffsetCalibration
@@ -36,6 +35,7 @@ Public Class MainForm
     Public pImm2 As New pImmediate(False)
     Public isSpectra = False
     Public Shared acquisition As New AcquisitionClass()
+    Public map As New Mapping
 
     Public __Running_OSC As Boolean = False
     Public __Running_SPE As Boolean = False

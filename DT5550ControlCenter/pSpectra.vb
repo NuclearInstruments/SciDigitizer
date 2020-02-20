@@ -75,12 +75,12 @@ Public Class pSpectra
     Private Sub pSpectra_Load(sender As Object, e As EventArgs) Handles MyBase.Load
 
         DisegnaGrafico(Pesgo1, SGraphPlottingMethod.Step)
+        _n_ch = Connection.ComClass._n_ch
+        n_ch = MainForm.acquisition.CHList.Count
         If Connection.ComClass._boardModel = communication.tModel.DT5550 Then
             addressData = MainForm.CurrentMCA.Address
         ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Then
             addressData = (MainForm.CurrentCP.Address)
-            _n_ch = Connection.ComClass._n_ch
-            n_ch = MainForm.acquisition.CHList.Count
             MaxNumberOfChannel = _n_ch * Connection.ComClass._nBoard
             ReDim spectra(MaxNumberOfChannel, MaxSpectrumLength)
             ReDim Rebinned_spectra(MaxNumberOfChannel, MaxSpectrumLength)

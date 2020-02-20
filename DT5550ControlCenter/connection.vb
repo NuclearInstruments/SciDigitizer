@@ -95,29 +95,29 @@ Public Class Connection
     '    'End If
 
     'End Sub
-    Private Sub ComboBox1_SelectedIndexChanged(ByVal sender As System.Object, ByVal e As System.EventArgs)
+    'Private Sub ComboBox1_SelectedIndexChanged(ByVal sender As System.Object, ByVal e As System.EventArgs)
 
 
-        Dim i = DataGridView1.CurrentRow.Index
+    '    Dim i = DataGridView1.CurrentRow.Index
 
-        If DataGridView1.Rows(i).Cells("ConnectionType").Value = "USB" Or DataGridView1.Rows(i).Cells("BoardType").Value = "Baseboard" Then
-            Connect_R5560.Enabled = False
-        ElseIf DataGridView1.Rows(i).Cells("ConnectionType").Value = "Ethernet" And DataGridView1.Rows(i).Cells("BoardType").Value = "Single DAQ" Then
-            Connect_R5560.Enabled = True
-        End If
-    End Sub
+    '    If DataGridView1.Rows(i).Cells("ConnectionType").Value = "USB" Or DataGridView1.Rows(i).Cells("BoardType").Value = "Baseboard" Then
+    '        Connect_R5560.Enabled = False
+    '    ElseIf DataGridView1.Rows(i).Cells("ConnectionType").Value = "Ethernet" And DataGridView1.Rows(i).Cells("BoardType").Value = "Single DAQ" Then
+    '        Connect_R5560.Enabled = True
+    '    End If
+    'End Sub
 
-    Private Sub ComboBox2_SelectedIndexChanged(ByVal sender As System.Object, ByVal e As System.EventArgs)
-        Dim i = DataGridView1.CurrentRow.Index
+    'Private Sub ComboBox2_SelectedIndexChanged(ByVal sender As System.Object, ByVal e As System.EventArgs)
+    '    Dim i = DataGridView1.CurrentRow.Index
 
-        If DataGridView1.Rows(i).Cells("ConnectionType").Value = "USB" Or DataGridView1.Rows(i).Cells("BoardType").Value = "Baseboard" Then
-            Connect_R5560.Enabled = False
-        ElseIf DataGridView1.Rows(i).Cells("ConnectionType").Value = "Ethernet" And DataGridView1.Rows(i).Cells("BoardType").Value = "Single DAQ" Then
-            Connect_R5560.Enabled = True
-        End If
-    End Sub
+    '    If DataGridView1.Rows(i).Cells("ConnectionType").Value = "USB" Or DataGridView1.Rows(i).Cells("BoardType").Value = "Baseboard" Then
+    '        Connect_R5560.Enabled = False
+    '    ElseIf DataGridView1.Rows(i).Cells("ConnectionType").Value = "Ethernet" And DataGridView1.Rows(i).Cells("BoardType").Value = "Single DAQ" Then
+    '        Connect_R5560.Enabled = True
+    '    End If
+    'End Sub
 
-    Private Sub Browse_Click(sender As Object, e As EventArgs)
+    Private Sub Browse_Click(sender As Object, e As EventArgs) Handles Browse.Click
 
         Dim OpenFileDialog1 As New OpenFileDialog()
         OpenFileDialog1.InitialDirectory = Application.StartupPath
@@ -131,7 +131,7 @@ Public Class Connection
 
     End Sub
 
-    Private Sub Connect_Click(sender As Object, e As EventArgs)
+    Private Sub Connect_Click(sender As Object, e As EventArgs) Handles Connect.Click
         selected_board = communication.tModel.DT5550
         ComClass._nBoard = 1
         ComClass._n_ch = 32
@@ -253,7 +253,7 @@ Public Class Connection
 
     End Sub
 
-    Private Sub Button1_Click(sender As Object, e As EventArgs)
+    Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
         CreateDeviceList()
     End Sub
 
@@ -337,6 +337,7 @@ Public Class Connection
             DataGridView1.Rows.RemoveAt(nSel.RowIndex)
         End If
     End Sub
+
 
     'Private Sub DataGridView1_CurrentCellDirtyStateChanged(sender As Object, e As EventArgs) Handles DataGridView1.CurrentCellChanged
     '    Dim i = DataGridView1.CurrentRow.Index

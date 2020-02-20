@@ -11,7 +11,7 @@
     Dim numeric_col As New NumericUpDown
     Dim numeric_row As New NumericUpDown
     Dim inhibit = True
-
+    Dim first = True
 
 
     Private Sub Mapping_Load(sender As Object, e As EventArgs) Handles MyBase.Load
@@ -28,12 +28,16 @@
 
     Private Sub Mapping_Resize(sender As Object, e As EventArgs) Handles Me.Resize
         If Connection.ComClass._boardModel = communication.tModel.DT5550 Then
-            ResizeMaps(ROWS, COLS)
+            If first = True Then
+            Else
+                ResizeMaps(ROWS, COLS)
+            End If
         End If
     End Sub
 
     Public Sub ResizeMaps(ROWS As Integer, COLS As Integer)
         ptb.Clear()
+        first = False
         ReDim CURRENTMAP(ROWS - 1, COLS - 1)
         For i = 0 To ROWS - 1
             For j = 0 To COLS - 1

@@ -255,16 +255,18 @@ Public Class Settings
                 End If
             End If
         End If
+        If Connection.ComClass._boardModel = communication.tModel.R5560 Then
 
-        If (DataGridView1.Rows(e.RowIndex).Cells("Peaking Time").Value + DataGridView1.Rows(e.RowIndex).Cells("Flat Top").Value) / sampling_factor > 512 Then
-            DataGridView1.Rows(e.RowIndex).Cells("Peaking Time").Style.BackColor = Color.Red
-            DataGridView1.Rows(e.RowIndex).Cells("Flat Top").Style.BackColor = Color.Red
-            Apply.Enabled = False
-            Apply.BackColor = Color.LightGray
-            MainForm.plog.TextBox1.AppendText("Peaking Time plus Flat Top Time could not exceeds 4096 ns!" & vbCrLf)
-        Else
-            DataGridView1.Rows(e.RowIndex).Cells("Peaking Time").Style.BackColor = Color.White
-            DataGridView1.Rows(e.RowIndex).Cells("Flat Top").Style.BackColor = Color.White
+            If (DataGridView1.Rows(e.RowIndex).Cells("Peaking Time").Value + DataGridView1.Rows(e.RowIndex).Cells("Flat Top").Value) / sampling_factor > 512 Then
+                DataGridView1.Rows(e.RowIndex).Cells("Peaking Time").Style.BackColor = Color.Red
+                DataGridView1.Rows(e.RowIndex).Cells("Flat Top").Style.BackColor = Color.Red
+                Apply.Enabled = False
+                Apply.BackColor = Color.LightGray
+                MainForm.plog.TextBox1.AppendText("Peaking Time plus Flat Top Time could not exceeds 4096 ns!" & vbCrLf)
+            Else
+                DataGridView1.Rows(e.RowIndex).Cells("Peaking Time").Style.BackColor = Color.White
+                DataGridView1.Rows(e.RowIndex).Cells("Flat Top").Style.BackColor = Color.White
+            End If
         End If
     End Sub
 
