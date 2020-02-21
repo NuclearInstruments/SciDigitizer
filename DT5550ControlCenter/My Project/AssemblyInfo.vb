@@ -8,10 +8,10 @@ Imports System.Runtime.InteropServices
 
 ' Rivedere i valori degli attributi degli assembly
 
-<Assembly: AssemblyTitle("DT5550 Readout system")>
+<Assembly: AssemblyTitle("DT55XX Readout system")>
 <Assembly: AssemblyDescription("")>
 <Assembly: AssemblyCompany("Nuclear Instruments")>
-<Assembly: AssemblyProduct("DT5550 Readout System")>
+<Assembly: AssemblyProduct("DT55xx Readout System")>
 <Assembly: AssemblyCopyright("Copyright ©  2018")>
 <Assembly: AssemblyTrademark("")>
 
