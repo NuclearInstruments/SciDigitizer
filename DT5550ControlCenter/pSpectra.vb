@@ -794,8 +794,13 @@ Public Class pSpectra
 
                     trigger_id = trigger_id >> 24
                     ev.SingleChannelTriggerId = trigger_id
-                    ev.valid = True
-                    ' If (ev.ValidEvent >> pxcnt) And &H1 Then
+
+                    If (ev.energy(0) < 65535) Then
+                        ev.valid = True
+                    Else
+                        ev.energy(0) = 0
+                        ev.valid = False
+                    End If
                     MutexSpe.WaitOne()
                     spectra(trigger_id + (cp * _n_ch), ev.energy(0)) += 1
                     MutexSpe.ReleaseMutex()
