@@ -257,7 +257,7 @@ Public Class Settings
         End If
         If Connection.ComClass._boardModel = communication.tModel.R5560 Then
 
-            If (DataGridView1.Rows(e.RowIndex).Cells("Peaking Time").Value + DataGridView1.Rows(e.RowIndex).Cells("Flat Top").Value) / sampling_factor > 512 Then
+            If (CInt(DataGridView1.Rows(e.RowIndex).Cells("Peaking Time").Value) + CInt(DataGridView1.Rows(e.RowIndex).Cells("Flat Top").Value)) / sampling_factor > 512 Then
                 DataGridView1.Rows(e.RowIndex).Cells("Peaking Time").Style.BackColor = Color.Red
                 DataGridView1.Rows(e.RowIndex).Cells("Flat Top").Style.BackColor = Color.Red
                 Apply.Enabled = False
