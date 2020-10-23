@@ -18,6 +18,7 @@ Public Class pSpectra
     Public addressArm As UInt32
     Public addressStatus As UInt32
     Public addressSync As UInt32
+    Public addressRUN As UInt32
 
     'Public addressDataR As New List(Of UInt32)
     'Public addressArmR As New List(Of UInt32)
@@ -49,6 +50,7 @@ Public Class pSpectra
     Dim freq = 80000000
     Dim T0 As UInt64
     Dim T As UInt64
+    Dim isRunning As Boolean = False
     Dim plotS As Integer = 0
     Public method As SGraphPlottingMethods
     Dim colorList() As Color = {Color.Red, Color.Yellow, Color.Lime, Color.Cyan, Color.Magenta, Color.Blue, Color.BlueViolet, Color.Violet, Color.Peru, Color.Orange, Color.White,
@@ -107,7 +109,10 @@ Public Class pSpectra
     End Sub
 
     Public Sub Producer()
-
+        Dim PCC(Connection.ComClass._nBoard) As Queue(Of UInt32)
+        For i = 0 To Connection.ComClass._nBoard - 1
+            PCC(i) = New Queue(Of UInt32)
+        Next
         While StopT_spect = False
             Dim npacket = 100
             Dim read_data As UInt32
@@ -135,8 +140,13 @@ Public Class pSpectra
                     Dim status_error = Connection.ComClass.GetRegister(addressStatus, status, cp)
                     If status_error = 0 And status <> 3 Then
 
-                        If Connection.ComClass.ReadDataFifo(addressData, Data, lenght, addressStatus, 1, 1000, read_data, valid_data, cp) = 0 Then
-                            UnpackDataPacketR(Data, lenght, cp)
+                        If Connection.ComClass.ReadDataFifo(addressData, data, lenght, addressStatus, 1, 100, read_data, valid_data, cp) = 0 Then
+
+                            For i = 0 To read_data - 1
+                                PCC(cp).Enqueue(data(i))
+                            Next
+
+                            UnpackDataPacketR(PCC(cp), cp)
                         Else
                             MainForm.plog.TextBox1.AppendText("Communication error" & vbCrLf)
                             Exit Sub
@@ -200,12 +210,15 @@ Public Class pSpectra
 
     Public Sub StartDataCaptureOnFile(file As String)
 
+
+
         MutexFile.WaitOne()
         If fileEnable = False Then
             fileName = file
             fileEnable = True
             objRawWriter = New StreamWriter(fileName)
             MainForm.plog.TextBox1.AppendText("Starting Spectrum Recording..." & vbCrLf)
+            isRunning = True
         End If
         MutexFile.ReleaseMutex()
 
@@ -220,6 +233,7 @@ Public Class pSpectra
             objRawWriter.Close()
             MainForm.plog.TextBox1.AppendText("Stopping Spectrum Recording." & vbCrLf)
         End If
+        isRunning = False
         MutexFile.ReleaseMutex()
 
     End Sub
@@ -244,6 +258,10 @@ Public Class pSpectra
 
     Public Sub stopspectrum()
 
+
+        If IsNothing(T_spect) Then
+            Exit Sub
+        End If
         StopSpectraReceiverThread()
         While T_spect.IsAlive
             Application.DoEvents()
@@ -258,6 +276,11 @@ Public Class pSpectra
                 MainForm.plog.TextBox1.AppendText("Error on CONFIG_ARM" & vbCrLf)
             End If
         ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Then
+            For cp = 0 To Connection.ComClass._nBoard - 1
+                If Connection.ComClass.SetRegister(addressRUN, 0, cp) = 0 Then
+
+                End If
+            Next
             For cp = 0 To Connection.ComClass._nBoard - 1
                 If Connection.ComClass.SetRegister(addressArm, 0, cp) = 0 Then
                     Timer1.Enabled = False
@@ -276,7 +299,10 @@ Public Class pSpectra
 
     Public Sub startspectrum()
         Dim _start = False
+
         If Connection.ComClass._boardModel = communication.tModel.DT5550 Then
+
+
             If Connection.ComClass.SetRegister(addressSync, 0, 0) = 0 Then
                 If Connection.ComClass.SetRegister(addressWait, 0, 0) = 0 Then
                     Dim mode_value As UInt32
@@ -316,8 +342,39 @@ Public Class pSpectra
             Else
                 MainForm.plog.TextBox1.AppendText("Error on CONFIG_SYNC!" & vbCrLf)
             End If
-        ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Then
+
             For cp = 0 To Connection.ComClass._nBoard - 1
+                If Connection.ComClass.SetRegister(addressRUN, 1, cp) = 0 Then
+
+                End If
+            Next
+        ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Then
+
+            For cp = 0 To Connection.ComClass._nBoard - 1
+                If Connection.ComClass.SetRegister(addressRUN, 0, cp) = 0 Then
+
+                End If
+            Next
+
+
+            Dim data(1000000) As UInt32
+            Dim status As Integer
+            Dim rd, vd As Integer
+            For cp = 0 To Connection.ComClass._nBoard - 1
+                Dim status_error = Connection.ComClass.GetRegister(addressStatus, status, cp)
+                If status_error = 0 And status <> 3 Then
+
+                    If Connection.ComClass.ReadDataFifo(addressData, data, 1000000 - 1, addressStatus, 1, 100, rd, vd, cp) = 0 Then
+
+                    Else
+                        MainForm.plog.TextBox1.AppendText("Communication error" & vbCrLf)
+                        Exit Sub
+                    End If
+                End If
+            Next
+
+            For cp = 0 To Connection.ComClass._nBoard - 1
+                Connection.ComClass.SetRegister(addressArm, 2, cp)
                 If Connection.ComClass.SetRegister(addressArm, 0, cp) = 0 Then
                     If Connection.ComClass.SetRegister(addressArm, 1, cp) = 0 Then
                         _start = True
@@ -369,6 +426,10 @@ Public Class pSpectra
         objRawWriter.Close()
         MainForm.plog.TextBox1.AppendText("Done." & vbCrLf)
     End Sub
+    Dim timeStart As DateTime
+    Public Sub setStartTimeNow()
+        timeStart = Now
+    End Sub
 
     Private Sub Timer1_Tick(sender As Object, e As EventArgs) Handles Timer1.Tick
         If SpectrumLength <> MaxSpectrumLength Then
@@ -392,13 +453,15 @@ Public Class pSpectra
                 End If
             End If
             If TargetMode = 2 Then
-                If (T / freq) >= TargetEvent Then
+                'If (T / freq) >= TargetEvent Then
+                If (Now - timeStart).TotalMilliseconds / 1000.0 >= TargetEvent Then
+
                     MainForm.ProgressBar.Value = 100
                     StopDataCaptureOnFile()
                     MainForm.SaveData.Enabled = True
                     MainForm.StopSaveData.Enabled = False
                 Else
-                    MainForm.ProgressBar.Value = (T / freq) / TargetEvent * 100
+                    MainForm.ProgressBar.Value = (Now - timeStart).TotalSeconds / TargetEvent * 100
                 End If
             End If
         End If
@@ -421,56 +484,46 @@ Public Class pSpectra
             For Each s In Checked_id
                 If s <> 0 Then
 
-                    ' Parallel.For(0, SpectrumLength - 1, Sub(p)
+
                     For p = 0 To SpectrumLength - 1
                         LinearArrayX(l * SpectrumLength + p) = p
                         If logmode = False Then
-                            'Pesgo1.PeData.X(l, p) = p
-
-                            'Pesgo1.PeData.Y(l, p) = Rebinned_spectra(s - 1, p)
                             LinearArray(l * SpectrumLength + p) = Rebinned_spectra(s - 1, p)
                         Else
                             LinearArray(l * SpectrumLength + p) = Rebinned_spectra(s - 1, p) + 1
 
                         End If
                     Next p
-                    '                                    End Sub)
 
-
-                    ' For p = 0 To SpectrumLength - 1
-
-                    ' If logmode = False Then
-                    'Pesgo1.PeData.Y(l, p) = Rebinned_spectra(s - 1, p)
-                    'LinearArray(l * SpectrumLength + p) = Rebinned_spectra(s - 1, p)
-
-                    'Pesgo1.PeGrid.Configure.YAxisScaleControl = Gigasoft.ProEssentials.Enums.ScaleControl.Normal
-                    'Else
-                    'Pesgo1.PeData.Y(l, p) = Rebinned_spectra(s - 1, p) + 1
-                    'Pesgo1.PeGrid.Configure.YAxisScaleControl = Gigasoft.ProEssentials.Enums.ScaleControl.Log
-                    ' End If
-                    'Next p
-                    Pesgo1.PePlot.Methods(l) = method 'SGraphPlottingMethods.Step
-                    Pesgo1.PeColor.SubsetColors(l) = colorList(l Mod 32)
-                    Pesgo1.PePlot.SubsetLineTypes(l) = LineType.ThinSolid
-                    If CheckedListBox1.CheckedItems.Contains("ALL") Then
-                        Pesgo1.PeString.SubsetLabels(l) = CheckedListBox1.CheckedItems(l + 1)
-                    Else
-                        Pesgo1.PeString.SubsetLabels(l) = CheckedListBox1.CheckedItems(l)
+                    If (CheckedListBox1.CheckedItems.Count > 0) Then
+                        Pesgo1.PePlot.Methods(l) = method 'SGraphPlottingMethods.Step
+                        Pesgo1.PeColor.SubsetColors(l) = colorList(l Mod 32)
+                        Pesgo1.PePlot.SubsetLineTypes(l) = LineType.ThinSolid
+                        If CheckedListBox1.CheckedItems.Contains("ALL") Then
+                            Pesgo1.PeString.SubsetLabels(l) = CheckedListBox1.CheckedItems(l + 1)
+                        Else
+                            Pesgo1.PeString.SubsetLabels(l) = CheckedListBox1.CheckedItems(l)
+                        End If
+                        l = l + 1
                     End If
-                    l = l + 1
                 End If
             Next
-            Gigasoft.ProEssentials.Api.PEvsetW(Pesgo1.PeSpecial.HObject, Gigasoft.ProEssentials.DllProperties.XData, LinearArrayX, Convert.ToInt32(SpectrumLength * l))
-            Gigasoft.ProEssentials.Api.PEvsetW(Pesgo1.PeSpecial.HObject, Gigasoft.ProEssentials.DllProperties.YData, LinearArray, Convert.ToInt32(SpectrumLength * l))
+            If (CheckedListBox1.CheckedItems.Count > 0) Then
+                Gigasoft.ProEssentials.Api.PEvsetW(Pesgo1.PeSpecial.HObject, Gigasoft.ProEssentials.DllProperties.XData, LinearArrayX, Convert.ToInt32(SpectrumLength * l))
+                Gigasoft.ProEssentials.Api.PEvsetW(Pesgo1.PeSpecial.HObject, Gigasoft.ProEssentials.DllProperties.YData, LinearArray, Convert.ToInt32(SpectrumLength * l))
+            End If
 
             If logmode = False Then
                 Pesgo1.PeGrid.Configure.YAxisScaleControl = Gigasoft.ProEssentials.Enums.ScaleControl.Normal
             Else
                 Pesgo1.PeGrid.Configure.YAxisScaleControl = Gigasoft.ProEssentials.Enums.ScaleControl.Log
             End If
-            Pesgo1.Refresh()
+            If (CheckedListBox1.CheckedItems.Count > 0) Then
+                Pesgo1.Refresh()
+            End If
         Else
-            Dim l = 0
+                Dim l = 0
+
             Dim n_fit As Integer = 0
             For r = 0 To MainForm.fit.DataGridView1.Rows.Count - 1
                 If MainForm.fit.DataGridView1.Rows(r).Cells("Channel").Value IsNot Nothing Then
@@ -494,15 +547,17 @@ Public Class pSpectra
                         End If
                         graficisullospettro_x(p + SpectrumLength * (l)) = p
                     Next
-                    Pesgo1.PePlot.Methods(l) = method 'SGraphPlottingMethods.Step
-                    Pesgo1.PeColor.SubsetColors(l) = colorList(l Mod 32)
-                    Pesgo1.PePlot.SubsetLineTypes(l) = LineType.ThinSolid
-                    If CheckedListBox1.CheckedItems.Contains("ALL") Then
-                        Pesgo1.PeString.SubsetLabels(l) = CheckedListBox1.CheckedItems(l + 1)
-                    Else
-                        Pesgo1.PeString.SubsetLabels(l) = CheckedListBox1.CheckedItems(l)
+                    If (CheckedListBox1.CheckedItems.Count > 0) Then
+                        Pesgo1.PePlot.Methods(l) = method 'SGraphPlottingMethods.Step
+                        Pesgo1.PeColor.SubsetColors(l) = colorList(l Mod 32)
+                        Pesgo1.PePlot.SubsetLineTypes(l) = LineType.ThinSolid
+                        If CheckedListBox1.CheckedItems.Contains("ALL") Then
+                            Pesgo1.PeString.SubsetLabels(l) = CheckedListBox1.CheckedItems(l + 1)
+                        Else
+                            Pesgo1.PeString.SubsetLabels(l) = CheckedListBox1.CheckedItems(l)
+                        End If
+                        l = l + 1
                     End If
-                    l = l + 1
                 End If
             Next
             For k = 0 To n_fit - 1
@@ -605,32 +660,36 @@ Public Class pSpectra
                         End If
                         graficisullospettro_x((k + checked_ch) * SpectrumLength + i) = i
                     Next
-                    Pesgo1.PePlot.Methods(k + checked_ch) = SGraphPlottingMethods.SplineArea
-                    Pesgo1.PeColor.SubsetColors(k + checked_ch) = Color.FromArgb(5, 0, 255, 50)
-                    Pesgo1.PeString.SubsetLabels(k + checked_ch) = "Fit " & k + 1
+                    If (CheckedListBox1.CheckedItems.Count > 0) Then
+                        Pesgo1.PePlot.Methods(k + checked_ch) = SGraphPlottingMethods.SplineArea
+                        Pesgo1.PeColor.SubsetColors(k + checked_ch) = Color.FromArgb(5, 0, 255, 50)
+                        Pesgo1.PeString.SubsetLabels(k + checked_ch) = "Fit " & k + 1
+                    End If
                 Catch exc As Exception
 
                 End Try
-
-                Pesgo1.PeAnnotation.Line.XAxis(2 * k) = sx
-                Pesgo1.PeAnnotation.Line.XAxisType(2 * k) = LineAnnotationType.ThinSolid
-                Pesgo1.PeAnnotation.Line.XAxisColor(2 * k) = Color.White
-                Pesgo1.PeAnnotation.Line.XAxisText(2 * k) = k + 1
-                Pesgo1.PeAnnotation.Line.XAxis(2 * k + 1) = ex
-                Pesgo1.PeAnnotation.Line.XAxisType(2 * k + 1) = LineAnnotationType.ThinSolid
-                Pesgo1.PeAnnotation.Line.XAxisColor(2 * k + 1) = Color.White
-                Pesgo1.PeAnnotation.Line.XAxisText(2 * k + 1) = k + 1
+                If (CheckedListBox1.CheckedItems.Count > 0) Then
+                    Pesgo1.PeAnnotation.Line.XAxis(2 * k) = sx
+                    Pesgo1.PeAnnotation.Line.XAxisType(2 * k) = LineAnnotationType.ThinSolid
+                    Pesgo1.PeAnnotation.Line.XAxisColor(2 * k) = Color.White
+                    Pesgo1.PeAnnotation.Line.XAxisText(2 * k) = k + 1
+                    Pesgo1.PeAnnotation.Line.XAxis(2 * k + 1) = ex
+                    Pesgo1.PeAnnotation.Line.XAxisType(2 * k + 1) = LineAnnotationType.ThinSolid
+                    Pesgo1.PeAnnotation.Line.XAxisColor(2 * k + 1) = Color.White
+                    Pesgo1.PeAnnotation.Line.XAxisText(2 * k + 1) = k + 1
+                End If
             Next
+            If (CheckedListBox1.CheckedItems.Count > 0) Then
+                If logmode Then
+                    Pesgo1.PeGrid.Configure.YAxisScaleControl = Gigasoft.ProEssentials.Enums.ScaleControl.Log
+                Else
+                    Pesgo1.PeGrid.Configure.YAxisScaleControl = Gigasoft.ProEssentials.Enums.ScaleControl.Normal
+                End If
 
-            If logmode Then
-                Pesgo1.PeGrid.Configure.YAxisScaleControl = Gigasoft.ProEssentials.Enums.ScaleControl.Log
-            Else
-                Pesgo1.PeGrid.Configure.YAxisScaleControl = Gigasoft.ProEssentials.Enums.ScaleControl.Normal
+                Gigasoft.ProEssentials.Api.PEvsetW(Pesgo1.PeSpecial.HObject, Gigasoft.ProEssentials.DllProperties.XData, graficisullospettro_x, graficisullospettro_x.Length)
+                Gigasoft.ProEssentials.Api.PEvsetW(Pesgo1.PeSpecial.HObject, Gigasoft.ProEssentials.DllProperties.YData, graficisullospettro, graficisullospettro.Length)
+                Pesgo1.Refresh()
             End If
-
-            Gigasoft.ProEssentials.Api.PEvsetW(Pesgo1.PeSpecial.HObject, Gigasoft.ProEssentials.DllProperties.XData, graficisullospettro_x, graficisullospettro_x.Length)
-            Gigasoft.ProEssentials.Api.PEvsetW(Pesgo1.PeSpecial.HObject, Gigasoft.ProEssentials.DllProperties.YData, graficisullospettro, graficisullospettro.Length)
-            Pesgo1.Refresh()
 
         End If
 
@@ -659,6 +718,7 @@ Public Class pSpectra
         Dim packid
         Dim mpe
         Dim discard As Boolean = False
+        freq = 80000000
         For iiii = 0 To ssize - 1
             mpe = data(iiii)
             Select Case insync
@@ -744,7 +804,7 @@ Public Class pSpectra
                                         T = Math.Abs(a.timecode - T0)
                                     End If
                                     spectracount += 1
-                                    If (TargetMode = 1 And spectracount <= TargetEvent) Or (TargetMode = 2 And (T / freq <= TargetEvent)) Or TargetMode = 0 Then
+                                    If IsRunning = True Then
                                         objRawWriter.WriteLine(a.eventId & ";" & a.timecode.ToString & ";" & String.Join(";", a.energy).Replace(",", "."))
                                     End If
                                 Catch ex As Exception
@@ -760,16 +820,24 @@ Public Class pSpectra
 
     End Sub
 
-    Public Sub UnpackDataPacketR(ByRef data As UInt32(), ssize As Integer, cp As Integer)
 
+    Public Sub UnpackDataPacketR(ByRef data As Queue(Of UInt32), cp As Integer)
+
+        Dim packetsize = 5
         Dim ev As Evento
         Dim insync = 0
         Dim pxcnt As Integer = 0
         Dim packid
         Dim mpe
         Dim discard As Boolean = False
-        For iiii = 0 To ssize - 1
-            mpe = data(iiii)
+        freq = 125000000
+        If (data.Count < packetsize) Then
+            Return
+        End If
+
+        While data.Count > 0
+            mpe = data.Dequeue
+
             Select Case insync
                 Case 0
                     If mpe = &H80000000& Then
@@ -778,9 +846,16 @@ Public Class pSpectra
                         ev.energy(0) = 0
                         discard = False
                         insync = 1
+                    Else
+                        If (data.Count < packetsize) Then
+                            Return
+                        End If
                     End If
                 Case 1
-                    ev.energy(0) = mpe
+                    Dim eee = mpe
+                    IIf(eee < 0, 0, eee)
+                    IIf(eee > 65535, 65535, eee)
+                    ev.energy(0) = eee
 
                     insync = 2
                 Case 2
@@ -802,18 +877,24 @@ Public Class pSpectra
                         ev.valid = False
                     End If
                     MutexSpe.WaitOne()
-                    spectra(trigger_id + (cp * _n_ch), ev.energy(0)) += 1
-                    MutexSpe.ReleaseMutex()
-                    MutexCumulative.WaitOne()
-                    realtimeimage(trigger_id + (cp * _n_ch)) = ev.energy(0)
-                    integralimage(trigger_id + (cp * _n_ch)) += ev.energy(0)
+                    If (trigger_id < 32) Then
 
+                        spectra(trigger_id + (cp * _n_ch), ev.energy(0)) += 1
+                        MutexSpe.ReleaseMutex()
+                        MutexCumulative.WaitOne()
+                        realtimeimage(trigger_id + (cp * _n_ch)) = ev.energy(0)
+                        integralimage(trigger_id + (cp * _n_ch)) += ev.energy(0)
+                        T = ev.timecode
+                        MutexCumulative.ReleaseMutex()
+                    Else
+                        MutexSpe.WaitOne()
+                    End If
 
                     If fileEnable Then
                         spectracount += 1
                         Try
                             If Array.IndexOf(EnabledChannel_id, trigger_id + (cp * _n_ch)) Then
-                                If (TargetMode = 1 And spectracount <= TargetEvent) Or (TargetMode = 2 And (T / freq <= TargetEvent)) Or TargetMode = 0 Then
+                                If IsRunning = True Then
                                     objRawWriter.WriteLine(trigger_id + (cp * _n_ch) & ";" & ev.timecode.ToString & ";" & String.Join(";", ev.energy(0)).Replace(",", "."))
                                 End If
                             End If
@@ -822,15 +903,94 @@ Public Class pSpectra
                         End Try
                     End If
 
-                    MutexCumulative.ReleaseMutex()
 
-                    insync = 0
+
+                        insync = 0
+
+                    If (data.Count < packetsize) Then
+                        Return
+                    End If
+
 
 
             End Select
-        Next
+
+        End While
+
 
     End Sub
+    'End Sub
+    'Public Sub UnpackDataPacketR(ByRef data As UInt32(), ssize As Integer, cp As Integer)
+
+    '    Dim ev As Evento
+    '    Dim insync = 0
+    '    Dim pxcnt As Integer = 0
+    '    Dim packid
+    '    Dim mpe
+    '    Dim discard As Boolean = False
+    '    For iiii = 0 To ssize - 1
+    '        mpe = data(iiii)
+    '        Select Case insync
+    '            Case 0
+    '                If mpe = &H80000000& Then
+    '                    ev = New Evento(1)
+
+    '                    ev.energy(0) = 0
+    '                    discard = False
+    '                    insync = 1
+    '                End If
+    '            Case 1
+    '                ev.energy(0) = mpe
+
+    '                insync = 2
+    '            Case 2
+    '                ev.timecode = mpe
+    '                insync = 3
+    '            Case 3
+    '                ev.timecode += mpe << 32L
+    '                insync = 4
+    '            Case 4
+    '                Dim trigger_id As UInt32 = mpe
+
+    '                trigger_id = trigger_id >> 24
+    '                ev.SingleChannelTriggerId = trigger_id
+
+    '                If (ev.energy(0) < 65535) Then
+    '                    ev.valid = True
+    '                Else
+    '                    ev.energy(0) = 0
+    '                    ev.valid = False
+    '                End If
+    '                MutexSpe.WaitOne()
+    '                spectra(trigger_id + (cp * _n_ch), ev.energy(0)) += 1
+    '                MutexSpe.ReleaseMutex()
+    '                MutexCumulative.WaitOne()
+    '                realtimeimage(trigger_id + (cp * _n_ch)) = ev.energy(0)
+    '                integralimage(trigger_id + (cp * _n_ch)) += ev.energy(0)
+
+
+    '                If fileEnable Then
+    '                    spectracount += 1
+    '                    Try
+    '                        If Array.IndexOf(EnabledChannel_id, trigger_id + (cp * _n_ch)) Then
+    '                            If (TargetMode = 1 And spectracount <= TargetEvent) Or (TargetMode = 2 And (T / freq <= TargetEvent)) Or TargetMode = 0 Then
+    '                                objRawWriter.WriteLine(trigger_id + (cp * _n_ch) & ";" & ev.timecode.ToString & ";" & String.Join(";", ev.energy(0)).Replace(",", "."))
+    '                            End If
+    '                        End If
+    '                    Catch ex As Exception
+
+    '                    End Try
+    '                End If
+
+    '                MutexCumulative.ReleaseMutex()
+
+    '                insync = 0
+
+
+    '        End Select
+    '    Next
+
+    'End Sub
 
 
 
@@ -969,4 +1129,20 @@ Public Class pSpectra
 
     End Sub
 
+    Public Sub FlushFifo()
+        For cp = 0 To Connection.ComClass._nBoard - 1
+            If Connection.ComClass.SetRegister(addressArm, 2, cp) = 0 Then
+            Else
+                MainForm.plog.TextBox1.AppendText("Error on CONFIG_ARM!" & vbCrLf)
+            End If
+        Next
+
+        For cp = 0 To Connection.ComClass._nBoard - 1
+            If Connection.ComClass.SetRegister(addressArm, 1, cp) = 0 Then
+
+            Else
+                MainForm.plog.TextBox1.AppendText("Error on CONFIG_ARM!" & vbCrLf)
+            End If
+        Next
+    End Sub
 End Class

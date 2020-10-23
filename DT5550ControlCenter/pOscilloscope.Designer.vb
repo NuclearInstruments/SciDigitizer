@@ -27,6 +27,7 @@ Partial Class pOscilloscope
         Me.Pesgo1 = New Gigasoft.ProEssentials.Pesgo()
         Me.CheckedListBox1 = New System.Windows.Forms.CheckedListBox()
         Me.Timer1 = New System.Windows.Forms.Timer(Me.components)
+        Me.BackgroundWorker1 = New System.ComponentModel.BackgroundWorker()
         Me.TableLayoutPanel1.SuspendLayout()
         Me.SuspendLayout()
         '
@@ -71,6 +72,11 @@ Partial Class pOscilloscope
         'Timer1
         '
         '
+        'BackgroundWorker1
+        '
+        Me.BackgroundWorker1.WorkerReportsProgress = True
+        Me.BackgroundWorker1.WorkerSupportsCancellation = True
+        '
         'pOscilloscope
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -88,4 +94,5 @@ Partial Class pOscilloscope
     Friend WithEvents CheckedListBox1 As CheckedListBox
     Friend WithEvents Pesgo1 As Gigasoft.ProEssentials.Pesgo
     Friend WithEvents Timer1 As Timer
+    Friend WithEvents BackgroundWorker1 As System.ComponentModel.BackgroundWorker
 End Class

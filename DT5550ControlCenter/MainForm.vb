@@ -40,12 +40,14 @@ Public Class MainForm
     Public __Running_OSC As Boolean = False
     Public __Running_SPE As Boolean = False
 
+
+
     Public Sub AppendToLog(text As String)
         msgcoda.Enqueue(text)
     End Sub
 
     Public Sub MDIParent_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-
+        My.Application.ChangeCulture("en-US")
         Me.Text = "SCI-55X0 Readout Software (NI - CAEN)"
         Dim file As String = Connection.Jsonfile
         Create(file)
@@ -137,6 +139,13 @@ Public Class MainForm
                                     isChargeIntegration = True
                                 End If
                             End If
+                        End If
+                    End If
+
+
+                    If Connection.ComClass._boardModel = communication.tModel.R5560 Then
+                        If r.Name = "RUN" Then
+                            spect.addressRUN = r.Address
                         End If
                     End If
 
@@ -746,6 +755,7 @@ Public Class MainForm
 
         Dim g As New WaveformCaptureSelect
         If g.ShowDialog = DialogResult.OK Then
+            spect.setStartTimeNow()
             If isSpectra Then
                 __Running_SPE = True
                 If IsNothing(spect) Then
@@ -760,6 +770,10 @@ Public Class MainForm
                         spect.TargetEvent = g.TargetValue.Text
                     End If
                     If spect.TargetMode = 2 Then
+                        If (g.TargetValue.Text < 1) Then
+                            MsgBox("Invalid time limit!", vbOKOnly + vbExclamation)
+                            Exit Sub
+                        End If
                         If g.TargetValueUnit.SelectedIndex = 0 Then
                             spect.TargetEvent = g.TargetValue.Text
                         ElseIf g.TargetValueUnit.SelectedIndex = 1 Then
@@ -772,12 +786,16 @@ Public Class MainForm
                         scope.StopAcquisition()
                         System.Threading.Thread.Sleep(1000)
                     End If
+                    spect.stopspectrum()
                     spect.StartDataCaptureOnFile(g.FileName.Text)
+
                     If spect.running = False Then
                         spect.startspectrum()
                         pImm1.Timer1.Enabled = True
                         pImm2.Timer1.Enabled = True
                     End If
+
+                    spect.setStartTimeNow()
                     FreeRunStart.Enabled = False
                     FreeRunStop.Enabled = False
                     SingleShot.Enabled = False
@@ -1199,5 +1217,10 @@ Public Class MainForm
 
 
         ofsc.ShowDialog()
+    End Sub
+
+    Private Sub MainForm_FormClosing(sender As Object, e As FormClosingEventArgs) Handles MyBase.FormClosing
+        Application.Exit()
+
     End Sub
 End Class

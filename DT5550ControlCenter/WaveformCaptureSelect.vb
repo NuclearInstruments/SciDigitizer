@@ -29,7 +29,7 @@
         FileName.ReadOnly = True
         DataType.Items.Clear()
         DataType.Items.Add("Oscilloscope")
-        DataType.Items.Add("Frame")
+        DataType.Items.Add("List Mode")
         DataType.SelectedIndex = 0
         For i = 0 To MainForm.acquisition.CHList.Count - 1
             ChList.Items.Add(MainForm.acquisition.CHList(i).name)

@@ -41,6 +41,7 @@ Public Class pOscilloscope
     Public totalACQ As Integer = 0
     Dim plotS As Integer = 0
     Dim _ch_checked_modified = False
+    Dim startTime As DateTime
 
     Dim colorList() As Color = {Color.Red, Color.Yellow, Color.Lime, Color.Cyan, Color.Magenta, Color.Blue, Color.BlueViolet, Color.Violet, Color.Peru, Color.Orange, Color.White,
                                 Color.DarkRed, Color.Gold, Color.DarkGreen, Color.Teal, Color.HotPink, Color.RoyalBlue, Color.Purple, Color.Sienna, Color.Chocolate, Color.LightSlateGray,
@@ -314,18 +315,37 @@ Public Class pOscilloscope
     Public Sub StartDataCaptureOnFile(file As String)
         totalACQ = 0
         MutexFile.WaitOne()
+        startTime = Now
+
+        For ch_id = 1 To CheckedListBox1.Items.Count - 1
+
+            If EnabledChannel(ch_id - 1) Then
+                CheckedListBox1.SetItemChecked(ch_id, True)
+            Else
+                CheckedListBox1.SetItemChecked(ch_id, False)
+            End If
+        Next
+
+        If running Then
+            _ch_checked_modified = True
+        Else
+            ChangeLegendList()
+        End If
+
+
         If fileEnable = False Then
             fileName = file
             fileEnable = True
             objRawWriter = New StreamWriter(fileName)
             MainForm.plog.TextBox1.AppendText("Starting Oscilloscope Waveform Recording..." & vbCrLf)
         End If
+        Timer1.Interval = 1
         MutexFile.ReleaseMutex()
 
     End Sub
 
     Public Sub StopDataCaptureOnFile()
-
+        Timer1.Interval = 100
         MutexFile.WaitOne()
         fileEnable = False
         If IsNothing(objRawWriter) Then
@@ -370,28 +390,35 @@ Public Class pOscilloscope
             n_ch = CheckedListBox1.CheckedIndices.Count
         End If
 
-        If CheckedListBox1.SelectedIndex = 0 Then
-            Dim state = IIf(CheckedListBox1.GetItemCheckState(0).ToString = "Checked", True, False)
+        If CheckedListBox1.SelectedIndex >= 0 Then
+            If CheckedListBox1.SelectedIndex = 0 Then
+                Dim state = IIf(CheckedListBox1.GetItemCheckState(0).ToString = "Checked", True, False)
+                For i = 1 To CheckedListBox1.Items.Count - 1
+                    CheckedListBox1.SetItemChecked(i, state)
+                    MainForm.acquisition.CHList(i - 1).scope_checked = state
+                Next
+            Else
+                MainForm.acquisition.CHList(CheckedListBox1.SelectedIndex - 1).scope_checked = IIf(CheckedListBox1.GetItemCheckState(CheckedListBox1.SelectedIndex).ToString = "Checked", True, False)
+                If CheckedListBox1.GetItemCheckState(0).ToString = "Checked" And CheckedListBox1.GetItemCheckState(CheckedListBox1.SelectedIndex).ToString = "Unchecked" Then
+                    CheckedListBox1.SetItemChecked(0, False)
+                End If
+                Dim all_checked = True
+                For i = 1 To CheckedListBox1.Items.Count - 1
+                    If CheckedListBox1.GetItemCheckState(i).ToString = "Checked" Then
+                    Else
+                        all_checked = False
+                        Exit For
+                    End If
+                Next
+                If all_checked Then
+                    CheckedListBox1.SetItemChecked(0, True)
+                End If
+            End If
+        Else
             For i = 1 To CheckedListBox1.Items.Count - 1
-                CheckedListBox1.SetItemChecked(i, state)
+                Dim state = IIf(CheckedListBox1.GetItemCheckState(i).ToString = "Checked", True, False)
                 MainForm.acquisition.CHList(i - 1).scope_checked = state
             Next
-        Else
-            MainForm.acquisition.CHList(CheckedListBox1.SelectedIndex - 1).scope_checked = IIf(CheckedListBox1.GetItemCheckState(CheckedListBox1.SelectedIndex).ToString = "Checked", True, False)
-            If CheckedListBox1.GetItemCheckState(0).ToString = "Checked" And CheckedListBox1.GetItemCheckState(CheckedListBox1.SelectedIndex).ToString = "Unchecked" Then
-                CheckedListBox1.SetItemChecked(0, False)
-            End If
-            Dim all_checked = True
-            For i = 1 To CheckedListBox1.Items.Count - 1
-                If CheckedListBox1.GetItemCheckState(i).ToString = "Checked" Then
-                Else
-                    all_checked = False
-                    Exit For
-                End If
-            Next
-            If all_checked Then
-                CheckedListBox1.SetItemChecked(0, True)
-            End If
         End If
         For Each scope_ch In MainForm.acquisition.CHList
             If scope_ch.scope_checked Then
@@ -495,16 +522,17 @@ Public Class pOscilloscope
 
     Public Sub SingleShotA()
 
+        Static lastPlot As DateTime = Now
         Dim offsetLSB = (MainForm.acquisition.General_settings.AFEOffset + 2) / 4 * (4095 - 1650) + 1650
         Dim jjj As New ClassCalibration() 'My.Settings.AFECalibration)
         Dim coor = jjj.GetCorrectionFactors(offsetLSB)
         copyOscilloscopeParam()
-        setOscilloscopeParam()
 
+        Dim WaveNN = 0
 
         If Connection.ComClass._boardModel = communication.tModel.DT5550 Then
             'Pesgo1.PeLegend.SubsetsToLegend.Clear()
-
+            setOscilloscopeParam()
             Dim status As UInt32 = 0
             Dim tt = Now
             While status <> 1
@@ -690,20 +718,13 @@ Public Class pOscilloscope
         ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Then
             If n_ch > 0 Then
 
-                Pesgo1.PeData.Points = nsamples
-                Pesgo1.PeGrid.MultiAxesSubsets(0) = n_ch
-                Pesgo1.PeGrid.MultiAxesSubsets(1) = n_ch
-                Pesgo1.PeGrid.MultiAxesSubsets(2) = n_ch
-                Pesgo1.PeGrid.MultiAxesSubsets(3) = n_ch
-                Pesgo1.PeGrid.MultiAxesSubsets(4) = n_ch
-
                 Dim TOTpoints = tot_points * n_ch
                 Dim tmpYData2(TOTpoints) As Single
-                Dim AnalogArray(nsamples * n_ch) As Single
-                Dim AnalogArray2(nsamples * n_ch) As Single
-                Dim Digital1Array(nsamples * n_ch) As Single
-                Dim Digital2Array(nsamples * n_ch) As Single
-                Dim Digital3Array(nsamples * n_ch) As Single
+                Static AnalogArray(nsamples * CheckedListBox1.Items.Count) As Single
+                Static AnalogArray2(nsamples * CheckedListBox1.Items.Count) As Single
+                Static Digital1Array(nsamples * CheckedListBox1.Items.Count) As Single
+                Static Digital2Array(nsamples * CheckedListBox1.Items.Count) As Single
+                Static Digital3Array(nsamples * CheckedListBox1.Items.Count) As Single
 
                 Dim tmpXData(TOTpoints) As Single
                 For j = 0 To n_ch - 1
@@ -715,7 +736,7 @@ Public Class pOscilloscope
                         tmpXData(i + (nsamples * (n_ch * 4 + j))) = i * (MainForm.acquisition.General_settings.OscilloscopeDecimator) * sampling_factor
                     Next
                 Next
-                Gigasoft.ProEssentials.Api.PEvsetW(Pesgo1.PeSpecial.HObject, Gigasoft.ProEssentials.DllProperties.XData, tmpXData, TOTpoints)
+
 
                 Dim n = 0
 
@@ -732,6 +753,7 @@ Public Class pOscilloscope
                         n += 1
                         Continue For
                     End If
+
                     ' Application.DoEvents()
                     If MainForm.__Running_OSC = False Then
                             Exit Sub
@@ -747,120 +769,107 @@ Public Class pOscilloscope
                     Dim read_data As UInt32
                     Dim valid_data As UInt32
                     If Connection.ComClass.ReadData(addressData(ch_addr), data, length, 0, 1000, read_data, valid_data, ind) = 0 Then
+                        If Connection.ComClass.SetRegister(addressArm(ch_addr), 0, ind) = 0 Then
 
-
-                        Dim curr As Integer = position - Math.Floor(PreTriggerValue * nsamples / 100)
-                        If curr > 0 Then
-                            Dim k = 0
-                            For i = curr To nsamples - 2
-                                Dim d = data(i + nsamples)
-                                AnalogArray(k + nsamples * n) = (data(i) And 65535) '+ coor(ch)
-                                If ((d And 65535) > 32767) Then
-                                    AnalogArray2(k + nsamples * n) = -(65535 - (d And 65535))
-                                Else
-                                    AnalogArray2(k + nsamples * n) = d And 65535
-                                End If
-                                Digital1Array(k + nsamples * n) = data(i) >> 16 And 1
-                                Digital2Array(k + nsamples * n) = data(i) >> 17 And 1
-                                Digital3Array(k + nsamples * n) = data(i) >> 18 And 1
-                                k += 1
-                            Next
-                            For i = 0 To curr - 1
-                                Dim d = data(i + nsamples)
-                                AnalogArray(k + nsamples * n) = (data(i) And 65535) '+ coor(ch)
-                                If ((d And 65535) > 32767) Then
-                                    AnalogArray2(k + nsamples * n) = -(65535 - (d And 65535))
-                                Else
-                                    AnalogArray2(k + nsamples * n) = d And 65535
-                                End If
-                                Digital1Array(k + nsamples * n) = data(i) >> 16 And 1
-                                Digital2Array(k + nsamples * n) = data(i) >> 17 And 1
-                                Digital3Array(k + nsamples * n) = data(i) >> 18 And 1
-                                k += 1
-                            Next
-                        Else
-                            Dim k = 0
-                            For i = nsamples + curr To nsamples - 2
-                                Dim d = data(i + nsamples)
-                                AnalogArray(k + nsamples * n) = (data(i) And 65535) '+ coor(ch)
-                                If ((d And 65535) > 32767) Then
-                                    AnalogArray2(k + nsamples * n) = -(65535 - (d And 65535))
-                                Else
-                                    AnalogArray2(k + nsamples * n) = d And 65535
-                                End If
-                                Digital1Array(k + nsamples * n) = data(i) >> 16 And 1
-                                Digital2Array(k + nsamples * n) = data(i) >> 17 And 1
-                                Digital3Array(k + nsamples * n) = data(i) >> 18 And 1
-                                k += 1
-                            Next
-                            For i = 0 To nsamples + curr - 1
-                                Dim d = data(i + nsamples)
-                                AnalogArray(k + nsamples * n) = (data(i) And 65535) '+ coor(ch)
-                                If ((d And 65535) > 32767) Then
-                                    AnalogArray2(k + nsamples * n) = -(65535 - (d And 65535))
-                                Else
-                                    AnalogArray2(k + nsamples * n) = d And 65535
-                                End If
-                                Digital1Array(k + nsamples * n) = data(i) >> 16 And 1
-                                Digital2Array(k + nsamples * n) = data(i) >> 17 And 1
-                                Digital3Array(k + nsamples * n) = data(i) >> 18 And 1
-                                k += 1
-                            Next
                         End If
-                        'Pesgo1.PeColor.SubsetColors(n) = colorList(n Mod 32)
-                        'Pesgo1.PeColor.SubsetColors(n_ch * 1 + n) = colorList(n Mod 32)
-                        'Pesgo1.PeColor.SubsetColors(n_ch * 2 + n) = colorList(n Mod 32)
-                        'Pesgo1.PeColor.SubsetColors(n_ch * 3 + n) = colorList(n Mod 32)
-                        'Pesgo1.PeColor.SubsetColors(n_ch * 4 + n) = colorList(n Mod 32)
-                        'Pesgo1.PePlot.SubsetLineTypes(n) = LineType.ThickSolid
-                        'Pesgo1.PePlot.SubsetLineTypes(n_ch * 1 + n) = LineType.ThickSolid
-                        'Pesgo1.PePlot.SubsetLineTypes(n_ch * 2 + n) = LineType.ThickSolid
-                        'Pesgo1.PePlot.SubsetLineTypes(n_ch * 3 + n) = LineType.ThickSolid
-                        'Pesgo1.PePlot.SubsetLineTypes(n_ch * 4 + n) = LineType.ThickSolid
-                        'If CheckedListBox1.CheckedItems.Contains("ALL") Then
-                        '    Pesgo1.PeString.SubsetLabels(n) = CheckedListBox1.CheckedItems(n + 1)
-                        'Else
-                        '    Pesgo1.PeString.SubsetLabels(n) = CheckedListBox1.CheckedItems(n)
-                        'End If
-                        'Pesgo1.PeString.SubsetLabels(n_ch * 1 + n) = ""
-                        'Pesgo1.PeString.SubsetLabels(n_ch * 2 + n) = ""
-                        'Pesgo1.PeString.SubsetLabels(n_ch * 3 + n) = ""
-                        'Pesgo1.PeString.SubsetLabels(n_ch * 4 + n) = ""
-                        'Pesgo1.PeLegend.SubsetsToLegend(n) = n
+                        If Connection.ComClass.SetRegister(addressArm(ch_addr), 1, ind) = 0 Then
 
+                        End If
 
-                        'wavecount += 1
+                        WaveNN += 1
+                        Dim curr As Integer = position - Math.Floor(PreTriggerValue * nsamples / 100)
+                            If curr > 0 Then
+                                Dim k = 0
+                                For i = curr To nsamples - 2
+                                    Dim d = data(i + nsamples)
+                                    AnalogArray(k + nsamples * n) = (data(i) And 65535) '+ coor(ch)
+                                    If ((d And 65535) > 32767) Then
+                                        AnalogArray2(k + nsamples * n) = -(65535 - (d And 65535))
+                                    Else
+                                        AnalogArray2(k + nsamples * n) = d And 65535
+                                    End If
+                                    Digital1Array(k + nsamples * n) = data(i) >> 16 And 1
+                                    Digital2Array(k + nsamples * n) = data(i) >> 17 And 1
+                                    Digital3Array(k + nsamples * n) = data(i) >> 18 And 1
+                                    k += 1
+                                Next
+                                For i = 0 To curr - 1
+                                    Dim d = data(i + nsamples)
+                                    AnalogArray(k + nsamples * n) = (data(i) And 65535) '+ coor(ch)
+                                    If ((d And 65535) > 32767) Then
+                                        AnalogArray2(k + nsamples * n) = -(65535 - (d And 65535))
+                                    Else
+                                        AnalogArray2(k + nsamples * n) = d And 65535
+                                    End If
+                                    Digital1Array(k + nsamples * n) = data(i) >> 16 And 1
+                                    Digital2Array(k + nsamples * n) = data(i) >> 17 And 1
+                                    Digital3Array(k + nsamples * n) = data(i) >> 18 And 1
+                                    k += 1
+                                Next
+                            Else
+                                Dim k = 0
+                                For i = nsamples + curr To nsamples - 2
+                                    Dim d = data(i + nsamples)
+                                    AnalogArray(k + nsamples * n) = (data(i) And 65535) '+ coor(ch)
+                                    If ((d And 65535) > 32767) Then
+                                        AnalogArray2(k + nsamples * n) = -(65535 - (d And 65535))
+                                    Else
+                                        AnalogArray2(k + nsamples * n) = d And 65535
+                                    End If
+                                    Digital1Array(k + nsamples * n) = data(i) >> 16 And 1
+                                    Digital2Array(k + nsamples * n) = data(i) >> 17 And 1
+                                    Digital3Array(k + nsamples * n) = data(i) >> 18 And 1
+                                    k += 1
+                                Next
+                                For i = 0 To nsamples + curr - 1
+                                    Dim d = data(i + nsamples)
+                                    AnalogArray(k + nsamples * n) = (data(i) And 65535) '+ coor(ch)
+                                    If ((d And 65535) > 32767) Then
+                                        AnalogArray2(k + nsamples * n) = -(65535 - (d And 65535))
+                                    Else
+                                        AnalogArray2(k + nsamples * n) = d And 65535
+                                    End If
+                                    Digital1Array(k + nsamples * n) = data(i) >> 16 And 1
+                                    Digital2Array(k + nsamples * n) = data(i) >> 17 And 1
+                                    Digital3Array(k + nsamples * n) = data(i) >> 18 And 1
+                                    k += 1
+                                Next
+                            End If
 
 
                         If fileEnable = True Then
-                            'For k = 0 To osc_ch - 1
-                            If EnabledChannel(ch_id) Then
-                                Dim A(nsamples), A2(nsamples), D0(nsamples), D1(nsamples), D2(nsamples) As Single
-                                'For j = 0 To nsamples - 1
-                                Array.Copy(AnalogArray, nsamples * n, A, 0, nsamples)
-                                Array.Copy(AnalogArray2, nsamples * n, A2, 0, nsamples)
-                                Array.Copy(Digital1Array, nsamples * n, D0, 0, nsamples)
-                                Array.Copy(Digital2Array, nsamples * n, D1, 0, nsamples)
-                                Array.Copy(Digital3Array, nsamples * n, D2, 0, nsamples)
-                                '    Next
-                                MutexFile.WaitOne()
-                                objRawWriter.WriteLine(totalACQ & ";" & ch_id + 1 & ";" & nsamples & ";" & 5 & ";" & String.Join(";", A) & String.Join(";", A2) & String.Join(";", D0) & String.Join(";", D1) & String.Join(";", D2))
+                                'For k = 0 To osc_ch - 1
+                                If EnabledChannel(ch_id) Then
+                                    Dim A(nsamples), A2(nsamples), D0(nsamples), D1(nsamples), D2(nsamples) As Single
+                                    'For j = 0 To nsamples - 1
+                                    Array.Copy(AnalogArray, nsamples * n, A, 0, nsamples)
+                                    Array.Copy(AnalogArray2, nsamples * n, A2, 0, nsamples)
+                                    Array.Copy(Digital1Array, nsamples * n, D0, 0, nsamples)
+                                    Array.Copy(Digital2Array, nsamples * n, D1, 0, nsamples)
+                                    Array.Copy(Digital3Array, nsamples * n, D2, 0, nsamples)
+                                    '    Next
+                                    MutexFile.WaitOne()
+                                objRawWriter.WriteLine((Now - startTime).TotalMilliseconds / 1000.0 & ";" & ch_id + 1 & ";" & nsamples & ";" & 1 & ";" & String.Join(";", A)) ' & String.Join(";", A2) & String.Join(";", D0) & String.Join(";", D1) & String.Join(";", D2))
                                 MutexFile.ReleaseMutex()
-                            End If
-                            ' Next
-                            If TargetMode = 1 Then
-                                If totalACQ >= TargetEvent Then
-                                    MainForm.ProgressBar.Value = 100
-                                    StopDataCaptureOnFile()
-                                    MainForm.SaveData.Enabled = True
-                                    MainForm.StopSaveData.Enabled = False
-                                Else
-                                    MainForm.ProgressBar.Value = totalACQ / TargetEvent * 100
+                                End If
+                                ' Next
+                                If TargetMode = 1 Then
+                                    If totalACQ >= TargetEvent Then
+                                        MainForm.ProgressBar.Value = 100
+                                        StopDataCaptureOnFile()
+                                        MainForm.SaveData.Enabled = True
+                                        MainForm.StopSaveData.Enabled = False
+                                    Else
+                                        MainForm.ProgressBar.Value = totalACQ / TargetEvent * 100
+                                    End If
                                 End If
                             End If
-                        End If
 
-                        n += 1
+                            n += 1
+
+                        Console.WriteLine((Now - lastPlot).TotalMilliseconds)
+
+
                     End If
                 Next
 
@@ -875,59 +884,45 @@ Public Class pOscilloscope
 
                 Next
 
-                Array.Copy(AnalogArray, 0, tmpYData2, 0, nsamples * n_ch)
-                Array.Copy(AnalogArray2, 0, tmpYData2, nsamples * (n_ch * 1), nsamples * n_ch)
-                Array.Copy(Digital1Array, 0, tmpYData2, nsamples * (n_ch * 2), nsamples * n_ch)
-                Array.Copy(Digital2Array, 0, tmpYData2, nsamples * (n_ch * 3), nsamples * n_ch)
-                Array.Copy(Digital3Array, 0, tmpYData2, nsamples * (n_ch * 4), nsamples * n_ch)
+                If (Now - lastPlot).TotalMilliseconds > 90 Then
 
-                Gigasoft.ProEssentials.Api.PEvsetW(Pesgo1.PeSpecial.HObject, Gigasoft.ProEssentials.DllProperties.YData, tmpYData2, TOTpoints)
 
-                If (Pesgo1.PeConfigure.RenderEngine = RenderEngine.Direct3D) Then
-                    Pesgo1.PeFunction.Force3dxVerticeRebuild = True
-                    Pesgo1.PeFunction.Force3dxNewColors = True
-                Else
-                    Pesgo1.PeFunction.Reinitialize()
-                    Pesgo1.PeFunction.ResetImage(0, 0)
+                    Pesgo1.PeData.Points = nsamples
+                    Pesgo1.PeGrid.MultiAxesSubsets(0) = n_ch
+                    Pesgo1.PeGrid.MultiAxesSubsets(1) = n_ch
+                    Pesgo1.PeGrid.MultiAxesSubsets(2) = n_ch
+                    Pesgo1.PeGrid.MultiAxesSubsets(3) = n_ch
+                    Pesgo1.PeGrid.MultiAxesSubsets(4) = n_ch
+                    Gigasoft.ProEssentials.Api.PEvsetW(Pesgo1.PeSpecial.HObject, Gigasoft.ProEssentials.DllProperties.XData, tmpXData, TOTpoints)
+
+                    Array.Copy(AnalogArray, 0, tmpYData2, 0, nsamples * n_ch)
+                    Array.Copy(AnalogArray2, 0, tmpYData2, nsamples * (n_ch * 1), nsamples * n_ch)
+                    Array.Copy(Digital1Array, 0, tmpYData2, nsamples * (n_ch * 2), nsamples * n_ch)
+                    Array.Copy(Digital2Array, 0, tmpYData2, nsamples * (n_ch * 3), nsamples * n_ch)
+                    Array.Copy(Digital3Array, 0, tmpYData2, nsamples * (n_ch * 4), nsamples * n_ch)
+
+                    Gigasoft.ProEssentials.Api.PEvsetW(Pesgo1.PeSpecial.HObject, Gigasoft.ProEssentials.DllProperties.YData, tmpYData2, TOTpoints)
+
+                    If (Pesgo1.PeConfigure.RenderEngine = RenderEngine.Direct3D) Then
+                        Pesgo1.PeFunction.Force3dxVerticeRebuild = True
+                        Pesgo1.PeFunction.Force3dxNewColors = True
+                    Else
+                        Pesgo1.PeFunction.Reinitialize()
+                        Pesgo1.PeFunction.ResetImage(0, 0)
+                    End If
+                    totalACQ += WaveNN
+                    Pesgo1.PeString.MainTitle = "Real Time Oscilloscope (" & totalACQ & ")"
+                    Pesgo1.Invalidate()
+                    Pesgo1.PeFunction.ReinitializeResetImage()
+                    lastPlot = Now
                 End If
-                totalACQ += 1
-                Pesgo1.PeString.MainTitle = "Real Time Oscilloscope (" & totalACQ & ")"
-                Pesgo1.Invalidate()
-                Pesgo1.PeFunction.ReinitializeResetImage()
 
 
-
-                'If fileEnable = True Then
-                '    For k = 0 To osc_ch - 1
-                '        If EnabledChannel(k) Then
-                '            Dim A(nsamples), A2(nsamples), D0(nsamples), D1(nsamples), D2(nsamples) As Single
-                '            For j = 0 To nsamples - 1
-                '                A(j) = data(j + nsamples * (EnabledChannel_id(k) - 1)) And 65535
-                '                D0(j) = data(j + nsamples * (EnabledChannel_id(k) - 1)) >> 16 And 1
-                '                D1(j) = data(j + nsamples * (EnabledChannel_id(k) - 1)) >> 17 And 1
-                '                D2(j) = data(j + nsamples * (EnabledChannel_id(k) - 1)) >> 18 And 1
-                '            Next
-                '            MutexFile.WaitOne()
-                '            objRawWriter.WriteLine(wavecount & ";" & k + 1 & ";" & nsamples & ";" & 5 & ";" & String.Join(";", A) & String.Join(";", D0) & String.Join(";", D1) & String.Join(";", D2) & String.Join(";", D3))
-                '            MutexFile.ReleaseMutex()
-                '        End If
-                '    Next
-                '    If TargetMode = 1 Then
-                '        If wavecount >= TargetEvent Then
-                '            MainForm.ProgressBar.Value = 100
-                '            StopDataCaptureOnFile()
-                '            MainForm.SaveData.Enabled = True
-                '            MainForm.StopSaveData.Enabled = False
-                '        Else
-                '            MainForm.ProgressBar.Value = wavecount / TargetEvent * 100
-                '        End If
-                '    End If
-                'End If
             End If
 
 
 
-        End If
+            End If
 
     End Sub
 
@@ -952,6 +947,14 @@ Public Class pOscilloscope
     End Sub
 
     Private Sub Pesgo1_Click(sender As Object, e As EventArgs) Handles Pesgo1.Click
+
+    End Sub
+
+    Private Sub BackgroundWorker1_DoWork(sender As Object, e As DoWorkEventArgs) Handles BackgroundWorker1.DoWork
+
+    End Sub
+
+    Private Sub TableLayoutPanel1_Paint(sender As Object, e As PaintEventArgs) Handles TableLayoutPanel1.Paint
 
     End Sub
 End Class

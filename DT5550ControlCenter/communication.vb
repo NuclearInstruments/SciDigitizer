@@ -610,5 +610,8 @@
         End Select
     End Function
 
+    Public Sub FlushFIFO()
+
+    End Sub
 
 End Class
