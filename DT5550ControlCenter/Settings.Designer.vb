@@ -23,7 +23,6 @@ Partial Class Settings
     <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
         Me.TableLayoutPanel1 = New System.Windows.Forms.TableLayoutPanel()
-        Me.DataGridView1 = New System.Windows.Forms.DataGridView()
         Me.Panel1 = New System.Windows.Forms.Panel()
         Me.Panel5 = New System.Windows.Forms.Panel()
         Me.GroupBox2 = New System.Windows.Forms.GroupBox()
@@ -57,8 +56,8 @@ Partial Class Settings
         Me.Impedance = New System.Windows.Forms.ComboBox()
         Me.Panel3 = New System.Windows.Forms.Panel()
         Me.Apply = New System.Windows.Forms.Button()
+        Me.DataGridView1 = New System.Windows.Forms.DataGridView()
         Me.TableLayoutPanel1.SuspendLayout()
-        CType(Me.DataGridView1, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.Panel1.SuspendLayout()
         Me.Panel5.SuspendLayout()
         Me.GroupBox2.SuspendLayout()
@@ -69,6 +68,7 @@ Partial Class Settings
         CType(Me.TriggerDelay, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.Offset, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.Panel3.SuspendLayout()
+        CType(Me.DataGridView1, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
         'TableLayoutPanel1
@@ -90,32 +90,13 @@ Partial Class Settings
         Me.TableLayoutPanel1.Size = New System.Drawing.Size(1036, 751)
         Me.TableLayoutPanel1.TabIndex = 0
         '
-        'DataGridView1
-        '
-        Me.DataGridView1.AllowUserToAddRows = False
-        Me.DataGridView1.AllowUserToDeleteRows = False
-        Me.DataGridView1.AllowUserToResizeColumns = False
-        Me.DataGridView1.AllowUserToResizeRows = False
-        Me.DataGridView1.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill
-        Me.DataGridView1.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.AllCells
-        Me.DataGridView1.BackgroundColor = System.Drawing.Color.White
-        Me.DataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
-        Me.DataGridView1.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.DataGridView1.EditMode = System.Windows.Forms.DataGridViewEditMode.EditOnEnter
-        Me.DataGridView1.Location = New System.Drawing.Point(3, 217)
-        Me.DataGridView1.Name = "DataGridView1"
-        Me.DataGridView1.RowHeadersVisible = False
-        Me.DataGridView1.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders
-        Me.DataGridView1.Size = New System.Drawing.Size(1012, 684)
-        Me.DataGridView1.TabIndex = 0
-        '
         'Panel1
         '
         Me.Panel1.Controls.Add(Me.Panel5)
         Me.Panel1.Dock = System.Windows.Forms.DockStyle.Fill
         Me.Panel1.Location = New System.Drawing.Point(3, 3)
         Me.Panel1.Name = "Panel1"
-        Me.Panel1.Size = New System.Drawing.Size(1012, 208)
+        Me.Panel1.Size = New System.Drawing.Size(1030, 208)
         Me.Panel1.TabIndex = 1
         '
         'Panel5
@@ -126,7 +107,7 @@ Partial Class Settings
         Me.Panel5.Dock = System.Windows.Forms.DockStyle.Fill
         Me.Panel5.Location = New System.Drawing.Point(0, 0)
         Me.Panel5.Name = "Panel5"
-        Me.Panel5.Size = New System.Drawing.Size(1012, 208)
+        Me.Panel5.Size = New System.Drawing.Size(1030, 208)
         Me.Panel5.TabIndex = 4
         '
         'GroupBox2
@@ -135,7 +116,7 @@ Partial Class Settings
         Me.GroupBox2.Dock = System.Windows.Forms.DockStyle.Top
         Me.GroupBox2.Location = New System.Drawing.Point(0, 105)
         Me.GroupBox2.Name = "GroupBox2"
-        Me.GroupBox2.Size = New System.Drawing.Size(1012, 103)
+        Me.GroupBox2.Size = New System.Drawing.Size(1030, 103)
         Me.GroupBox2.TabIndex = 9
         Me.GroupBox2.TabStop = False
         Me.GroupBox2.Text = "Oscilloscope Settings"
@@ -156,14 +137,14 @@ Partial Class Settings
         Me.Panel4.Dock = System.Windows.Forms.DockStyle.Fill
         Me.Panel4.Location = New System.Drawing.Point(3, 16)
         Me.Panel4.Name = "Panel4"
-        Me.Panel4.Size = New System.Drawing.Size(1006, 84)
+        Me.Panel4.Size = New System.Drawing.Size(1024, 84)
         Me.Panel4.TabIndex = 60
         '
         'Label10
         '
         Me.Label10.Anchor = System.Windows.Forms.AnchorStyles.Top
         Me.Label10.AutoSize = True
-        Me.Label10.Location = New System.Drawing.Point(405, 46)
+        Me.Label10.Location = New System.Drawing.Point(414, 46)
         Me.Label10.Name = "Label10"
         Me.Label10.Size = New System.Drawing.Size(76, 13)
         Me.Label10.TabIndex = 51
@@ -174,7 +155,7 @@ Partial Class Settings
         Me.TriggerLevelOscilloscope.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.TriggerLevelOscilloscope.BackColor = System.Drawing.Color.White
         Me.TriggerLevelOscilloscope.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
-        Me.TriggerLevelOscilloscope.Location = New System.Drawing.Point(895, 10)
+        Me.TriggerLevelOscilloscope.Location = New System.Drawing.Point(913, 10)
         Me.TriggerLevelOscilloscope.Name = "TriggerLevelOscilloscope"
         Me.TriggerLevelOscilloscope.Size = New System.Drawing.Size(96, 20)
         Me.TriggerLevelOscilloscope.TabIndex = 59
@@ -196,7 +177,7 @@ Partial Class Settings
         Me.PreTrigger.Anchor = System.Windows.Forms.AnchorStyles.Top
         Me.PreTrigger.BackColor = System.Drawing.Color.White
         Me.PreTrigger.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
-        Me.PreTrigger.Location = New System.Drawing.Point(503, 44)
+        Me.PreTrigger.Location = New System.Drawing.Point(512, 44)
         Me.PreTrigger.Name = "PreTrigger"
         Me.PreTrigger.Size = New System.Drawing.Size(97, 20)
         Me.PreTrigger.TabIndex = 52
@@ -215,7 +196,7 @@ Partial Class Settings
         Me.TriggerEdge.Anchor = System.Windows.Forms.AnchorStyles.Top
         Me.TriggerEdge.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
         Me.TriggerEdge.FormattingEnabled = True
-        Me.TriggerEdge.Location = New System.Drawing.Point(504, 9)
+        Me.TriggerEdge.Location = New System.Drawing.Point(513, 9)
         Me.TriggerEdge.Name = "TriggerEdge"
         Me.TriggerEdge.Size = New System.Drawing.Size(96, 21)
         Me.TriggerEdge.TabIndex = 53
@@ -224,7 +205,7 @@ Partial Class Settings
         '
         Me.Label12.Anchor = System.Windows.Forms.AnchorStyles.Top
         Me.Label12.AutoSize = True
-        Me.Label12.Location = New System.Drawing.Point(405, 12)
+        Me.Label12.Location = New System.Drawing.Point(414, 12)
         Me.Label12.Name = "Label12"
         Me.Label12.Size = New System.Drawing.Size(68, 13)
         Me.Label12.TabIndex = 54
@@ -252,7 +233,7 @@ Partial Class Settings
         'Label14
         '
         Me.Label14.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.Label14.Location = New System.Drawing.Point(792, 12)
+        Me.Label14.Location = New System.Drawing.Point(810, 12)
         Me.Label14.Name = "Label14"
         Me.Label14.Size = New System.Drawing.Size(70, 13)
         Me.Label14.TabIndex = 56
@@ -264,7 +245,7 @@ Partial Class Settings
         Me.GroupBox1.Dock = System.Windows.Forms.DockStyle.Top
         Me.GroupBox1.Location = New System.Drawing.Point(0, 0)
         Me.GroupBox1.Name = "GroupBox1"
-        Me.GroupBox1.Size = New System.Drawing.Size(1012, 105)
+        Me.GroupBox1.Size = New System.Drawing.Size(1030, 105)
         Me.GroupBox1.TabIndex = 8
         Me.GroupBox1.TabStop = False
         Me.GroupBox1.Text = "General Settings"
@@ -290,7 +271,7 @@ Partial Class Settings
         Me.Panel2.Dock = System.Windows.Forms.DockStyle.Fill
         Me.Panel2.Location = New System.Drawing.Point(3, 16)
         Me.Panel2.Name = "Panel2"
-        Me.Panel2.Size = New System.Drawing.Size(1006, 86)
+        Me.Panel2.Size = New System.Drawing.Size(1024, 86)
         Me.Panel2.TabIndex = 0
         '
         'Button1
@@ -307,7 +288,7 @@ Partial Class Settings
         Me.SignalOffset.Anchor = System.Windows.Forms.AnchorStyles.Top
         Me.SignalOffset.BackColor = System.Drawing.Color.White
         Me.SignalOffset.Increment = New Decimal(New Integer() {1000, 0, 0, 0})
-        Me.SignalOffset.Location = New System.Drawing.Point(895, 9)
+        Me.SignalOffset.Location = New System.Drawing.Point(915, 9)
         Me.SignalOffset.Maximum = New Decimal(New Integer() {65536, 0, 0, 0})
         Me.SignalOffset.Name = "SignalOffset"
         Me.SignalOffset.Size = New System.Drawing.Size(96, 20)
@@ -317,7 +298,7 @@ Partial Class Settings
         'Label1
         '
         Me.Label1.Anchor = System.Windows.Forms.AnchorStyles.Top
-        Me.Label1.Location = New System.Drawing.Point(792, 11)
+        Me.Label1.Location = New System.Drawing.Point(812, 11)
         Me.Label1.Name = "Label1"
         Me.Label1.Size = New System.Drawing.Size(91, 13)
         Me.Label1.TabIndex = 38
@@ -326,7 +307,7 @@ Partial Class Settings
         'Label9
         '
         Me.Label9.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.Label9.Location = New System.Drawing.Point(792, 47)
+        Me.Label9.Location = New System.Drawing.Point(812, 43)
         Me.Label9.Name = "Label9"
         Me.Label9.Size = New System.Drawing.Size(89, 13)
         Me.Label9.TabIndex = 37
@@ -337,7 +318,7 @@ Partial Class Settings
         Me.sampling.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.sampling.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
         Me.sampling.FormattingEnabled = True
-        Me.sampling.Location = New System.Drawing.Point(895, 44)
+        Me.sampling.Location = New System.Drawing.Point(915, 40)
         Me.sampling.Name = "sampling"
         Me.sampling.Size = New System.Drawing.Size(96, 21)
         Me.sampling.TabIndex = 36
@@ -346,7 +327,7 @@ Partial Class Settings
         '
         Me.TriggerDelay.Anchor = System.Windows.Forms.AnchorStyles.Top
         Me.TriggerDelay.BackColor = System.Drawing.Color.White
-        Me.TriggerDelay.Location = New System.Drawing.Point(365, 45)
+        Me.TriggerDelay.Location = New System.Drawing.Point(385, 45)
         Me.TriggerDelay.Name = "TriggerDelay"
         Me.TriggerDelay.Size = New System.Drawing.Size(96, 20)
         Me.TriggerDelay.TabIndex = 35
@@ -354,7 +335,7 @@ Partial Class Settings
         'TriggerDelayLabel
         '
         Me.TriggerDelayLabel.Anchor = System.Windows.Forms.AnchorStyles.Top
-        Me.TriggerDelayLabel.Location = New System.Drawing.Point(269, 47)
+        Me.TriggerDelayLabel.Location = New System.Drawing.Point(289, 47)
         Me.TriggerDelayLabel.Name = "TriggerDelayLabel"
         Me.TriggerDelayLabel.Size = New System.Drawing.Size(90, 13)
         Me.TriggerDelayLabel.TabIndex = 34
@@ -380,7 +361,7 @@ Partial Class Settings
         'Label4
         '
         Me.Label4.Anchor = System.Windows.Forms.AnchorStyles.Top
-        Me.Label4.Location = New System.Drawing.Point(530, 47)
+        Me.Label4.Location = New System.Drawing.Point(530, 48)
         Me.Label4.Name = "Label4"
         Me.Label4.Size = New System.Drawing.Size(70, 13)
         Me.Label4.TabIndex = 27
@@ -391,7 +372,7 @@ Partial Class Settings
         Me.TriggerMode.Anchor = System.Windows.Forms.AnchorStyles.Top
         Me.TriggerMode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
         Me.TriggerMode.FormattingEnabled = True
-        Me.TriggerMode.Location = New System.Drawing.Point(621, 44)
+        Me.TriggerMode.Location = New System.Drawing.Point(621, 45)
         Me.TriggerMode.Name = "TriggerMode"
         Me.TriggerMode.Size = New System.Drawing.Size(96, 21)
         Me.TriggerMode.TabIndex = 26
@@ -402,7 +383,7 @@ Partial Class Settings
         Me.Offset.BackColor = System.Drawing.Color.White
         Me.Offset.DecimalPlaces = 3
         Me.Offset.Increment = New Decimal(New Integer() {5, 0, 0, 131072})
-        Me.Offset.Location = New System.Drawing.Point(365, 9)
+        Me.Offset.Location = New System.Drawing.Point(385, 9)
         Me.Offset.Maximum = New Decimal(New Integer() {9, 0, 0, 65536})
         Me.Offset.Minimum = New Decimal(New Integer() {9, 0, 0, -2147418112})
         Me.Offset.Name = "Offset"
@@ -412,7 +393,7 @@ Partial Class Settings
         'Label3
         '
         Me.Label3.Anchor = System.Windows.Forms.AnchorStyles.Top
-        Me.Label3.Location = New System.Drawing.Point(272, 11)
+        Me.Label3.Location = New System.Drawing.Point(292, 11)
         Me.Label3.Name = "Label3"
         Me.Label3.Size = New System.Drawing.Size(91, 13)
         Me.Label3.TabIndex = 24
@@ -439,20 +420,39 @@ Partial Class Settings
         '
         Me.Panel3.Controls.Add(Me.Apply)
         Me.Panel3.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.Panel3.Location = New System.Drawing.Point(3, 907)
+        Me.Panel3.Location = New System.Drawing.Point(3, 724)
         Me.Panel3.Name = "Panel3"
-        Me.Panel3.Size = New System.Drawing.Size(1012, 24)
+        Me.Panel3.Size = New System.Drawing.Size(1030, 24)
         Me.Panel3.TabIndex = 2
         '
         'Apply
         '
         Me.Apply.Anchor = System.Windows.Forms.AnchorStyles.Top
-        Me.Apply.Location = New System.Drawing.Point(407, 0)
+        Me.Apply.Location = New System.Drawing.Point(416, 0)
         Me.Apply.Name = "Apply"
         Me.Apply.Size = New System.Drawing.Size(178, 21)
         Me.Apply.TabIndex = 0
         Me.Apply.Text = "APPLY SETTINGS"
         Me.Apply.UseVisualStyleBackColor = True
+        '
+        'DataGridView1
+        '
+        Me.DataGridView1.AllowUserToAddRows = False
+        Me.DataGridView1.AllowUserToDeleteRows = False
+        Me.DataGridView1.AllowUserToResizeColumns = False
+        Me.DataGridView1.AllowUserToResizeRows = False
+        Me.DataGridView1.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill
+        Me.DataGridView1.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.AllCells
+        Me.DataGridView1.BackgroundColor = System.Drawing.Color.White
+        Me.DataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
+        Me.DataGridView1.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.DataGridView1.EditMode = System.Windows.Forms.DataGridViewEditMode.EditOnEnter
+        Me.DataGridView1.Location = New System.Drawing.Point(3, 217)
+        Me.DataGridView1.Name = "DataGridView1"
+        Me.DataGridView1.RowHeadersVisible = False
+        Me.DataGridView1.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders
+        Me.DataGridView1.Size = New System.Drawing.Size(1030, 501)
+        Me.DataGridView1.TabIndex = 0
         '
         'Settings
         '
@@ -463,7 +463,6 @@ Partial Class Settings
         Me.Name = "Settings"
         Me.Size = New System.Drawing.Size(1036, 751)
         Me.TableLayoutPanel1.ResumeLayout(False)
-        CType(Me.DataGridView1, System.ComponentModel.ISupportInitialize).EndInit()
         Me.Panel1.ResumeLayout(False)
         Me.Panel5.ResumeLayout(False)
         Me.GroupBox2.ResumeLayout(False)
@@ -475,6 +474,7 @@ Partial Class Settings
         CType(Me.TriggerDelay, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.Offset, System.ComponentModel.ISupportInitialize).EndInit()
         Me.Panel3.ResumeLayout(False)
+        CType(Me.DataGridView1, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)
 
     End Sub

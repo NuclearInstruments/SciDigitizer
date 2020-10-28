@@ -58,11 +58,21 @@ Public Class MainForm
             DefaultFirmwareMapping()
         End If
 
-        If Connection.ComClass._boardModel = communication.tModel.R5560 Then
+
+        If Connection.ComClass._boardModel = communication.tModel.R5560 Or
+            Connection.ComClass._boardModel = communication.tModel.SCIDK Then
             OffsetCalibrationToolToolStripMenuItem.Visible = False
         End If
 
         CreateGUI()
+
+        If Connection.ComClass._boardModel = communication.tModel.DT5550 Then
+            Ts = 1000 / 80
+        ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Then
+            Ts = 1000 / 125
+        ElseIf Connection.ComClass._boardModel = communication.tModel.SCIDK Then
+            Ts = 1000 / 60
+        End If
 
     End Sub
 
@@ -117,6 +127,8 @@ Public Class MainForm
                                 scope.addressStatus.Add(r.Address)
                                 ofsc.addressStatus = r.Address
                             End If
+
+
                             If r.Name = "READ_POSITION" Then
                                 scope.addressPosition.Add(r.Address)
                                 ofsc.addressPosition = r.Address
@@ -143,7 +155,8 @@ Public Class MainForm
                     End If
 
 
-                    If Connection.ComClass._boardModel = communication.tModel.R5560 Then
+                    If Connection.ComClass._boardModel = communication.tModel.R5560 Or 
+                        Connection.ComClass._boardModel = communication.tModel.SCIDK Then
                         If r.Name = "RUN" Then
                             spect.addressRUN = r.Address
                         End If
@@ -174,6 +187,9 @@ Public Class MainForm
                         If r.Name = "READ_STATUS" Then
                             spect.addressStatus = r.Address
                         End If
+                        If r.Name = "READ_VALID_WORDS" Then
+                            spect.addressValidWords = r.Address
+                        End If
                         If r.Name = "CONFIG_SYNC" Then
                             spect.addressSync = r.Address
                         End If
@@ -196,7 +212,7 @@ Public Class MainForm
                             spect.addressStatus = r.Address
                         End If
                         If r.Name = "READ_VALID_WORDS" Then
-                            spect.addressSync = r.Address
+                            spect.addressValidWords = r.Address
                         End If
                     Next
                 End If
@@ -245,6 +261,13 @@ Public Class MainForm
                         End If
                     End If
 
+                    If Connection.ComClass._boardModel = communication.tModel.R5560 Or
+    Connection.ComClass._boardModel = communication.tModel.SCIDK Then
+                        If r.Name = "RUN" Then
+                            spect.addressRUN = r.Address
+                        End If
+                    End If
+
                 Next
 
                 For o = 0 To Connection.ComClass._n_oscilloscope - 1
@@ -267,7 +290,7 @@ Public Class MainForm
                                 spect.addressStatus = r.Address
                             End If
                             If r.Name = "READ_VALID_WORDS" Then
-                                spect.addressSync = r.Address
+                                spect.addressValidWords = r.Address
                             End If
                         Next
                     End If
@@ -422,20 +445,22 @@ Public Class MainForm
             map.Dock = DockStyle.Fill
             list_dockPanel.Add(content1d)
         End If
-        If CurrentMCA IsNot Nothing Then
-            Dim content2 As DockContent = GetDockContentForm("Real Time View", DockState.DockRight, Color.White)
-            content2.Show(dockPanel)
-            content2.CloseButtonVisible = False
-            content2.Controls.Add(pImm1)
-            pImm1.Dock = DockStyle.Fill
-            list_dockPanel.Add(content2)
-            Dim content3 As DockContent = GetDockContentForm("Cumulative", DockState.Float, Color.White)
-            content3.Show(dockPanel)
-            content3.CloseButtonVisible = False
-            content3.DockHandler.FloatPane.DockTo(dockPanel.DockWindows(DockState.DockRight))
-            content3.Controls.Add(pImm2)
-            pImm2.Dock = DockStyle.Fill
-            list_dockPanel.Add(content3)
+        If Connection.ComClass._boardModel <> communication.tModel.SCIDK Then
+            If CurrentMCA IsNot Nothing Then
+                Dim content2 As DockContent = GetDockContentForm("Real Time View", DockState.DockRight, Color.White)
+                content2.Show(dockPanel)
+                content2.CloseButtonVisible = False
+                content2.Controls.Add(pImm1)
+                pImm1.Dock = DockStyle.Fill
+                list_dockPanel.Add(content2)
+                Dim content3 As DockContent = GetDockContentForm("Cumulative", DockState.Float, Color.White)
+                content3.Show(dockPanel)
+                content3.CloseButtonVisible = False
+                content3.DockHandler.FloatPane.DockTo(dockPanel.DockWindows(DockState.DockRight))
+                content3.Controls.Add(pImm2)
+                pImm2.Dock = DockStyle.Fill
+                list_dockPanel.Add(content3)
+            End If
         End If
         Dim content4 As DockContent = GetDockContentForm("Log File", DockState.DockBottom, Color.White)
         content4.Show(dockPanel)
@@ -479,16 +504,16 @@ Public Class MainForm
                     acquisition.General_settings.TriggerSourceOscilloscope = trigger_source.FREE
                 Else
                     acquisition.General_settings.TriggerSourceOscilloscope = trigger_source.LEVEL
-                    If Connection.ComClass._boardModel = communication.tModel.DT5550 Then
+                    If Connection.ComClass._boardModel = communication.tModel.DT5550 Or Connection.ComClass._boardModel = communication.tModel.SCIDK Then
                         acquisition.General_settings.TriggerChannelOscilloscope = xmldoc.SelectSingleNode("Settings/Oscilloscope_Settings/Oscilloscope_Trigger_Source").InnerText.Replace("CHANNEL ", "") - 1
-                    ElseIf Connection.ComClass._boardModel = communication.tModel.DT5550 Then
+                    ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Then
                         acquisition.General_settings.TriggerChannelOscilloscope = 0
                     End If
                 End If
                     acquisition.General_settings.TriggerOscilloscopeEdges = IIf(xmldoc.SelectSingleNode("Settings/Oscilloscope_Settings/Oscilloscope_Trigger_Edge").InnerText = "Rising", edge.RISING, edge.FALLING)
                 acquisition.General_settings.TriggerOscilloscopeLevel = xmldoc.SelectSingleNode("Settings/Oscilloscope_Settings/Oscilloscope_Trigger_Level").InnerText
                 acquisition.General_settings.OscilloscopePreTrigger = xmldoc.SelectSingleNode("Settings/Oscilloscope_Settings/Oscilloscope_Pre_Trigger").InnerText
-                acquisition.General_settings.OscilloscopeDecimator = CType(xmldoc.SelectSingleNode("Settings/Oscilloscope_Settings/Oscilloscope_Trigger_Decimator").InnerText, Double) / 12.5
+                acquisition.General_settings.OscilloscopeDecimator = CType(xmldoc.SelectSingleNode("Settings/Oscilloscope_Settings/Oscilloscope_Trigger_Decimator").InnerText, Double) / Ts
                 Dim k = 0
                 For Each node In xmldoc.SelectSingleNode("Settings").LastChild.ChildNodes
                     acquisition.CHList(k).polarity = IIf(node.ChildNodes.Item(0).innertext = "Positive", signal_polarity.POSITIVE, signal_polarity.NEGATIVE)
@@ -515,7 +540,7 @@ Public Class MainForm
                             acquisition.CHList(k).baseline_sample = node.ChildNodes.Item(11).innertext
                         End If
 
-                    ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Then
+                    ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.SCIDK Then
                         acquisition.CHList(k).offset = node.ChildNodes.Item(1).innertext
                         acquisition.CHList(k).trigger_level = node.ChildNodes.Item(2).innertext
                         acquisition.CHList(k).trigger_peaking = node.ChildNodes.Item(3).innertext
@@ -598,7 +623,7 @@ Public Class MainForm
                         writer.WriteElementString("Pileup_Rejection_Time", sets.DataGridView1.Rows(i).Cells("Pileup Rejection Time").Value)
                         writer.WriteElementString("Baseline_Inhibit_Time", sets.DataGridView1.Rows(i).Cells("Baseline Inhibit Time").Value)
                         writer.WriteElementString("Baseline_Lenght", sets.DataGridView1.Rows(i).Cells("Baseline Lenght").Value)
-                    ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Then
+                    ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.SCIDK Then
                         writer.WriteElementString("Polarity", sets.DataGridView1.Rows(i).Cells("Polarity").Value)
                         writer.WriteElementString("Offset", sets.DataGridView1.Rows(i).Cells("Offset").Value)
                         writer.WriteElementString("Trigger_Level", sets.DataGridView1.Rows(i).Cells("Trigger Level").Value)
@@ -709,6 +734,7 @@ Public Class MainForm
         If IsNothing(spect) Then
         Else
             spect.startspectrum()
+
             pImm1.Timer1.Enabled = True
             pImm2.Timer1.Enabled = True
 

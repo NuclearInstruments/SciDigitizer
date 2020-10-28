@@ -55,6 +55,8 @@ Public Class pOscilloscope
             sampling_factor = 1000 / 80
         ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Then
             sampling_factor = 1000 / 125
+        ElseIf Connection.ComClass._boardModel = communication.tModel.SCIDK Then
+            sampling_factor = 1000 / 60
         End If
 
         n_osc = Connection.ComClass._n_oscilloscope
@@ -287,7 +289,13 @@ Public Class pOscilloscope
         Pesgo1.PeGrid.WorkingAxis = 0
         Pesgo1.PeGrid.Configure.ManualScaleControlY = ManualScaleControl.MinMax
         Pesgo1.PeGrid.Configure.ManualMinY = 0
-        Pesgo1.PeGrid.Configure.ManualMaxY = 16384
+        If Connection.ComClass._boardModel = communication.tModel.SCIDK Then
+            Pesgo1.PeGrid.Configure.ManualMaxY = 4096
+        Else
+            Pesgo1.PeGrid.Configure.ManualMaxY = 16384
+        End If
+
+
     End Sub
 
     Private Sub Pesgo1_KeyPress(sender As Object, e As KeyPressEventArgs) Handles Pesgo1.KeyPress
@@ -626,26 +634,7 @@ Public Class pOscilloscope
                                 Next
                             End If
 
-                            'Pesgo1.PeColor.SubsetColors(n) = colorList(n Mod 32)
-                            'Pesgo1.PeColor.SubsetColors(n_ch * 1 + n) = colorList(n Mod 32)
-                            'Pesgo1.PeColor.SubsetColors(n_ch * 2 + n) = colorList(n Mod 32)
-                            'Pesgo1.PeColor.SubsetColors(n_ch * 3 + n) = colorList(n Mod 32)
-                            'Pesgo1.PeColor.SubsetColors(n_ch * 4 + n) = colorList(n Mod 32)
-                            'Pesgo1.PePlot.SubsetLineTypes(n) = LineType.ThickSolid
-                            'Pesgo1.PePlot.SubsetLineTypes(n_ch * 1 + n) = LineType.ThickSolid
-                            'Pesgo1.PePlot.SubsetLineTypes(n_ch * 2 + n) = LineType.ThickSolid
-                            'Pesgo1.PePlot.SubsetLineTypes(n_ch * 3 + n) = LineType.ThickSolid
-                            'Pesgo1.PePlot.SubsetLineTypes(n_ch * 4 + n) = LineType.ThickSolid
-                            'If CheckedListBox1.CheckedItems.Contains("ALL") Then
-                            '    Pesgo1.PeString.SubsetLabels(n) = CheckedListBox1.CheckedItems(n + 1)
-                            'Else
-                            '    Pesgo1.PeString.SubsetLabels(n) = CheckedListBox1.CheckedItems(n)
-                            'End If
-                            'Pesgo1.PeString.SubsetLabels(n_ch * 1 + n) = ""
-                            'Pesgo1.PeString.SubsetLabels(n_ch * 2 + n) = ""
-                            'Pesgo1.PeString.SubsetLabels(n_ch * 3 + n) = ""
-                            'Pesgo1.PeString.SubsetLabels(n_ch * 4 + n) = ""
-                            'Pesgo1.PeLegend.SubsetsToLegend(n) = n
+
 
                             n += 1
                         End If
@@ -756,8 +745,8 @@ Public Class pOscilloscope
 
                     ' Application.DoEvents()
                     If MainForm.__Running_OSC = False Then
-                            Exit Sub
-                        End If
+                        Exit Sub
+                    End If
 
                     'End While
 
@@ -778,94 +767,94 @@ Public Class pOscilloscope
 
                         WaveNN += 1
                         Dim curr As Integer = position - Math.Floor(PreTriggerValue * nsamples / 100)
-                            If curr > 0 Then
-                                Dim k = 0
-                                For i = curr To nsamples - 2
-                                    Dim d = data(i + nsamples)
-                                    AnalogArray(k + nsamples * n) = (data(i) And 65535) '+ coor(ch)
-                                    If ((d And 65535) > 32767) Then
-                                        AnalogArray2(k + nsamples * n) = -(65535 - (d And 65535))
-                                    Else
-                                        AnalogArray2(k + nsamples * n) = d And 65535
-                                    End If
-                                    Digital1Array(k + nsamples * n) = data(i) >> 16 And 1
-                                    Digital2Array(k + nsamples * n) = data(i) >> 17 And 1
-                                    Digital3Array(k + nsamples * n) = data(i) >> 18 And 1
-                                    k += 1
-                                Next
-                                For i = 0 To curr - 1
-                                    Dim d = data(i + nsamples)
-                                    AnalogArray(k + nsamples * n) = (data(i) And 65535) '+ coor(ch)
-                                    If ((d And 65535) > 32767) Then
-                                        AnalogArray2(k + nsamples * n) = -(65535 - (d And 65535))
-                                    Else
-                                        AnalogArray2(k + nsamples * n) = d And 65535
-                                    End If
-                                    Digital1Array(k + nsamples * n) = data(i) >> 16 And 1
-                                    Digital2Array(k + nsamples * n) = data(i) >> 17 And 1
-                                    Digital3Array(k + nsamples * n) = data(i) >> 18 And 1
-                                    k += 1
-                                Next
-                            Else
-                                Dim k = 0
-                                For i = nsamples + curr To nsamples - 2
-                                    Dim d = data(i + nsamples)
-                                    AnalogArray(k + nsamples * n) = (data(i) And 65535) '+ coor(ch)
-                                    If ((d And 65535) > 32767) Then
-                                        AnalogArray2(k + nsamples * n) = -(65535 - (d And 65535))
-                                    Else
-                                        AnalogArray2(k + nsamples * n) = d And 65535
-                                    End If
-                                    Digital1Array(k + nsamples * n) = data(i) >> 16 And 1
-                                    Digital2Array(k + nsamples * n) = data(i) >> 17 And 1
-                                    Digital3Array(k + nsamples * n) = data(i) >> 18 And 1
-                                    k += 1
-                                Next
-                                For i = 0 To nsamples + curr - 1
-                                    Dim d = data(i + nsamples)
-                                    AnalogArray(k + nsamples * n) = (data(i) And 65535) '+ coor(ch)
-                                    If ((d And 65535) > 32767) Then
-                                        AnalogArray2(k + nsamples * n) = -(65535 - (d And 65535))
-                                    Else
-                                        AnalogArray2(k + nsamples * n) = d And 65535
-                                    End If
-                                    Digital1Array(k + nsamples * n) = data(i) >> 16 And 1
-                                    Digital2Array(k + nsamples * n) = data(i) >> 17 And 1
-                                    Digital3Array(k + nsamples * n) = data(i) >> 18 And 1
-                                    k += 1
-                                Next
-                            End If
+                        If curr > 0 Then
+                            Dim k = 0
+                            For i = curr To nsamples - 2
+                                Dim d = data(i + nsamples)
+                                AnalogArray(k + nsamples * n) = (data(i) And 65535) '+ coor(ch)
+                                If ((d And 65535) > 32767) Then
+                                    AnalogArray2(k + nsamples * n) = -(65535 - (d And 65535))
+                                Else
+                                    AnalogArray2(k + nsamples * n) = d And 65535
+                                End If
+                                Digital1Array(k + nsamples * n) = data(i) >> 16 And 1
+                                Digital2Array(k + nsamples * n) = data(i) >> 17 And 1
+                                Digital3Array(k + nsamples * n) = data(i) >> 18 And 1
+                                k += 1
+                            Next
+                            For i = 0 To curr - 1
+                                Dim d = data(i + nsamples)
+                                AnalogArray(k + nsamples * n) = (data(i) And 65535) '+ coor(ch)
+                                If ((d And 65535) > 32767) Then
+                                    AnalogArray2(k + nsamples * n) = -(65535 - (d And 65535))
+                                Else
+                                    AnalogArray2(k + nsamples * n) = d And 65535
+                                End If
+                                Digital1Array(k + nsamples * n) = data(i) >> 16 And 1
+                                Digital2Array(k + nsamples * n) = data(i) >> 17 And 1
+                                Digital3Array(k + nsamples * n) = data(i) >> 18 And 1
+                                k += 1
+                            Next
+                        Else
+                            Dim k = 0
+                            For i = nsamples + curr To nsamples - 2
+                                Dim d = data(i + nsamples)
+                                AnalogArray(k + nsamples * n) = (data(i) And 65535) '+ coor(ch)
+                                If ((d And 65535) > 32767) Then
+                                    AnalogArray2(k + nsamples * n) = -(65535 - (d And 65535))
+                                Else
+                                    AnalogArray2(k + nsamples * n) = d And 65535
+                                End If
+                                Digital1Array(k + nsamples * n) = data(i) >> 16 And 1
+                                Digital2Array(k + nsamples * n) = data(i) >> 17 And 1
+                                Digital3Array(k + nsamples * n) = data(i) >> 18 And 1
+                                k += 1
+                            Next
+                            For i = 0 To nsamples + curr - 1
+                                Dim d = data(i + nsamples)
+                                AnalogArray(k + nsamples * n) = (data(i) And 65535) '+ coor(ch)
+                                If ((d And 65535) > 32767) Then
+                                    AnalogArray2(k + nsamples * n) = -(65535 - (d And 65535))
+                                Else
+                                    AnalogArray2(k + nsamples * n) = d And 65535
+                                End If
+                                Digital1Array(k + nsamples * n) = data(i) >> 16 And 1
+                                Digital2Array(k + nsamples * n) = data(i) >> 17 And 1
+                                Digital3Array(k + nsamples * n) = data(i) >> 18 And 1
+                                k += 1
+                            Next
+                        End If
 
 
                         If fileEnable = True Then
-                                'For k = 0 To osc_ch - 1
-                                If EnabledChannel(ch_id) Then
-                                    Dim A(nsamples), A2(nsamples), D0(nsamples), D1(nsamples), D2(nsamples) As Single
-                                    'For j = 0 To nsamples - 1
-                                    Array.Copy(AnalogArray, nsamples * n, A, 0, nsamples)
-                                    Array.Copy(AnalogArray2, nsamples * n, A2, 0, nsamples)
-                                    Array.Copy(Digital1Array, nsamples * n, D0, 0, nsamples)
-                                    Array.Copy(Digital2Array, nsamples * n, D1, 0, nsamples)
-                                    Array.Copy(Digital3Array, nsamples * n, D2, 0, nsamples)
-                                    '    Next
-                                    MutexFile.WaitOne()
+                            'For k = 0 To osc_ch - 1
+                            If EnabledChannel(ch_id) Then
+                                Dim A(nsamples), A2(nsamples), D0(nsamples), D1(nsamples), D2(nsamples) As Single
+                                'For j = 0 To nsamples - 1
+                                Array.Copy(AnalogArray, nsamples * n, A, 0, nsamples)
+                                Array.Copy(AnalogArray2, nsamples * n, A2, 0, nsamples)
+                                Array.Copy(Digital1Array, nsamples * n, D0, 0, nsamples)
+                                Array.Copy(Digital2Array, nsamples * n, D1, 0, nsamples)
+                                Array.Copy(Digital3Array, nsamples * n, D2, 0, nsamples)
+                                '    Next
+                                MutexFile.WaitOne()
                                 objRawWriter.WriteLine((Now - startTime).TotalMilliseconds / 1000.0 & ";" & ch_id + 1 & ";" & nsamples & ";" & 1 & ";" & String.Join(";", A)) ' & String.Join(";", A2) & String.Join(";", D0) & String.Join(";", D1) & String.Join(";", D2))
                                 MutexFile.ReleaseMutex()
-                                End If
-                                ' Next
-                                If TargetMode = 1 Then
-                                    If totalACQ >= TargetEvent Then
-                                        MainForm.ProgressBar.Value = 100
-                                        StopDataCaptureOnFile()
-                                        MainForm.SaveData.Enabled = True
-                                        MainForm.StopSaveData.Enabled = False
-                                    Else
-                                        MainForm.ProgressBar.Value = totalACQ / TargetEvent * 100
-                                    End If
+                            End If
+                            ' Next
+                            If TargetMode = 1 Then
+                                If totalACQ >= TargetEvent Then
+                                    MainForm.ProgressBar.Value = 100
+                                    StopDataCaptureOnFile()
+                                    MainForm.SaveData.Enabled = True
+                                    MainForm.StopSaveData.Enabled = False
+                                Else
+                                    MainForm.ProgressBar.Value = totalACQ / TargetEvent * 100
                                 End If
                             End If
+                        End If
 
-                            n += 1
+                        n += 1
 
                         Console.WriteLine((Now - lastPlot).TotalMilliseconds)
 
@@ -921,8 +910,178 @@ Public Class pOscilloscope
             End If
 
 
+        ElseIf Connection.ComClass._boardModel = communication.tModel.SCIDK Then
+            Dim status As UInt32 = 0
+            Dim tt = Now
+            While status <> 1
+                Connection.ComClass.GetRegister(addressStatus(0), status, 0)
+                Application.DoEvents()
+                If MainForm.__Running_OSC = False Then
+                    Exit Sub
+                End If
+                If (Now - tt).TotalMilliseconds > 2000 Then
+                    Exit Sub
+                End If
+            End While
 
+            Dim position As UInt32
+            Connection.ComClass.GetRegister(addressPosition(0), position, 0)
+
+            Dim data(length * 2) As UInt32
+            Dim read_data As UInt32
+            Dim valid_data As UInt32
+            If Connection.ComClass.ReadData(addressData(0), data, length * 2, 0, 1000, read_data, valid_data, 0) = 0 Then
+                If Connection.ComClass.SetRegister(addressArm(0), 0, 0) = 0 Then
+
+                End If
+                If Connection.ComClass.SetRegister(addressArm(0), 1, 0) = 0 Then
+
+                End If
+                If n_ch > 0 Then
+                    ' Pesgo1.PeData.Subsets = 5 * n_ch
+                    Pesgo1.PeData.Points = nsamples
+                    Pesgo1.PeGrid.MultiAxesSubsets(0) = n_ch
+                    Pesgo1.PeGrid.MultiAxesSubsets(1) = n_ch
+                    Pesgo1.PeGrid.MultiAxesSubsets(2) = n_ch
+                    Pesgo1.PeGrid.MultiAxesSubsets(3) = n_ch
+                    Pesgo1.PeGrid.MultiAxesSubsets(4) = n_ch
+
+                    Dim TOTpoints As Integer = 5 * nsamples * n_ch
+                    Dim tmpYData2(TOTpoints) As Single
+                    Dim AnalogArray(nsamples * n_ch) As Single
+                    Dim AnalogArray2(nsamples * n_ch) As Single
+                    Dim Digital1Array(nsamples * n_ch) As Single
+                    Dim Digital2Array(nsamples * n_ch) As Single
+                    Dim Digital3Array(nsamples * n_ch) As Single
+                    Dim Digital4Array(nsamples * n_ch) As Single
+
+                    Dim tmpXData(TOTpoints) As Single
+                    For j = 0 To n_ch - 1
+                        For i = 0 To nsamples - 1
+                            tmpXData(i + (nsamples * (n_ch * 0 + j))) = i * (MainForm.acquisition.General_settings.OscilloscopeDecimator) * sampling_factor
+                            tmpXData(i + (nsamples * (n_ch * 1 + j))) = i * (MainForm.acquisition.General_settings.OscilloscopeDecimator) * sampling_factor
+                            tmpXData(i + (nsamples * (n_ch * 2 + j))) = i * (MainForm.acquisition.General_settings.OscilloscopeDecimator) * sampling_factor
+                            tmpXData(i + (nsamples * (n_ch * 3 + j))) = i * (MainForm.acquisition.General_settings.OscilloscopeDecimator) * sampling_factor
+                            tmpXData(i + (nsamples * (n_ch * 4 + j))) = i * (MainForm.acquisition.General_settings.OscilloscopeDecimator) * sampling_factor
+                        Next
+                    Next
+                    Gigasoft.ProEssentials.Api.PEvsetW(Pesgo1.PeSpecial.HObject, Gigasoft.ProEssentials.DllProperties.XData, tmpXData, TOTpoints)
+
+                    Dim curr As Integer = position - Math.Floor(PreTriggerValue * nsamples / 100)
+                    Dim n = 0
+                    For Each ch_id In Checked_id
+                        If ch_id <> 0 Then
+                            Dim ch = (ch_id - 1) * 2
+                            If curr > 0 Then
+                                Dim k = 0
+                                For i = curr To nsamples - 2
+                                    AnalogArray(k + nsamples * n) = (data(i + nsamples * ch) And 65535) + coor(ch)
+                                    Dim d = (data(i + nsamples * (ch + 1)) And 65535)
+                                    AnalogArray2(k + nsamples * n) = IIf(d > 32767, d = -(65535 - d), d)
+                                    Digital1Array(k + nsamples * n) = data(i + nsamples * (ch + 1)) >> 16 And 1
+                                    Digital2Array(k + nsamples * n) = data(i + nsamples * (ch + 1)) >> 17 And 1
+                                    Digital3Array(k + nsamples * n) = data(i + nsamples * (ch + 1)) >> 18 And 1
+                                    k += 1
+                                Next
+                                For i = 0 To curr - 1
+                                    AnalogArray(k + nsamples * n) = (data(i + nsamples * ch) And 65535) + coor(ch)
+                                    Dim d = (data(i + nsamples * (ch + 1)) And 65535)
+                                    AnalogArray2(k + nsamples * n) = IIf(d > 32767, d = -(65535 - d), d)
+                                    Digital1Array(k + nsamples * n) = data(i + nsamples * (ch + 1)) >> 16 And 1
+                                    Digital2Array(k + nsamples * n) = data(i + nsamples * (ch + 1)) >> 17 And 1
+                                    Digital3Array(k + nsamples * n) = data(i + nsamples * (ch + 1)) >> 18 And 1
+                                    k += 1
+                                Next
+                            Else
+                                Dim k = 0
+                                For i = nsamples + curr To nsamples - 2
+                                    AnalogArray(k + nsamples * n) = (data(i + nsamples * ch) And 65535) + coor(ch)
+                                    Dim d = (data(i + nsamples * (ch + 1)) And 65535)
+                                    AnalogArray2(k + nsamples * n) = IIf(d > 32767, d = -(65535 - d), d)
+                                    Digital1Array(k + nsamples * n) = data(i + nsamples * (ch + 1)) >> 16 And 1
+                                    Digital2Array(k + nsamples * n) = data(i + nsamples * (ch + 1)) >> 17 And 1
+                                    Digital3Array(k + nsamples * n) = data(i + nsamples * (ch + 1)) >> 18 And 1
+                                    k += 1
+                                Next
+                                For i = 0 To nsamples + curr - 1
+                                    AnalogArray(k + nsamples * n) = (data(i + nsamples * ch) And 65535) + coor(ch)
+                                    Dim d = (data(i + nsamples * (ch + 1)) And 65535)
+                                    AnalogArray2(k + nsamples * n) = IIf(d > 32767, d = -(65535 - d), d)
+                                    Digital1Array(k + nsamples * n) = data(i + nsamples * (ch + 1)) >> 16 And 1
+                                    Digital2Array(k + nsamples * n) = data(i + nsamples * (ch + 1)) >> 17 And 1
+                                    Digital3Array(k + nsamples * n) = data(i + nsamples * (ch + 1)) >> 18 And 1
+                                    k += 1
+                                Next
+                            End If
+
+
+
+                            n += 1
+                        End If
+                    Next
+                    For i = 1 To n_ch
+                        For q = 0 To 4
+                            AnalogArray(nsamples * i - q) = AnalogArray(nsamples * i - 4)
+                            AnalogArray2(nsamples * i - q) = AnalogArray2(nsamples * i - 4)
+                            Digital1Array(nsamples * i - q) = Digital1Array(nsamples * i - 4)
+                            Digital2Array(nsamples * i - q) = Digital2Array(nsamples * i - 4)
+                            Digital3Array(nsamples * i - q) = Digital3Array(nsamples * i - 4)
+                            Digital4Array(nsamples * i - q) = Digital4Array(nsamples * i - 4)
+                        Next
+
+                    Next
+
+                    Array.Copy(AnalogArray, 0, tmpYData2, 0, nsamples * n_ch)
+                    Array.Copy(AnalogArray2, 0, tmpYData2, nsamples * (n_ch * 1), nsamples * n_ch)
+                    Array.Copy(Digital1Array, 0, tmpYData2, nsamples * (n_ch * 2), nsamples * n_ch)
+                    Array.Copy(Digital2Array, 0, tmpYData2, nsamples * (n_ch * 3), nsamples * n_ch)
+                    Array.Copy(Digital3Array, 0, tmpYData2, nsamples * (n_ch * 4), nsamples * n_ch)
+                    'Array.Copy(Digital4Array, 0, tmpYData2, nsamples * (n_ch * 4), nsamples * n_ch)
+
+
+
+                    Gigasoft.ProEssentials.Api.PEvsetW(Pesgo1.PeSpecial.HObject, Gigasoft.ProEssentials.DllProperties.YData, tmpYData2, TOTpoints)
+
+                    If (Pesgo1.PeConfigure.RenderEngine = RenderEngine.Direct3D) Then
+                        Pesgo1.PeFunction.Force3dxVerticeRebuild = True
+                        Pesgo1.PeFunction.Force3dxNewColors = True
+                    Else
+                        Pesgo1.PeFunction.Reinitialize()
+                        Pesgo1.PeFunction.ResetImage(0, 0)
+                    End If
+                    totalACQ += 1
+                    Pesgo1.PeString.MainTitle = "Real Time Oscilloscope (" & totalACQ & ")"
+                    Pesgo1.Invalidate()
+                    Pesgo1.PeFunction.ReinitializeResetImage()
+                End If
+
+                ' wavecount += 1
+
+                If fileEnable = True Then
+                    For k = 0 To osc_ch - 1
+                        If EnabledChannel(k) Then
+                            Dim A(nsamples), D0(nsamples), D1(nsamples), D2(nsamples), D3(nsamples) As Single
+                            For j = 0 To nsamples - 1
+                                A(j) = data(j + nsamples * (EnabledChannel_id(k) - 1)) And 65535
+                            Next
+                            MutexFile.WaitOne()
+                            objRawWriter.WriteLine(totalACQ & ";" & k + 1 & ";" & nsamples & ";" & 1 & ";" & String.Join(";", A))
+                            MutexFile.ReleaseMutex()
+                        End If
+                    Next
+                    If TargetMode = 1 Then
+                        If totalACQ >= TargetEvent Then
+                            MainForm.ProgressBar.Value = 100
+                            StopDataCaptureOnFile()
+                            MainForm.SaveData.Enabled = True
+                            MainForm.StopSaveData.Enabled = False
+                        Else
+                            MainForm.ProgressBar.Value = totalACQ / TargetEvent * 100
+                        End If
+                    End If
+                End If
             End If
+        End If
 
     End Sub
 

@@ -1,0 +1,317 @@
+{"Registers":[
+{
+  "Name": "POL_0",
+  "Address": 0,
+  "RegionSize": 1,
+  "Description": "",
+  "Category": "Undefined"
+},
+{
+  "Name": "OFS_0",
+  "Address": 1,
+  "RegionSize": 1,
+  "Description": "",
+  "Category": "Undefined"
+},
+{
+  "Name": "TH_0",
+  "Address": 2,
+  "RegionSize": 1,
+  "Description": "",
+  "Category": "Undefined"
+},
+{
+  "Name": "TRAP_K_0",
+  "Address": 3,
+  "RegionSize": 1,
+  "Description": "",
+  "Category": "Undefined"
+},
+{
+  "Name": "TRAP_M_0",
+  "Address": 4,
+  "RegionSize": 1,
+  "Description": "",
+  "Category": "Undefined"
+},
+{
+  "Name": "K_0",
+  "Address": 5,
+  "RegionSize": 1,
+  "Description": "",
+  "Category": "Undefined"
+},
+{
+  "Name": "M_0",
+  "Address": 6,
+  "RegionSize": 1,
+  "Description": "",
+  "Category": "Undefined"
+},
+{
+  "Name": "DECAY_0",
+  "Address": 7,
+  "RegionSize": 1,
+  "Description": "",
+  "Category": "Undefined"
+},
+{
+  "Name": "GAIN_0",
+  "Address": 8,
+  "RegionSize": 1,
+  "Description": "",
+  "Category": "Undefined"
+},
+{
+  "Name": "BLLEN_0",
+  "Address": 9,
+  "RegionSize": 1,
+  "Description": "",
+  "Category": "Undefined"
+},
+{
+  "Name": "SIGLEN_0",
+  "Address": 10,
+  "RegionSize": 1,
+  "Description": "",
+  "Category": "Undefined"
+},
+{
+  "Name": "SAMPLE_0",
+  "Address": 11,
+  "RegionSize": 1,
+  "Description": "",
+  "Category": "Undefined"
+},
+{
+  "Name": "RUNCFG",
+  "Address": 12,
+  "RegionSize": 1,
+  "Description": "",
+  "Category": "Undefined"
+},
+{
+  "Name": "POL_1",
+  "Address": 13,
+  "RegionSize": 1,
+  "Description": "",
+  "Category": "Undefined"
+},
+{
+  "Name": "OFS_1",
+  "Address": 14,
+  "RegionSize": 1,
+  "Description": "",
+  "Category": "Undefined"
+},
+{
+  "Name": "TH_1",
+  "Address": 15,
+  "RegionSize": 1,
+  "Description": "",
+  "Category": "Undefined"
+},
+{
+  "Name": "TRAP_K_1",
+  "Address": 16,
+  "RegionSize": 1,
+  "Description": "",
+  "Category": "Undefined"
+},
+{
+  "Name": "TRAP_M_1",
+  "Address": 17,
+  "RegionSize": 1,
+  "Description": "",
+  "Category": "Undefined"
+},
+{
+  "Name": "K_1",
+  "Address": 18,
+  "RegionSize": 1,
+  "Description": "",
+  "Category": "Undefined"
+},
+{
+  "Name": "M_1",
+  "Address": 19,
+  "RegionSize": 1,
+  "Description": "",
+  "Category": "Undefined"
+},
+{
+  "Name": "DECAY_1",
+  "Address": 20,
+  "RegionSize": 1,
+  "Description": "",
+  "Category": "Undefined"
+},
+{
+  "Name": "GAIN_1",
+  "Address": 21,
+  "RegionSize": 1,
+  "Description": "",
+  "Category": "Undefined"
+},
+{
+  "Name": "BLLEN_1",
+  "Address": 22,
+  "RegionSize": 1,
+  "Description": "",
+  "Category": "Undefined"
+},
+{
+  "Name": "SIGLEN_1",
+  "Address": 23,
+  "RegionSize": 1,
+  "Description": "",
+  "Category": "Undefined"
+},
+{
+  "Name": "SAMPLE_1",
+  "Address": 24,
+  "RegionSize": 1,
+  "Description": "",
+  "Category": "Undefined"
+},
+{
+  "Name": "RUN",
+  "Address": 131079,
+  "RegionSize": 1,
+  "Description": "",
+  "Category": "Undefined"
+},
+{
+  "Name": "LEMO_OUT_0",
+  "Address": 262144,
+  "RegionSize": 1,
+  "Description": "",
+  "Category": "Undefined"
+},
+{
+  "Name": "LEMO_OUT_1",
+  "Address": 262145,
+  "RegionSize": 1,
+  "Description": "",
+  "Category": "Undefined"
+},
+{
+  "Name": "EN_EXT_T0",
+  "Address": 262146,
+  "RegionSize": 1,
+  "Description": "",
+  "Category": "Undefined"
+},
+{
+  "Name": "EN_EXT_TRIG",
+  "Address": 262147,
+  "RegionSize": 1,
+  "Description": "",
+  "Category": "Undefined"
+},
+{
+  "Name": "ANALOG_OFFSET",
+  "Address": 4294967289,
+  "RegionSize": 1,
+  "Description": "",
+  "Category": "AnalogAFE"
+}],
+"MMCComponents":[
+{
+  "Name": "CP_0",
+  "Type": "CustomPacket",
+  "Address": 131081,
+  "Version": "1.1.0.0",
+  "Channels": 0,
+  "Registers": [
+    {
+      "Name": "READ_STATUS",
+      "Address": 131082,
+      "RegionSize": 1,
+      "Description": "",
+      "Category": "Undefined"
+    },
+    {
+      "Name": "READ_VALID_WORDS",
+      "Address": 131083,
+      "RegionSize": 1,
+      "Description": "",
+      "Category": "Undefined"
+    },
+    {
+      "Name": "CONFIG",
+      "Address": 131084,
+      "RegionSize": 1,
+      "Description": "",
+      "Category": "Undefined"
+    }
+  ],
+  "UseDMA": false
+},
+{
+  "Name": "RateMeter_0",
+  "Type": "MCRateMeter",
+  "Address": 196608,
+  "Version": "1.0.0.0",
+  "Channels": 5,
+  "Registers": []
+},
+{
+  "Name": "Oscilloscope_0",
+  "Type": "Oscilloscope",
+  "Address": 65536,
+  "Version": "1.0.0.0",
+  "nsamples": 1024,
+  "Registers": [
+    {
+      "Name": "READ_STATUS",
+      "Address": 131072,
+      "RegionSize": 1,
+      "Description": "",
+      "Category": "Undefined"
+    },
+    {
+      "Name": "READ_POSITION",
+      "Address": 131073,
+      "RegionSize": 1,
+      "Description": "",
+      "Category": "Undefined"
+    },
+    {
+      "Name": "CONFIG_TRIGGER_MODE",
+      "Address": 131074,
+      "RegionSize": 1,
+      "Description": "",
+      "Category": "Undefined"
+    },
+    {
+      "Name": "CONFIG_PRETRIGGER",
+      "Address": 131075,
+      "RegionSize": 1,
+      "Description": "",
+      "Category": "Undefined"
+    },
+    {
+      "Name": "CONFIG_TRIGGER_LEVEL",
+      "Address": 131076,
+      "RegionSize": 1,
+      "Description": "",
+      "Category": "Undefined"
+    },
+    {
+      "Name": "CONFIG_ARM",
+      "Address": 131077,
+      "RegionSize": 1,
+      "Description": "",
+      "Category": "Undefined"
+    },
+    {
+      "Name": "CONFIG_DECIMATOR",
+      "Address": 131078,
+      "RegionSize": 1,
+      "Description": "",
+      "Category": "Undefined"
+    }
+  ],
+  "Channels": 4
+}],"Device":"SCIDK","Project":"SciDK_MCA"}

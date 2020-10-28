@@ -47,11 +47,17 @@ Partial Class Connection
         Me.AddButton = New System.Windows.Forms.Button()
         Me.Connect_R5560 = New System.Windows.Forms.Button()
         Me.PictureBox1 = New System.Windows.Forms.PictureBox()
+        Me.TabPage3 = New System.Windows.Forms.TabPage()
+        Me.Button2 = New System.Windows.Forms.Button()
+        Me.Label5 = New System.Windows.Forms.Label()
+        Me.DeviceListSciDK = New System.Windows.Forms.ComboBox()
+        Me.ConnectSciDK = New System.Windows.Forms.Button()
         Me.TabControl1.SuspendLayout()
         Me.TabPage1.SuspendLayout()
         Me.TabPage2.SuspendLayout()
         CType(Me.DataGridView1, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.TabPage3.SuspendLayout()
         Me.SuspendLayout()
         '
         'Label3
@@ -88,6 +94,7 @@ Partial Class Connection
         '
         Me.TabControl1.Controls.Add(Me.TabPage1)
         Me.TabControl1.Controls.Add(Me.TabPage2)
+        Me.TabControl1.Controls.Add(Me.TabPage3)
         Me.TabControl1.Location = New System.Drawing.Point(-2, 115)
         Me.TabControl1.Name = "TabControl1"
         Me.TabControl1.SelectedIndex = 0
@@ -304,6 +311,58 @@ Partial Class Connection
         Me.PictureBox1.TabIndex = 24
         Me.PictureBox1.TabStop = False
         '
+        'TabPage3
+        '
+        Me.TabPage3.Controls.Add(Me.Button2)
+        Me.TabPage3.Controls.Add(Me.Label5)
+        Me.TabPage3.Controls.Add(Me.DeviceListSciDK)
+        Me.TabPage3.Controls.Add(Me.ConnectSciDK)
+        Me.TabPage3.Location = New System.Drawing.Point(4, 22)
+        Me.TabPage3.Name = "TabPage3"
+        Me.TabPage3.Padding = New System.Windows.Forms.Padding(3)
+        Me.TabPage3.Size = New System.Drawing.Size(550, 192)
+        Me.TabPage3.TabIndex = 2
+        Me.TabPage3.Text = "SCIDK"
+        Me.TabPage3.UseVisualStyleBackColor = True
+        '
+        'Button2
+        '
+        Me.Button2.Location = New System.Drawing.Point(268, 27)
+        Me.Button2.Name = "Button2"
+        Me.Button2.Size = New System.Drawing.Size(75, 21)
+        Me.Button2.TabIndex = 44
+        Me.Button2.Text = "Refresh"
+        Me.Button2.UseVisualStyleBackColor = True
+        '
+        'Label5
+        '
+        Me.Label5.AutoSize = True
+        Me.Label5.Location = New System.Drawing.Point(21, 31)
+        Me.Label5.Name = "Label5"
+        Me.Label5.Size = New System.Drawing.Size(73, 13)
+        Me.Label5.TabIndex = 43
+        Me.Label5.Text = "Serial Number"
+        '
+        'DeviceListSciDK
+        '
+        Me.DeviceListSciDK.BackColor = System.Drawing.Color.White
+        Me.DeviceListSciDK.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.DeviceListSciDK.FormattingEnabled = True
+        Me.DeviceListSciDK.Location = New System.Drawing.Point(110, 27)
+        Me.DeviceListSciDK.Name = "DeviceListSciDK"
+        Me.DeviceListSciDK.Size = New System.Drawing.Size(121, 21)
+        Me.DeviceListSciDK.TabIndex = 42
+        '
+        'ConnectSciDK
+        '
+        Me.ConnectSciDK.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.ConnectSciDK.Location = New System.Drawing.Point(439, 144)
+        Me.ConnectSciDK.Name = "ConnectSciDK"
+        Me.ConnectSciDK.Size = New System.Drawing.Size(91, 32)
+        Me.ConnectSciDK.TabIndex = 39
+        Me.ConnectSciDK.Text = "Connect"
+        Me.ConnectSciDK.UseVisualStyleBackColor = True
+        '
         'Connection
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -325,6 +384,8 @@ Partial Class Connection
         Me.TabPage2.ResumeLayout(False)
         CType(Me.DataGridView1, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).EndInit()
+        Me.TabPage3.ResumeLayout(False)
+        Me.TabPage3.PerformLayout()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -353,4 +414,9 @@ Partial Class Connection
     Friend WithEvents DataGridView1 As DataGridView
     Friend WithEvents AddButton As Button
     Friend WithEvents RemoveButton As Button
+    Friend WithEvents TabPage3 As TabPage
+    Friend WithEvents Button2 As Button
+    Friend WithEvents Label5 As Label
+    Friend WithEvents DeviceListSciDK As ComboBox
+    Friend WithEvents ConnectSciDK As Button
 End Class

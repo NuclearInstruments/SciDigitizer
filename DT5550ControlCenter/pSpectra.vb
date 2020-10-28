@@ -17,6 +17,8 @@ Public Class pSpectra
     Public addressMode As UInt32
     Public addressArm As UInt32
     Public addressStatus As UInt32
+    Public addressValidWords As UInt32
+
     Public addressSync As UInt32
     Public addressRUN As UInt32
 
@@ -81,7 +83,7 @@ Public Class pSpectra
         n_ch = MainForm.acquisition.CHList.Count
         If Connection.ComClass._boardModel = communication.tModel.DT5550 Then
             addressData = MainForm.CurrentMCA.Address
-        ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Then
+        ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.SCIDK Then
             addressData = (MainForm.CurrentCP.Address)
             MaxNumberOfChannel = _n_ch * Connection.ComClass._nBoard
             ReDim spectra(MaxNumberOfChannel, MaxSpectrumLength)
@@ -140,13 +142,33 @@ Public Class pSpectra
                     Dim status_error = Connection.ComClass.GetRegister(addressStatus, status, cp)
                     If status_error = 0 And status <> 3 Then
 
-                        If Connection.ComClass.ReadDataFifo(addressData, data, lenght, addressStatus, 1, 100, read_data, valid_data, cp) = 0 Then
+                        If Connection.ComClass.ReadDataFifo(addressData, data, lenght, addressStatus, 1, 100, read_data, valid_data, cp, addressValidWords) = 0 Then
 
                             For i = 0 To read_data - 1
                                 PCC(cp).Enqueue(data(i))
                             Next
 
                             UnpackDataPacketR(PCC(cp), cp)
+                        Else
+                            MainForm.plog.TextBox1.AppendText("Communication error" & vbCrLf)
+                            Exit Sub
+                        End If
+                    End If
+                Next
+            ElseIf Connection.ComClass._boardModel = communication.tModel.SCIDK Then
+                Dim lenght = 16384
+                Dim data(lenght) As UInt32
+                For cp = 0 To Connection.ComClass._nBoard - 1
+                    Dim status_error = Connection.ComClass.GetRegister(addressStatus, status, cp)
+                    If status_error = 0 And status <> 3 Then
+
+                        If Connection.ComClass.ReadDataFifo(addressData, data, lenght, addressStatus, 1, 100, read_data, valid_data, cp, addressValidWords) = 0 Then
+
+                            For i = 0 To read_data - 1
+                                PCC(cp).Enqueue(data(i))
+                            Next
+
+                            UnpackDataPacketS(PCC(cp), cp)
                         Else
                             MainForm.plog.TextBox1.AppendText("Communication error" & vbCrLf)
                             Exit Sub
@@ -275,7 +297,7 @@ Public Class pSpectra
             Else
                 MainForm.plog.TextBox1.AppendText("Error on CONFIG_ARM" & vbCrLf)
             End If
-        ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Then
+        ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.SCIDK Then
             For cp = 0 To Connection.ComClass._nBoard - 1
                 If Connection.ComClass.SetRegister(addressRUN, 0, cp) = 0 Then
 
@@ -348,7 +370,7 @@ Public Class pSpectra
 
                 End If
             Next
-        ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Then
+        ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.SCIDK Then
 
             For cp = 0 To Connection.ComClass._nBoard - 1
                 If Connection.ComClass.SetRegister(addressRUN, 0, cp) = 0 Then
@@ -364,7 +386,7 @@ Public Class pSpectra
                 Dim status_error = Connection.ComClass.GetRegister(addressStatus, status, cp)
                 If status_error = 0 And status <> 3 Then
 
-                    If Connection.ComClass.ReadDataFifo(addressData, data, 1000000 - 1, addressStatus, 1, 100, rd, vd, cp) = 0 Then
+                    If Connection.ComClass.ReadDataFifo(addressData, data, 1000000 - 1, addressStatus, 1, 100, rd, vd, cp, addressValidWords) = 0 Then
 
                     Else
                         MainForm.plog.TextBox1.AppendText("Communication error" & vbCrLf)
@@ -376,6 +398,7 @@ Public Class pSpectra
             For cp = 0 To Connection.ComClass._nBoard - 1
                 Connection.ComClass.SetRegister(addressArm, 2, cp)
                 If Connection.ComClass.SetRegister(addressArm, 0, cp) = 0 Then
+                    Connection.ComClass.SetRegister(addressRUN, 1, cp)                      'APPENA AGGIUNTO PROVA
                     If Connection.ComClass.SetRegister(addressArm, 1, cp) = 0 Then
                         _start = True
                     Else
@@ -385,6 +408,7 @@ Public Class pSpectra
                     MainForm.plog.TextBox1.AppendText("Error on CONFIG_ARM!" & vbCrLf)
                 End If
             Next
+
             If _start Then
                 StartSpectraReceiverThread()
                 Timer1.Enabled = True
@@ -905,7 +929,108 @@ Public Class pSpectra
 
 
 
-                        insync = 0
+                    insync = 0
+
+                    If (data.Count < packetsize) Then
+                        Return
+                    End If
+
+
+
+            End Select
+
+        End While
+
+
+    End Sub
+
+
+
+    Public Sub UnpackDataPacketS(ByRef data As Queue(Of UInt32), cp As Integer)
+
+        Dim packetsize = 5
+        Dim ev As Evento
+        Dim insync = 0
+        Dim pxcnt As Integer = 0
+        Dim packid
+        Dim mpe
+        Dim discard As Boolean = False
+        freq = 60000000
+        If (data.Count < packetsize) Then
+            Return
+        End If
+
+        While data.Count > 0
+            mpe = data.Dequeue
+
+            Select Case insync
+                Case 0
+                    If mpe = &HFFFFFFFF& Then
+                        ev = New Evento(1)
+
+                        ev.energy(0) = 0
+                        discard = False
+                        insync = 1
+                    Else
+                        If (data.Count < packetsize) Then
+                            Return
+                        End If
+                    End If
+                Case 1
+                    Dim eee = mpe
+                    IIf(eee < 0, 0, eee)
+                    IIf(eee > 65535, 65535, eee)
+                    ev.energy(0) = eee
+
+                    insync = 2
+                Case 2
+                    ev.timecode = mpe
+                    insync = 3
+                Case 3
+                    ev.timecode += mpe << 32L
+                    insync = 4
+                Case 4
+                    Dim trigger_id As UInt32 = mpe
+
+                    trigger_id = trigger_id >> 24
+                    ev.SingleChannelTriggerId = trigger_id
+
+                    If (ev.energy(0) < 65535) Then
+                        ev.valid = True
+                    Else
+                        ev.energy(0) = 0
+                        ev.valid = False
+                    End If
+                    MutexSpe.WaitOne()
+                    If (trigger_id < 32) Then
+
+                        spectra(trigger_id + (cp * _n_ch), ev.energy(0)) += 1
+                        MutexSpe.ReleaseMutex()
+                        MutexCumulative.WaitOne()
+                        realtimeimage(trigger_id + (cp * _n_ch)) = ev.energy(0)
+                        integralimage(trigger_id + (cp * _n_ch)) += ev.energy(0)
+                        T = ev.timecode
+                        MutexCumulative.ReleaseMutex()
+                    Else
+                        MutexSpe.WaitOne()
+                    End If
+
+                    If fileEnable Then
+                        spectracount += 1
+                        Try
+                            If Array.IndexOf(EnabledChannel_id, trigger_id + (cp * _n_ch)) Then
+                                If isRunning = True Then
+                                    objRawWriter.WriteLine(trigger_id + (cp * _n_ch) & ";" & ev.timecode.ToString & ";" & String.Join(";", ev.energy(0)).Replace(",", "."))
+                                End If
+                            End If
+                        Catch ex As Exception
+
+                        End Try
+                    End If
+
+
+
+                    insync = 0
 
                     If (data.Count < packetsize) Then
                         Return
@@ -1144,5 +1269,9 @@ Public Class pSpectra
                 MainForm.plog.TextBox1.AppendText("Error on CONFIG_ARM!" & vbCrLf)
             End If
         Next
+    End Sub
+
+    Private Sub Pesgo1_Click(sender As Object, e As EventArgs) Handles Pesgo1.Click
+
     End Sub
 End Class

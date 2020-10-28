@@ -8,13 +8,15 @@ Public Class Settings
     Dim inhibit = True
     Dim l As Integer = 814
     Dim n As Integer
-    Dim sampling_factor As Integer
+    Dim sampling_factor As Double
     Private Sub Settings_Load(sender As Object, e As EventArgs) Handles MyBase.Load
 
         If Connection.ComClass._boardModel = communication.tModel.DT5550 Then
             sampling_factor = 1000 / 80
         ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Then
             sampling_factor = 1000 / 125
+        ElseIf Connection.ComClass._boardModel = communication.tModel.SCIDK Then
+            sampling_factor = 1000 / 60
         End If
 
 
@@ -56,6 +58,20 @@ Public Class Settings
             TriggerSourceOscilloscope.Items.Add("MCA Trigger")
             TriggerSourceOscilloscope.Items.Add("Free Running")
 
+        ElseIf Connection.ComClass._boardModel = communication.tModel.SCIDK Then
+            GroupBox1.SetBounds(0, 0, 0, 0)
+            TriggerSource.Items.Clear()
+            TriggerSource.Items.Add("Internal")
+            TriggerSource.Items.Add("External")
+
+            TriggerSourceOscilloscope.Items.Clear()
+            TriggerSourceOscilloscope.Items.Add("Internal")
+            TriggerSourceOscilloscope.Items.Add("External")
+            TriggerSourceOscilloscope.Items.Add("Free Running")
+
+            For Each i In MainForm.acquisition.CHList
+                TriggerSourceOscilloscope.Items.Add(i.name)
+            Next
         End If
 
         TriggerEdge.Items.Clear()
@@ -77,7 +93,7 @@ Public Class Settings
         If Connection.ComClass._boardModel = communication.tModel.DT5550 Then
             DataGridView1.Columns.Add("Trigger Level", "Trigger Level (lsb)")
             DataGridView1.Columns.Add("Trigger Hold-Off", "Trigger Hold-Off (ns)")
-        ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Then
+        ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.SCIDK Then
             DataGridView1.Columns.Add("Offset", "Offset (lsb)")
             DataGridView1.Columns.Add("Trigger Level", "Trigger Level (lsb)")
             DataGridView1.Columns.Add("Trigger Peaking", "Trigger Peaking Time (ns)")
@@ -163,7 +179,8 @@ Public Class Settings
         ElseIf MainForm.acquisition.General_settings.TriggerSourceOscilloscope = trigger_source.EXTERNAL Then
             TriggerSourceOscilloscope.SelectedIndex = 1
         ElseIf MainForm.acquisition.General_settings.TriggerSourceOscilloscope = trigger_source.LEVEL Then
-            If Connection.ComClass._boardModel = communication.tModel.DT5550 Then
+            If Connection.ComClass._boardModel = communication.tModel.DT5550 Or
+                Connection.ComClass._boardModel = communication.tModel.SCIDK Then
                 TriggerSourceOscilloscope.SelectedIndex = MainForm.acquisition.General_settings.TriggerChannelOscilloscope + 3
             ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Then
                 TriggerSourceOscilloscope.SelectedIndex = 0
@@ -180,7 +197,7 @@ Public Class Settings
 
         TriggerLevelOscilloscope.Text = MainForm.acquisition.General_settings.TriggerOscilloscopeLevel
         PreTrigger.Text = MainForm.acquisition.General_settings.OscilloscopePreTrigger
-        Horizontal.Text = MainForm.acquisition.General_settings.OscilloscopeDecimator * 12.5
+        Horizontal.Text = Math.Round(MainForm.acquisition.General_settings.OscilloscopeDecimator * sampling_factor, 1)
 
     End Sub
 
@@ -209,7 +226,7 @@ Public Class Settings
                 End If
 
             End If
-            If Connection.ComClass._boardModel = communication.tModel.R5560 Then
+            If Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.SCIDK Then
                 DataGridView1.Rows(i).Cells("Trigger Peaking").Value = MainForm.acquisition.CHList(i).trigger_peaking
                 DataGridView1.Rows(i).Cells("Trigger Flat").Value = MainForm.acquisition.CHList(i).trigger_flat
                 DataGridView1.Rows(i).Cells("Offset").Value = MainForm.acquisition.CHList(i).offset
@@ -376,7 +393,7 @@ Public Class Settings
         ' MainForm.acquisition.General_settings.trigholdoff = holdoff.Value
 
         MainForm.acquisition.General_settings.OscilloscopePreTrigger = PreTrigger.Text
-        MainForm.acquisition.General_settings.OscilloscopeDecimator = Math.Round((Horizontal.Text).Replace(".", ",") / 12.5)
+        MainForm.acquisition.General_settings.OscilloscopeDecimator = Math.Round(Horizontal.Text / sampling_factor)
         MainForm.acquisition.General_settings.TriggerOscilloscopeLevel = TriggerLevelOscilloscope.Text
 
         For i = 0 To DataGridView1.Rows.Count - 1
@@ -415,7 +432,7 @@ Public Class Settings
             MainForm.acquisition.CHList(i).baseline_inhibit = DataGridView1.Rows(i).Cells("Baseline Inhibit Time").Value
             MainForm.acquisition.CHList(i).baseline_sample = CType(DataGridView1.Rows(i).Cells("Baseline Lenght").Value, Integer)
 
-            If Connection.ComClass._boardModel = communication.tModel.R5560 Then
+            If Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.SCIDK Then
                 MainForm.acquisition.CHList(i).offset = DataGridView1.Rows(i).Cells("Offset").Value
                 MainForm.acquisition.CHList(i).trigger_peaking = DataGridView1.Rows(i).Cells("Trigger Peaking").Value
                 MainForm.acquisition.CHList(i).trigger_flat = DataGridView1.Rows(i).Cells("Trigger Flat").Value
@@ -526,6 +543,8 @@ Public Class Settings
                 index = MainForm.acquisition.CHList.Count - MainForm.acquisition.CHList(i).id
             ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Then
                 index = MainForm.acquisition.CHList(i).ch_id - 1
+            ElseIf Connection.ComClass._boardModel = communication.tModel.SCIDK Then
+                index = MainForm.acquisition.CHList(i).ch_id - 1
             End If
             Dim ind = MainForm.acquisition.CHList(i).board_number
 
@@ -612,10 +631,17 @@ Public Class Settings
                 If r.Name = "TRINIB" & index Then
                     TRHoldOffAddress = r.Address
                 End If
+                If r.Name = "TRINIB_" & index Then
+                    TRHoldOffAddress = r.Address
+                End If
                 If r.Name = "PUP_" & index Then
                     PileUpAddress = r.Address
                 End If
                 If r.Name = "RUN_" & index Then
+                    RunAddress = r.Address
+                End If
+
+                If r.Name = "RUNCFG" Then
                     RunAddress = r.Address
                 End If
 
@@ -742,6 +768,24 @@ Public Class Settings
                 Else
                     MainForm.plog.TextBox1.AppendText("Run Set Register Error!" & vbCrLf)
                 End If
+
+            ElseIf Connection.ComClass._boardModel = communication.tModel.SCIDK Then
+                Connection.ComClass.SetRegister(RunAddress, 0, ind)
+                Connection.ComClass.SetRegister(PolarityAddress, 1 - MainForm.acquisition.CHList(i).polarity, ind)
+                Connection.ComClass.SetRegister(TriggerAddress, MainForm.acquisition.CHList(i).trigger_level, ind)
+                Connection.ComClass.SetRegister(TriggerKAddress, MainForm.acquisition.CHList(i).trigger_peaking / sampling_factor, ind)
+                Connection.ComClass.SetRegister(TriggerMAddress, (MainForm.acquisition.CHList(i).trigger_peaking + MainForm.acquisition.CHList(i).trigger_flat) / sampling_factor, ind)
+                Connection.ComClass.SetRegister(BaselineAddress, Math.Log(MainForm.acquisition.CHList(i).baseline_sample) / Math.Log(2), ind)
+                Connection.ComClass.SetRegister(BaseHoldAddress, MainForm.acquisition.CHList(i).baseline_inhibit / sampling_factor, ind)
+                Connection.ComClass.SetRegister(GainAddress, MainForm.acquisition.CHList(i).gain * 65536, ind)
+                Connection.ComClass.SetRegister(MAddress, (MainForm.acquisition.CHList(i).peaking_time + MainForm.acquisition.CHList(i).flat_top) / sampling_factor, ind)
+                Connection.ComClass.SetRegister(KAddress, MainForm.acquisition.CHList(i).peaking_time / sampling_factor, ind)
+                Connection.ComClass.SetRegister(DecayAddress, Math.Floor(256 / (Math.Exp(16.6 / MainForm.acquisition.CHList(i).decay_constant) - 1)), ind)
+                Connection.ComClass.SetRegister(SampleAddress, MainForm.acquisition.CHList(i).energy_sample / sampling_factor, ind)
+
+                Connection.ComClass.SetRegister(RunAddress, 1, ind)
+                n_ok += 1
+                MainForm.plog.TextBox1.AppendText(MainForm.acquisition.CHList(i).name & " parameters applied successfully!" & vbCrLf)
             End If
         Next
         If n_ok = MainForm.acquisition.CHList.Count Then
@@ -758,14 +802,14 @@ Public Class Settings
         Apply.Enabled = True
         Apply.BackColor = Color.DodgerBlue
         If Horizontal.Text <> "" Then
-            If Horizontal.Text < 12.5 Then
-                Horizontal.Text = 12.5
+            If Horizontal.Text < sampling_factor Then
+                Horizontal.Text = Math.Round(sampling_factor + 0.05, 1)
             End If
             If Horizontal.Text > 65535 Then
                 Horizontal.Text = 65535
             End If
-            Dim dec = Math.Round(Horizontal.Text / 12.5)
-            Horizontal.Text = dec * 1000 / 80
+            Dim dec = Math.Round(Horizontal.Text / sampling_factor)
+            Horizontal.Text = Math.Round(dec * 1000 / 80 + 0.05, 1)
         End If
 
     End Sub
@@ -853,6 +897,10 @@ Public Class Settings
     End Sub
 
     Private Sub Panel3_Paint(sender As Object, e As PaintEventArgs) Handles Panel3.Paint
+
+    End Sub
+
+    Private Sub Panel2_Paint(sender As Object, e As PaintEventArgs) Handles Panel2.Paint
 
     End Sub
 End Class

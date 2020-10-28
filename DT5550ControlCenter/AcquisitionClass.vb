@@ -177,6 +177,34 @@
                 Me.baseline_sample = 256
                 spectra_checked = False
                 scope_checked = False
+            ElseIf board_type = communication.tModel.SCIDK Then
+                Me.name = name
+                Me.id = id
+                Me.id = ch_id
+                Me.ch_id = ch_id
+                Me.board_number = board_number
+                Me.x_position = x
+                Me.y_position = y
+                Me.polarity = signal_polarity.POSITIVE
+                Me.offset = 0
+                Me.trigger_level = 25
+                Me.trigger_peaking = 100
+                Me.trigger_flat = 120
+                Me.trigger_inhibit = 1000
+                Me.energy_filter = energy_filter_mode.TRAPEZOIDAL
+                Me.decay_constant = 50000
+                Me.peaking_time = 1300
+                Me.flat_top = 100
+                Me.energy_sample = 1370
+                Me.gain = 0.5
+                Me.integration_time = 0
+                Me.pre_gate = 200
+                Me.pileup_enable = True
+                Me.pileup_time = 1000
+                Me.baseline_inhibit = 2500
+                Me.baseline_sample = 256
+                spectra_checked = False
+                scope_checked = False
             End If
         End Sub
 
@@ -221,6 +249,25 @@
                 Next
             Next
             currentMAP = New MAP(2 * nBoard, 16, nch * nBoard)
+        ElseIf board_type = communication.tModel.SCIDK Then
+
+            General_settings.SignalOffset = 0
+            General_settings.TriggerMode = trigger_mode.THRESHOLD
+            General_settings.TriggerSource = trigger_source.INTERNAL
+            General_settings.Sampling = sampling_method.COMMON
+            General_settings.TriggerDelay = 0
+            General_settings.TriggerSourceOscilloscope = trigger_source.FREE
+            General_settings.TriggerChannelOscilloscope = 0
+            General_settings.TriggerOscilloscopeEdges = edge.RISING
+            General_settings.TriggerOscilloscopeLevel = 2200
+            General_settings.OscilloscopeDecimator = 1
+            General_settings.OscilloscopePreTrigger = 20
+            For i = 0 To nch - 1
+
+                Dim ch = New Channel("CHANNEL " + (i + 1).ToString, i + 1, i + 1, i, 0, board_type, 1)
+                CHList.Add(ch)
+            Next
+            currentMAP = New MAP(1, 2, nch)
         End If
 
     End Sub

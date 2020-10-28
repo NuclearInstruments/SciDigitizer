@@ -68,6 +68,10 @@ Public Class pImmediate
         ' neccessary to display the label
         Dim heatMapSeries
         If immediateCumulative = True Then
+            Dim fsize = 0
+            If r >= 2 And c >= 2 Then
+                fsize = 0.05
+            End If
             heatMapSeries = New HeatMapSeries() With {
             .X0 = 0,
             .X1 = c - 1,
@@ -76,7 +80,7 @@ Public Class pImmediate
             .XAxisKey = "pxb",
             .YAxisKey = "pxl",
             .RenderMethod = HeatMapRenderMethod.Rectangles,
-            .LabelFontSize = 0.05,
+            .LabelFontSize = fsize,
             .Data = data
         }
         Else
@@ -103,6 +107,9 @@ Public Class pImmediate
     End Sub
 
     Private Sub Timer1_Tick(sender As Object, e As EventArgs) Handles Timer1.Tick
+        If Connection.ComClass._boardModel = communication.tModel.SCIDK Then
+            Exit Sub
+        End If
         Timer1.Enabled = False
         Dim tempdata() As Double
         Dim scale As Double = 1
@@ -156,5 +163,7 @@ Public Class pImmediate
         Timer1.Enabled = True
     End Sub
 
+    Private Sub plot1_Click(sender As Object, e As EventArgs) Handles plot1.Click
 
+    End Sub
 End Class

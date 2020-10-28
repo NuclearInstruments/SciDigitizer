@@ -235,6 +235,24 @@ Public Class Connection
         End If
     End Sub
 
+    Public Sub CreateDeviceListSciDK()
+
+        DeviceListSciDK.Items.Clear()
+        Dim listofdev As String = ""
+        Dim countdev As New Integer
+
+        ComClass.ListDevices(communication.tConnectionMode.USB, communication.tModel.SCIDK, listofdev, countdev)
+        If listofdev <> "" Then
+
+            Dim dev_sn = listofdev.Split(";")
+
+            For i = 0 To countdev - 1
+                DeviceListSciDK.Items.Add(dev_sn(i))
+            Next
+            DeviceListSciDK.SelectedIndex = 0
+        End If
+    End Sub
+
     Private Sub Firmware_selection_SelectedIndexChanged(sender As Object, e As EventArgs) Handles Firmware_selection.SelectedIndexChanged
 
         If Firmware_selection.SelectedIndex = 1 Then
@@ -338,14 +356,50 @@ Public Class Connection
         End If
     End Sub
 
+    Private Sub TabControl1_SelectedIndexChanged(sender As Object, e As EventArgs) Handles TabControl1.SelectedIndexChanged
+        If TabControl1.SelectedIndex = 2 Then
+            CreateDeviceListSciDK()
+        End If
+    End Sub
 
-    'Private Sub DataGridView1_CurrentCellDirtyStateChanged(sender As Object, e As EventArgs) Handles DataGridView1.CurrentCellChanged
-    '    Dim i = DataGridView1.CurrentRow.Index
-    '    If DataGridView1.Rows(i).Cells("ConnectionType").Value = "USB" Or DataGridView1.Rows(i).Cells("BoardType").Value = "Baseboard" Then
-    '        Connect_R5560.Enabled = False
-    '    ElseIf DataGridView1.Rows(i).Cells("ConnectionType").Value = "Ethernet" And DataGridView1.Rows(i).Cells("BoardType").Value = "Single DAQ" Then
-    '        Connect_R5560.Enabled = True
-    '    End If
-    'End Sub
+    Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
+        CreateDeviceListSciDK()
+    End Sub
+
+    Private Sub ConnectSciDK_Click(sender As Object, e As EventArgs) Handles ConnectSciDK.Click
+        selected_board = communication.tModel.SCIDK
+        ComClass._nBoard = 1
+        ComClass._n_ch = 2
+        ComClass._n_ch_oscilloscope = 2
+        ComClass._n_oscilloscope = 1
+        ComClass.StartConnection(1, selected_board)
+
+
+        If DeviceListSciDK.Items.Count = 0 Then
+
+            MsgBox("No devices connected. Please check cable connections", MsgBoxStyle.OkOnly + MsgBoxStyle.Critical)
+            Exit Sub
+        End If
+
+
+        Dim r As New communication.tError
+        r = ComClass.Connect(selected_connection, selected_board, DeviceListSciDK.Text, 0)
+        Jsonfile = My.Application.Info.DirectoryPath & "\RegisterFileSCIDK_MCA.json"
+
+        ' My.Settings.SN = IP.Text
+        My.Settings.Save()
+
+        If r = communication.tError.OK Then
+            MainForm.Show()
+            Me.Hide()
+        ElseIf r = communication.tError.ALREADY_CONNECTED Then
+            ComClass.GetMessage(r)
+            Me.Hide()
+        Else
+            ComClass.GetMessage(r)
+        End If
+    End Sub
+
+
 
 End Class

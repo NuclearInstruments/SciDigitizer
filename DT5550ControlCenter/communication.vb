@@ -1,4 +1,6 @@
-﻿Public Class communication
+﻿Imports System.Runtime.InteropServices
+
+Public Class communication
 
     Public Enum tConnectionMode
         USB = 0
@@ -11,6 +13,7 @@
         V2495 = 0
         DT5550 = 1
         R5560 = 2
+        SCIDK = 3
     End Enum
 
     Public Enum tError
@@ -47,6 +50,7 @@
     Private V2495Handle As UInt32
     Private DT5550Handle As New IntPtr
     Private R5560Handle As New List(Of IntPtr)
+    Private SCIDKHandle As New IntPtr
 
     Dim mtx As New Threading.Mutex
 
@@ -66,6 +70,8 @@
             modelcode = tModel.DT5550
         ElseIf model = "R5560" Then
             modelcode = tModel.R5560
+        ElseIf model = "SCIDK" Then
+            modelcode = tModel.SCIDK
         End If
         If modelcode = _boardModel Then
             Return True
@@ -168,6 +174,30 @@
                     Case tConnectionMode.VME
                         Return tError.ERROR_GENERIC
                 End Select
+            Case tModel.SCIDK
+
+                Select Case ConnectionMode
+                    Case tConnectionMode.USB
+
+                        mtx.WaitOne()
+                        Dim SCIDK_Handle As IntPtr
+                        SCIDK_Handle = Marshal.AllocHGlobal(1000)
+                        Dim ierror = SCIDK_ConnectUSB(param0, SCIDK_Handle)
+                        mtx.ReleaseMutex()
+                        Dim error_t = IErrorDT5550ToNETError(ierror)
+                        If error_t = tError.OK Then
+                            SCIDKHandle = SCIDK_Handle
+                            _boardModel = model
+                            _isconnected(ind) = True
+                        Else
+                            _isconnected(ind) = False
+                        End If
+                        Return error_t
+                    Case tConnectionMode.ETHERNET
+                    Case tConnectionMode.ETHERNET2
+                    Case tConnectionMode.VME
+                        Return tError.ERROR_GENERIC
+                End Select
             Case Else
                 Return tError.UNSUPPORTED_DEVICE
         End Select
@@ -205,6 +235,19 @@
                 Next
 
                 Return tError.OK
+
+            Case tModel.SCIDK
+                If _isconnected(0) = False Then
+                    Return tError.ALREADY_DISCONNECTED
+                End If
+                mtx.WaitOne()
+                Dim ierror = USB2_CloseConnection(SCIDKHandle)
+                If ierror = 0 Then
+                    _isconnected(0) = False
+                    Return tError.OK
+                Else
+                    Return tError.ALREADY_DISCONNECTED
+                End If
             Case Else
                 Return tError.UNSUPPORTED_DEVICE
         End Select
@@ -227,6 +270,21 @@
                         Return error_t
                     Case tConnectionMode.ETHERNET
 
+
+                    Case tConnectionMode.VME
+                End Select
+
+            Case tModel.SCIDK
+
+
+                Select Case ConnectionMode
+                    Case tConnectionMode.USB
+                        mtx.WaitOne()
+                        Dim ierror = USB2_ListDevices(ListOfDevice, "SCIDK", DeviceCount)
+                        mtx.ReleaseMutex()
+                        Dim error_t = IErrorDT5550ToNETError(ierror)
+                        Return error_t
+                    Case tConnectionMode.ETHERNET
 
                     Case tConnectionMode.VME
                 End Select
@@ -387,6 +445,18 @@
                 Else
                     Return tError.ERROR_FPGA
                 End If
+            Case tModel.SCIDK
+                If _isconnected(0) = False Then
+                    Return tError.NOT_CONNECTED
+                End If
+                mtx.WaitOne()
+                Dim ierror = USB2_WriteReg(value, address, SCIDKHandle)
+                mtx.ReleaseMutex()
+                If ierror < &HFFFFFFFF& Then
+                    Return ierror
+                Else
+                    Return tError.ERROR_FPGA
+                End If
             Case Else
                 Return tError.UNSUPPORTED_DEVICE
         End Select
@@ -442,6 +512,18 @@
                 End If
                 mtx.WaitOne()
                 Dim ierror = R5560_ReadReg(value, address, R5560Handle(Handle_indx))
+                mtx.ReleaseMutex()
+                If ierror < &HFFFFFFFF& Then
+                    Return ierror
+                Else
+                    Return tError.ERROR_FPGA
+                End If
+            Case tModel.SCIDK
+                If _isconnected(0) = False Then
+                    Return tError.NOT_CONNECTED
+                End If
+                mtx.WaitOne()
+                Dim ierror = USB2_ReadReg(value, address, SCIDKHandle)
                 mtx.ReleaseMutex()
                 If ierror < &HFFFFFFFF& Then
                     Return ierror
@@ -567,7 +649,7 @@
            ' Case tModel.V2495
             Case tModel.DT5550
                 If _isconnected(0) = False Then
-                    Return terror.NOT_CONNECTED
+                    Return tError.NOT_CONNECTED
                 End If
                 mtx.WaitOne()
                 Dim ierror = USB3_ReadData(value, lenght, address, bus_mode, timeout, DT5550Handle, read_data, valid_data)
@@ -576,20 +658,28 @@
                 Return _terror
             Case tModel.R5560
                 If _isconnected(Handle_indx) = False Then
-                    Return terror.NOT_CONNECTED
+                    Return tError.NOT_CONNECTED
                 End If
                 mtx.WaitOne()
                 Dim ierror = R5560_ReadData(value, lenght, address, R5560Handle(Handle_indx), read_data)
                 mtx.ReleaseMutex()
                 Dim _terror = IErrorDT5550ToNETError(ierror)
                 Return _terror
-
+            Case tModel.SCIDK
+                If _isconnected(0) = False Then
+                    Return tError.NOT_CONNECTED
+                End If
+                mtx.WaitOne()
+                Dim ierror = USB2_ReadData(value, lenght, address, bus_mode, timeout, SCIDKHandle, read_data, valid_data)
+                mtx.ReleaseMutex()
+                Dim _terror = IErrorDT5550ToNETError(ierror)
+                Return _terror
             Case Else
                 Return tError.UNSUPPORTED_DEVICE
         End Select
     End Function
 
-    Public Function ReadDataFifo(address As UInt32, ByRef value() As UInt32, ByRef lenght As Integer, ByVal address_status As Integer, ByVal bus_mode As Integer, timeout_ms As Integer, ByRef read_data As UInt32, ByRef valid_data As UInt32, ByVal Handle_indx As Integer) As tError
+    Public Function ReadDataFifo(address As UInt32, ByRef value() As UInt32, ByRef lenght As Integer, ByVal address_status As Integer, ByVal bus_mode As Integer, timeout_ms As Integer, ByRef read_data As UInt32, ByRef valid_data As UInt32, ByVal Handle_indx As Integer, addressValidWords As Integer) As tError
 
         Select Case _boardModel
            ' Case tModel.V2495
@@ -597,13 +687,23 @@
 
             Case tModel.R5560
                 If _isconnected(Handle_indx) = False Then
-                    Return terror.NOT_CONNECTED
+                    Return tError.NOT_CONNECTED
                 End If
                 mtx.WaitOne()
                 Dim ierror = R5560_ReadFifo(value, lenght, address, address_status, bus_mode, timeout_ms, R5560Handle(Handle_indx), read_data)
                 mtx.ReleaseMutex()
                 Dim _terror = IErrorDT5550ToNETError(ierror)
                 Return _terror
+            Case tModel.SCIDK
+                Dim rrw As UInt32
+                USB2_ReadReg(rrw, addressValidWords, SCIDKHandle)
+                If rrw > 0 Then
+                    rrw = IIf(rrw > lenght, lenght, rrw)
+                    ReadData(address, value, rrw, bus_mode, timeout_ms, read_data, valid_data, SCIDKHandle)
+                Else
+                    read_data = 0
+                    valid_data = 0
+                End If
 
             Case Else
                 Return tError.UNSUPPORTED_DEVICE

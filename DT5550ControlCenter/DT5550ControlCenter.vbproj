@@ -122,6 +122,7 @@
     <Compile Include="fit_win.vb">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Include="ImportDLL_niusb2.vb" />
     <Compile Include="ImportDLL_niusb3.vb" />
     <Compile Include="AcquisitionClass.vb" />
     <Compile Include="EEPROM Write Tool.Designer.vb">
