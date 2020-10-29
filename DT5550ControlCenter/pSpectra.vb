@@ -163,7 +163,7 @@ Public Class pSpectra
                     If status_error = 0 And status <> 3 Then
 
                         If Connection.ComClass.ReadDataFifo(addressData, data, lenght, addressStatus, 1, 100, read_data, valid_data, cp, addressValidWords) = 0 Then
-
+                            Console.WriteLine(valid_data)
                             For i = 0 To read_data - 1
                                 PCC(cp).Enqueue(data(i))
                             Next
@@ -900,9 +900,9 @@ Public Class pSpectra
                         ev.energy(0) = 0
                         ev.valid = False
                     End If
-                    MutexSpe.WaitOne()
-                    If (trigger_id < 32) Then
 
+                    If (trigger_id < 32) Then
+                        MutexSpe.WaitOne()
                         spectra(trigger_id + (cp * _n_ch), ev.energy(0)) += 1
                         MutexSpe.ReleaseMutex()
                         MutexCumulative.WaitOne()
@@ -911,7 +911,7 @@ Public Class pSpectra
                         T = ev.timecode
                         MutexCumulative.ReleaseMutex()
                     Else
-                        MutexSpe.WaitOne()
+
                     End If
 
                     If fileEnable Then
@@ -947,7 +947,7 @@ Public Class pSpectra
 
 
     Public Sub UnpackDataPacketS(ByRef data As Queue(Of UInt32), cp As Integer)
-
+        Static last_timecodes() As Int64 = {0, 0}
         Dim packetsize = 5
         Dim ev As Evento
         Dim insync = 0
@@ -1001,18 +1001,27 @@ Public Class pSpectra
                         ev.energy(0) = 0
                         ev.valid = False
                     End If
-                    MutexSpe.WaitOne()
-                    If (trigger_id < 32) Then
 
-                        spectra(trigger_id + (cp * _n_ch), ev.energy(0)) += 1
-                        MutexSpe.ReleaseMutex()
-                        MutexCumulative.WaitOne()
-                        realtimeimage(trigger_id + (cp * _n_ch)) = ev.energy(0)
-                        integralimage(trigger_id + (cp * _n_ch)) += ev.energy(0)
-                        T = ev.timecode
-                        MutexCumulative.ReleaseMutex()
-                    Else
-                        MutexSpe.WaitOne()
+                    If (trigger_id < 2) Then
+                        Dim b = MainForm.acquisition.CHList(trigger_id).pileup_enable
+                        Dim t = MainForm.acquisition.CHList(trigger_id).pileup_time / (1000000000 / freq)
+                        Dim pileup As Boolean = False
+                        If b Then
+                            If ev.timecode - last_timecodes(trigger_id) < t Then
+                                pileup = True
+                            End If
+                        End If
+                        last_timecodes(trigger_id) = ev.timecode
+                        If pileup = False Then
+                            MutexSpe.WaitOne()
+                            spectra(trigger_id + (cp * _n_ch), ev.energy(0)) += 1
+                            MutexSpe.ReleaseMutex()
+                            MutexCumulative.WaitOne()
+                            realtimeimage(trigger_id + (cp * _n_ch)) = ev.energy(0)
+                            integralimage(trigger_id + (cp * _n_ch)) += ev.energy(0)
+                            t = ev.timecode
+                            MutexCumulative.ReleaseMutex()
+                        End If
                     End If
 
                     If fileEnable Then

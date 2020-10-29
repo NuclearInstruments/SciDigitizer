@@ -697,6 +697,7 @@ Public Class communication
             Case tModel.SCIDK
                 Dim rrw As UInt32
                 USB2_ReadReg(rrw, addressValidWords, SCIDKHandle)
+
                 If rrw > 0 Then
                     rrw = IIf(rrw > lenght, lenght, rrw)
                     ReadData(address, value, rrw, bus_mode, timeout_ms, read_data, valid_data, SCIDKHandle)

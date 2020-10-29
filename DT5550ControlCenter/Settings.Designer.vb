@@ -27,6 +27,7 @@ Partial Class Settings
         Me.Panel5 = New System.Windows.Forms.Panel()
         Me.GroupBox2 = New System.Windows.Forms.GroupBox()
         Me.Panel4 = New System.Windows.Forms.Panel()
+        Me.Horizontal = New System.Windows.Forms.NumericUpDown()
         Me.Label10 = New System.Windows.Forms.Label()
         Me.TriggerLevelOscilloscope = New System.Windows.Forms.TextBox()
         Me.TriggerSourceOscilloscope = New System.Windows.Forms.ComboBox()
@@ -35,7 +36,6 @@ Partial Class Settings
         Me.TriggerEdge = New System.Windows.Forms.ComboBox()
         Me.Label12 = New System.Windows.Forms.Label()
         Me.Label11 = New System.Windows.Forms.Label()
-        Me.Horizontal = New System.Windows.Forms.TextBox()
         Me.Label14 = New System.Windows.Forms.Label()
         Me.GroupBox1 = New System.Windows.Forms.GroupBox()
         Me.Panel2 = New System.Windows.Forms.Panel()
@@ -62,6 +62,7 @@ Partial Class Settings
         Me.Panel5.SuspendLayout()
         Me.GroupBox2.SuspendLayout()
         Me.Panel4.SuspendLayout()
+        CType(Me.Horizontal, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.GroupBox1.SuspendLayout()
         Me.Panel2.SuspendLayout()
         CType(Me.SignalOffset, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -124,6 +125,7 @@ Partial Class Settings
         'Panel4
         '
         Me.Panel4.AutoScroll = True
+        Me.Panel4.Controls.Add(Me.Horizontal)
         Me.Panel4.Controls.Add(Me.Label10)
         Me.Panel4.Controls.Add(Me.TriggerLevelOscilloscope)
         Me.Panel4.Controls.Add(Me.TriggerSourceOscilloscope)
@@ -132,13 +134,24 @@ Partial Class Settings
         Me.Panel4.Controls.Add(Me.TriggerEdge)
         Me.Panel4.Controls.Add(Me.Label12)
         Me.Panel4.Controls.Add(Me.Label11)
-        Me.Panel4.Controls.Add(Me.Horizontal)
         Me.Panel4.Controls.Add(Me.Label14)
         Me.Panel4.Dock = System.Windows.Forms.DockStyle.Fill
         Me.Panel4.Location = New System.Drawing.Point(3, 16)
         Me.Panel4.Name = "Panel4"
         Me.Panel4.Size = New System.Drawing.Size(1024, 84)
         Me.Panel4.TabIndex = 60
+        '
+        'Horizontal
+        '
+        Me.Horizontal.BackColor = System.Drawing.Color.White
+        Me.Horizontal.DecimalPlaces = 1
+        Me.Horizontal.Increment = New Decimal(New Integer() {125, 0, 0, 65536})
+        Me.Horizontal.Location = New System.Drawing.Point(106, 44)
+        Me.Horizontal.Maximum = New Decimal(New Integer() {10000, 0, 0, 0})
+        Me.Horizontal.Name = "Horizontal"
+        Me.Horizontal.Size = New System.Drawing.Size(96, 20)
+        Me.Horizontal.TabIndex = 60
+        Me.Horizontal.Value = New Decimal(New Integer() {125, 0, 0, 65536})
         '
         'Label10
         '
@@ -219,16 +232,6 @@ Partial Class Settings
         Me.Label11.Size = New System.Drawing.Size(93, 13)
         Me.Label11.TabIndex = 49
         Me.Label11.Text = "Horizontal (ns/div)"
-        '
-        'Horizontal
-        '
-        Me.Horizontal.BackColor = System.Drawing.Color.White
-        Me.Horizontal.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
-        Me.Horizontal.Location = New System.Drawing.Point(106, 44)
-        Me.Horizontal.Name = "Horizontal"
-        Me.Horizontal.Size = New System.Drawing.Size(96, 20)
-        Me.Horizontal.TabIndex = 50
-        Me.Horizontal.Text = "12.5"
         '
         'Label14
         '
@@ -468,6 +471,7 @@ Partial Class Settings
         Me.GroupBox2.ResumeLayout(False)
         Me.Panel4.ResumeLayout(False)
         Me.Panel4.PerformLayout()
+        CType(Me.Horizontal, System.ComponentModel.ISupportInitialize).EndInit()
         Me.GroupBox1.ResumeLayout(False)
         Me.Panel2.ResumeLayout(False)
         CType(Me.SignalOffset, System.ComponentModel.ISupportInitialize).EndInit()
@@ -495,7 +499,6 @@ Partial Class Settings
     Friend WithEvents TriggerEdge As ComboBox
     Friend WithEvents Label12 As Label
     Friend WithEvents Label11 As Label
-    Friend WithEvents Horizontal As TextBox
     Friend WithEvents Label14 As Label
     Friend WithEvents GroupBox1 As GroupBox
     Friend WithEvents Panel2 As Panel
@@ -514,4 +517,5 @@ Partial Class Settings
     Friend WithEvents SignalOffset As NumericUpDown
     Friend WithEvents Label1 As Label
     Friend WithEvents Button1 As Button
+    Friend WithEvents Horizontal As NumericUpDown
 End Class

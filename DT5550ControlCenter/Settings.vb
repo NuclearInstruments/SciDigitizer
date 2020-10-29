@@ -9,6 +9,12 @@ Public Class Settings
     Dim l As Integer = 814
     Dim n As Integer
     Dim sampling_factor As Double
+    Dim AnalogOffsetControl As NumericUpDown
+
+    Public Sub UpdateButtonStatusApply()
+        Apply.Enabled = True
+        Apply.BackColor = Color.DodgerBlue
+    End Sub
     Private Sub Settings_Load(sender As Object, e As EventArgs) Handles MyBase.Load
 
         If Connection.ComClass._boardModel = communication.tModel.DT5550 Then
@@ -18,7 +24,7 @@ Public Class Settings
         ElseIf Connection.ComClass._boardModel = communication.tModel.SCIDK Then
             sampling_factor = 1000 / 60
         End If
-
+        Horizontal.Increment = sampling_factor
 
         If Connection.ComClass._boardModel = communication.tModel.DT5550 Then
 
@@ -59,8 +65,28 @@ Public Class Settings
             TriggerSourceOscilloscope.Items.Add("Free Running")
 
         ElseIf Connection.ComClass._boardModel = communication.tModel.SCIDK Then
-            GroupBox1.SetBounds(0, 0, 0, 0)
-            TriggerSource.Items.Clear()
+            Panel2.Controls.Clear()
+            Dim lbl As New Label
+            lbl.Top = 10
+            lbl.Left = 10
+            lbl.Text = "Analog OFFSET"
+            AnalogOffsetControl = New NumericUpDown
+            AnalogOffsetControl.Top = 10
+            AnalogOffsetControl.Left = lbl.Width + lbl.Left + 15
+            AnalogOffsetControl.Increment = 1
+            AnalogOffsetControl.DecimalPlaces = 0
+            AnalogOffsetControl.Maximum = 4095
+            AnalogOffsetControl.Minimum = 0
+            AnalogOffsetControl.Value = 2048
+            AddHandler AnalogOffsetControl.Validated, AddressOf UpdateButtonStatusApply
+            Apply.Enabled = True
+            Apply.BackColor = Color.DodgerBlue
+
+            Panel2.Controls.Add(lbl)
+            Panel2.Controls.Add(AnalogOffsetControl)
+
+            GroupBox1.Height = 65
+            TableLayoutPanel1.RowStyles(0).Height = 10 + GroupBox1.Height + GroupBox2.Height
             TriggerSource.Items.Add("Internal")
             TriggerSource.Items.Add("External")
 
@@ -112,7 +138,7 @@ Public Class Settings
 
         DataGridView1.Columns.Add("Gain", "Gain")
 
-        If Connection.ComClass._boardModel = communication.tModel.DT5550 Then
+        If Connection.ComClass._boardModel = communication.tModel.DT5550 Or Connection.ComClass._boardModel = communication.tModel.SCIDK Then
             Dim pileup As New DataGridViewCheckBoxColumn
             pileup.HeaderText = "Pileup Rejection"
             pileup.Name = "Pileup Rejection"
@@ -225,6 +251,10 @@ Public Class Settings
                     DataGridView1.Rows(i).Cells("Pileup Rejection Time").ReadOnly = True
                 End If
 
+            End If
+            If Connection.ComClass._boardModel = communication.tModel.SCIDK Then
+                DataGridView1.Rows(i).Cells("Pileup Rejection").Value = MainForm.acquisition.CHList(i).pileup_enable
+                DataGridView1.Rows(i).Cells("Pileup Rejection Time").Value = MainForm.acquisition.CHList(i).pileup_time
             End If
             If Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.SCIDK Then
                 DataGridView1.Rows(i).Cells("Trigger Peaking").Value = MainForm.acquisition.CHList(i).trigger_peaking
@@ -396,6 +426,9 @@ Public Class Settings
         MainForm.acquisition.General_settings.OscilloscopeDecimator = Math.Round(Horizontal.Text / sampling_factor)
         MainForm.acquisition.General_settings.TriggerOscilloscopeLevel = TriggerLevelOscilloscope.Text
 
+        If Connection.ComClass._boardModel = communication.tModel.SCIDK Then
+            MainForm.acquisition.General_settings.SignalOffset = AnalogOffsetControl.Value
+        End If
         For i = 0 To DataGridView1.Rows.Count - 1
             If DataGridView1.Rows(i).Cells("Polarity").Value = "Positive" Then
                 MainForm.acquisition.CHList(i).polarity = signal_polarity.POSITIVE
@@ -406,6 +439,15 @@ Public Class Settings
 
             If Connection.ComClass._boardModel = communication.tModel.DT5550 Then
                 MainForm.acquisition.CHList(i).trigger_inhibit = DataGridView1.Rows(i).Cells("Trigger Hold-Off").Value
+                If DataGridView1.Rows(i).Cells("Pileup Rejection").Value Then
+                    MainForm.acquisition.CHList(i).pileup_enable = True
+                    MainForm.acquisition.CHList(i).pileup_time = DataGridView1.Rows(i).Cells("Pileup Rejection Time").Value
+                Else
+                    MainForm.acquisition.CHList(i).pileup_enable = False
+                End If
+            End If
+
+            If Connection.ComClass._boardModel = communication.tModel.SCIDK Then
                 If DataGridView1.Rows(i).Cells("Pileup Rejection").Value Then
                     MainForm.acquisition.CHList(i).pileup_enable = True
                     MainForm.acquisition.CHList(i).pileup_time = DataGridView1.Rows(i).Cells("Pileup Rejection Time").Value
@@ -569,8 +611,14 @@ Public Class Settings
             Dim TriggerKAddress As New UInt32
             Dim TriggerMAddress As New UInt32
             Dim RunAddress As New UInt32
+            Dim AnalogOffset As New UInt32
 
             For Each r In MainForm.CurrentRegisterList
+
+                If r.Name = "ANALOG_OFFSET" Then
+                    AnalogOffset = r.Address
+                End If
+
                 If r.Name = "POL_" & index Then
                     PolarityAddress = r.Address
                 End If
@@ -770,6 +818,9 @@ Public Class Settings
                 End If
 
             ElseIf Connection.ComClass._boardModel = communication.tModel.SCIDK Then
+
+                Connection.ComClass.SetRegister(AnalogOffset, MainForm.acquisition.General_settings.SignalOffset, ind)
+
                 Connection.ComClass.SetRegister(RunAddress, 0, ind)
                 Connection.ComClass.SetRegister(PolarityAddress, 1 - MainForm.acquisition.CHList(i).polarity, ind)
                 Connection.ComClass.SetRegister(TriggerAddress, MainForm.acquisition.CHList(i).trigger_level, ind)
@@ -901,6 +952,14 @@ Public Class Settings
     End Sub
 
     Private Sub Panel2_Paint(sender As Object, e As PaintEventArgs) Handles Panel2.Paint
+
+    End Sub
+
+    Private Sub Horizontal_ValueChanged(sender As Object, e As EventArgs) Handles Horizontal.ValueChanged
+
+    End Sub
+
+    Private Sub Impedance_SelectedIndexChanged(sender As Object, e As EventArgs) Handles Impedance.SelectedIndexChanged
 
     End Sub
 End Class

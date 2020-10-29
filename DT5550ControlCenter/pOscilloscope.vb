@@ -1062,7 +1062,7 @@ Public Class pOscilloscope
                         If EnabledChannel(k) Then
                             Dim A(nsamples), D0(nsamples), D1(nsamples), D2(nsamples), D3(nsamples) As Single
                             For j = 0 To nsamples - 1
-                                A(j) = data(j + nsamples * (EnabledChannel_id(k) - 1)) And 65535
+                                A(j) = data(j + nsamples * (EnabledChannel_id(k) - 1) * 2) And 65535
                             Next
                             MutexFile.WaitOne()
                             objRawWriter.WriteLine(totalACQ & ";" & k + 1 & ";" & nsamples & ";" & 1 & ";" & String.Join(";", A))
