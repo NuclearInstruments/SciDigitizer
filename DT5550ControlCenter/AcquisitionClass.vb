@@ -86,6 +86,13 @@
 
     End Structure
 
+    Structure AFESettings
+        Public Termination As Boolean
+        Public Division As Boolean
+        Public Offset As Integer
+        Public Gain As Double
+    End Structure
+
     Public Class Channel
 
         Enum energy_filter_mode
@@ -119,6 +126,7 @@
         Public baseline_sample As Integer
         Public spectra_checked As Boolean
         Public scope_checked As Boolean
+        Public Afe_set As AFESettings
 
         Public Sub New(name As String, id As Integer, ch_id As Integer, x As Integer, y As Integer, board_type As communication.tModel, board_number As Integer)
 
@@ -150,7 +158,7 @@
                 Me.baseline_sample = 256
                 spectra_checked = False
                 scope_checked = False
-            ElseIf board_type = communication.tModel.R5560 Then
+            ElseIf board_type = communication.tModel.R5560 Or board_type = communication.tModel.DT5560SE Then
                 Me.name = name
                 Me.id = id
                 Me.ch_id = ch_id
@@ -175,6 +183,10 @@
                 Me.pileup_time = 0
                 Me.baseline_inhibit = 8000
                 Me.baseline_sample = 256
+                Me.Afe_set.Termination = True
+                Me.Afe_set.Division = True
+                Me.Afe_set.Offset = 0
+                Me.Afe_set.Gain = 1
                 spectra_checked = False
                 scope_checked = False
             ElseIf board_type = communication.tModel.SCIDK Then
@@ -213,7 +225,6 @@
     Public Sub New(nch As Integer, board_type As communication.tModel, nBoard As Integer)
 
         If board_type = communication.tModel.DT5550 Then
-
             General_settings.AFEImpedance = True
             General_settings.AFEOffset = 0
             General_settings.SignalOffset = 0
@@ -249,6 +260,20 @@
                 Next
             Next
             currentMAP = New MAP(2 * nBoard, 16, nch * nBoard)
+        ElseIf board_type = communication.tModel.DT5560SE Then
+            General_settings.TriggerSourceOscilloscope = trigger_source.FREE
+            General_settings.TriggerChannelOscilloscope = 0
+            General_settings.TriggerOscilloscopeEdges = edge.RISING
+            General_settings.TriggerOscilloscopeLevel = 10000
+            General_settings.OscilloscopeDecimator = 1
+            General_settings.OscilloscopePreTrigger = 20
+
+            For i = 0 To nch - 1
+                Dim ch = New Channel("CHANNEL " + (i + 1).ToString, i + 1, i + 1, x, y, board_type, 1)
+                CHList.Add(ch)
+            Next
+            currentMAP = New MAP(2, 16, nch)
+
         ElseIf board_type = communication.tModel.SCIDK Then
 
             General_settings.SignalOffset = 0

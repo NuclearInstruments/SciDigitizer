@@ -70,6 +70,8 @@ Public Class MainForm
             Ts = 1000 / 80
         ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Then
             Ts = 1000 / 125
+        ElseIf Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
+            Ts = 1000 / 80
         ElseIf Connection.ComClass._boardModel = communication.tModel.SCIDK Then
             Ts = 1000 / 60
         End If
@@ -155,8 +157,9 @@ Public Class MainForm
                     End If
 
 
-                    If Connection.ComClass._boardModel = communication.tModel.R5560 Or 
-                        Connection.ComClass._boardModel = communication.tModel.SCIDK Then
+                    If Connection.ComClass._boardModel = communication.tModel.R5560 Or
+                        Connection.ComClass._boardModel = communication.tModel.SCIDK Or
+                        Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
                         If r.Name = "RUN" Then
                             spect.addressRUN = r.Address
                         End If
@@ -262,7 +265,8 @@ Public Class MainForm
                     End If
 
                     If Connection.ComClass._boardModel = communication.tModel.R5560 Or
-    Connection.ComClass._boardModel = communication.tModel.SCIDK Then
+                       Connection.ComClass._boardModel = communication.tModel.SCIDK Or
+                       Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
                         If r.Name = "RUN" Then
                             spect.addressRUN = r.Address
                         End If
@@ -506,7 +510,7 @@ Public Class MainForm
                     acquisition.General_settings.TriggerSourceOscilloscope = trigger_source.LEVEL
                     If Connection.ComClass._boardModel = communication.tModel.DT5550 Or Connection.ComClass._boardModel = communication.tModel.SCIDK Then
                         acquisition.General_settings.TriggerChannelOscilloscope = xmldoc.SelectSingleNode("Settings/Oscilloscope_Settings/Oscilloscope_Trigger_Source").InnerText.Replace("CHANNEL ", "") - 1
-                    ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Then
+                    ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
                         acquisition.General_settings.TriggerChannelOscilloscope = 0
                     End If
                 End If
@@ -540,7 +544,7 @@ Public Class MainForm
                             acquisition.CHList(k).baseline_sample = node.ChildNodes.Item(11).innertext
                         End If
 
-                    ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.SCIDK Then
+                    ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.SCIDK Or Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
                         acquisition.CHList(k).offset = node.ChildNodes.Item(1).innertext
                         acquisition.CHList(k).trigger_level = node.ChildNodes.Item(2).innertext
                         acquisition.CHList(k).trigger_peaking = node.ChildNodes.Item(3).innertext
@@ -552,6 +556,11 @@ Public Class MainForm
                         acquisition.CHList(k).gain = node.ChildNodes.Item(9).innertext
                         acquisition.CHList(k).baseline_inhibit = node.ChildNodes.Item(10).innertext
                         acquisition.CHList(k).baseline_sample = node.ChildNodes.Item(11).innertext
+                    ElseIf Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
+                        acquisition.CHList(k).Afe_set.Termination = node.ChildNodes.Item(12).innertext
+                        acquisition.CHList(k).Afe_set.Division = node.ChildNodes.Item(13).innertext
+                        acquisition.CHList(k).Afe_set.Offset = node.ChildNodes.Item(14).innertext
+                        acquisition.CHList(k).Afe_set.Gain = node.ChildNodes.Item(15).innertext
                     End If
 
 
@@ -623,7 +632,7 @@ Public Class MainForm
                         writer.WriteElementString("Pileup_Rejection_Time", sets.DataGridView1.Rows(i).Cells("Pileup Rejection Time").Value)
                         writer.WriteElementString("Baseline_Inhibit_Time", sets.DataGridView1.Rows(i).Cells("Baseline Inhibit Time").Value)
                         writer.WriteElementString("Baseline_Lenght", sets.DataGridView1.Rows(i).Cells("Baseline Lenght").Value)
-                    ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.SCIDK Then
+                    ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.SCIDK Or Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
                         writer.WriteElementString("Polarity", sets.DataGridView1.Rows(i).Cells("Polarity").Value)
                         writer.WriteElementString("Offset", sets.DataGridView1.Rows(i).Cells("Offset").Value)
                         writer.WriteElementString("Trigger_Level", sets.DataGridView1.Rows(i).Cells("Trigger Level").Value)
@@ -636,8 +645,20 @@ Public Class MainForm
                         writer.WriteElementString("Gain", sets.DataGridView1.Rows(i).Cells("Gain").Value)
                         writer.WriteElementString("Baseline_Inhibit_Time", sets.DataGridView1.Rows(i).Cells("Baseline Inhibit Time").Value)
                         writer.WriteElementString("Baseline_Lenght", sets.DataGridView1.Rows(i).Cells("Baseline Lenght").Value)
+                    ElseIf Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
+                        If i Mod 2 Then
+                            writer.WriteElementString("AFE_Termination", sets.DataGridView2.Rows(i).Cells("Termination").Value)
+                            writer.WriteElementString("AFE_Division", sets.DataGridView2.Rows(i).Cells("Division").Value)
+                            writer.WriteElementString("AFE_Offset", sets.DataGridView2.Rows(i).Cells("OffsetEven").Value)
+                            writer.WriteElementString("AFE_Gain", sets.DataGridView2.Rows(i).Cells("Gain").Value)
+                        Else
+                            writer.WriteElementString("AFE_Termination", sets.DataGridView2.Rows(i - 1).Cells("Termination").Value)
+                            writer.WriteElementString("AFE_Division", sets.DataGridView2.Rows(i - 1).Cells("Division").Value)
+                            writer.WriteElementString("AFE_Offset", sets.DataGridView2.Rows(i - 1).Cells("OffsetOdd").Value)
+                            writer.WriteElementString("AFE_Gain", sets.DataGridView2.Rows(i - 1).Cells("Gain").Value)
+                        End If
                     End If
-                    writer.WriteEndElement()
+                        writer.WriteEndElement()
                 Next
                 writer.WriteEndElement()
                 writer.WriteEndDocument()

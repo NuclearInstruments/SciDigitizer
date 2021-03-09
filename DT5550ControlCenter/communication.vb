@@ -1,4 +1,11 @@
-﻿Imports System.Runtime.InteropServices
+﻿Imports System.IO
+Imports System.IO.Ports
+Imports System.Net
+Imports System.Net.Security
+Imports System.Runtime.InteropServices
+Imports System.Security.Cryptography.X509Certificates
+Imports Newtonsoft.Json
+Imports System.Text
 
 Public Class communication
 
@@ -14,6 +21,7 @@ Public Class communication
         DT5550 = 1
         R5560 = 2
         SCIDK = 3
+        DT5560SE = 4
     End Enum
 
     Public Enum tError
@@ -50,6 +58,7 @@ Public Class communication
     Private V2495Handle As UInt32
     Private DT5550Handle As New IntPtr
     Private R5560Handle As New List(Of IntPtr)
+    Private DT5560SEHandle As New List(Of IntPtr)
     Private SCIDKHandle As New IntPtr
 
     Dim mtx As New Threading.Mutex
@@ -72,6 +81,8 @@ Public Class communication
             modelcode = tModel.R5560
         ElseIf model = "SCIDK" Then
             modelcode = tModel.SCIDK
+        ElseIf model = "DT5560" Then
+            modelcode = tModel.DT5560SE
         End If
         If modelcode = _boardModel Then
             Return True
@@ -88,6 +99,9 @@ Public Class communication
             _isconnected.Add(False)
             If model = tModel.R5560 Then
                 R5560Handle.Add(0)
+            End If
+            If model = tModel.DT5560SE Then
+                DT5560SEHandle.Add(0)
             End If
         Next
     End Sub
@@ -174,6 +188,32 @@ Public Class communication
                     Case tConnectionMode.VME
                         Return tError.ERROR_GENERIC
                 End Select
+            Case tModel.DT5560SE
+
+                Select Case ConnectionMode
+                    Case tConnectionMode.USB
+                    Case tConnectionMode.ETHERNET
+                        Return tError.ERROR_GENERIC
+                    Case tConnectionMode.ETHERNET2
+
+                        R5560_Init()
+                        mtx.WaitOne()
+                        Dim DT5560SE_Handle As IntPtr
+                        Dim ierror = R5560_ConnectDevice(param0, 8888, DT5560SE_Handle)
+                        mtx.ReleaseMutex()
+                        Dim error_t = IErrorDT5550ToNETError(ierror)
+                        If error_t = tError.OK Then
+                            DT5560SEHandle(ind) = DT5560SE_Handle
+                            _boardModel = model
+                            _isconnected(ind) = True
+                        Else
+                            _isconnected(ind) = False
+                        End If
+                        Return error_t
+
+                    Case tConnectionMode.VME
+                        Return tError.ERROR_GENERIC
+                End Select
             Case tModel.SCIDK
 
                 Select Case ConnectionMode
@@ -235,7 +275,14 @@ Public Class communication
                 Next
 
                 Return tError.OK
+            Case tModel.DT5560SE
+                mtx.WaitOne()
+                For r = 0 To DT5560SEHandle.Count - 1
+                    R5560_CloseConnection(DT5560SEHandle(r))
+                    _isconnected(r) = False
+                Next
 
+                Return tError.OK
             Case tModel.SCIDK
                 If _isconnected(0) = False Then
                     Return tError.ALREADY_DISCONNECTED
@@ -445,6 +492,18 @@ Public Class communication
                 Else
                     Return tError.ERROR_FPGA
                 End If
+            Case tModel.DT5560SE
+                If _isconnected(Handle_indx) = False Then
+                    Return tError.NOT_CONNECTED
+                End If
+                mtx.WaitOne()
+                Dim ierror = R5560_WriteReg(value, address, DT5560SEHandle(Handle_indx))
+                mtx.ReleaseMutex()
+                If ierror < &HFFFFFFFF& Then
+                    Return ierror
+                Else
+                    Return tError.ERROR_FPGA
+                End If
             Case tModel.SCIDK
                 If _isconnected(0) = False Then
                     Return tError.NOT_CONNECTED
@@ -512,6 +571,18 @@ Public Class communication
                 End If
                 mtx.WaitOne()
                 Dim ierror = R5560_ReadReg(value, address, R5560Handle(Handle_indx))
+                mtx.ReleaseMutex()
+                If ierror < &HFFFFFFFF& Then
+                    Return ierror
+                Else
+                    Return tError.ERROR_FPGA
+                End If
+            Case tModel.DT5560SE
+                If _isconnected(Handle_indx) = False Then
+                    Return tError.NOT_CONNECTED
+                End If
+                mtx.WaitOne()
+                Dim ierror = R5560_ReadReg(value, address, DT5560SEHandle(Handle_indx))
                 mtx.ReleaseMutex()
                 If ierror < &HFFFFFFFF& Then
                     Return ierror
@@ -665,6 +736,15 @@ Public Class communication
                 mtx.ReleaseMutex()
                 Dim _terror = IErrorDT5550ToNETError(ierror)
                 Return _terror
+            Case tModel.DT5560SE
+                If _isconnected(Handle_indx) = False Then
+                    Return tError.NOT_CONNECTED
+                End If
+                mtx.WaitOne()
+                Dim ierror = R5560_ReadData(value, lenght, address, DT5560SEHandle(Handle_indx), read_data)
+                mtx.ReleaseMutex()
+                Dim _terror = IErrorDT5550ToNETError(ierror)
+                Return _terror
             Case tModel.SCIDK
                 If _isconnected(0) = False Then
                     Return tError.NOT_CONNECTED
@@ -694,6 +774,15 @@ Public Class communication
                 mtx.ReleaseMutex()
                 Dim _terror = IErrorDT5550ToNETError(ierror)
                 Return _terror
+            Case tModel.DT5560SE
+                If _isconnected(Handle_indx) = False Then
+                    Return tError.NOT_CONNECTED
+                End If
+                mtx.WaitOne()
+                Dim ierror = R5560_ReadFifo(value, lenght, address, address_status, bus_mode, timeout_ms, DT5560SEHandle(Handle_indx), read_data)
+                mtx.ReleaseMutex()
+                Dim _terror = IErrorDT5550ToNETError(ierror)
+                Return _terror
             Case tModel.SCIDK
                 Dim rrw As UInt32
                 USB2_ReadReg(rrw, addressValidWords, SCIDKHandle)
@@ -714,5 +803,99 @@ Public Class communication
     Public Sub FlushFIFO()
 
     End Sub
+
+    Public Class WResponse
+        Public Property Response As String
+        Public Property Result As Boolean
+    End Class
+
+    Public Sub CreateJsonString(ByRef _json As String, ByVal param As String, ByVal values As Integer(), ByVal ch As Integer(), ByVal N_Sections As Integer)
+        Dim json As String = "["
+
+        For k As Integer = 0 To N_Sections - 1
+            For j As Integer = 0 To ch.Length - 1
+                'Dim ch As Integer = (N_Section_Channels * k) + j
+                json += "{""ch"": " & ch(j) & ",""value"": " & values(j) & "}"
+                If ((k = (N_Sections - 1)) AndAlso (j = (ch.Length - 1))) = False Then
+                    json += ","
+                End If
+            Next
+        Next
+
+        json += "]"
+
+        If param = "Termination" Then
+            _json = "{""term"": " & json & "}"
+        End If
+
+        If param = "Division" Then
+            _json = "{""div"": " & json & "}"
+        End If
+
+        If param = "Offset" Then
+            _json = "{""offset"": " & json & "}"
+        End If
+
+        If param = "Gain" Then
+            _json = "{""gain"": " & json & "}"
+        End If
+    End Sub
+
+    Public Function SetShaper(ByVal shaper As String) As Boolean
+        Dim url As String = "http://" & My.Settings.IP1 & ":80/afe_settings"
+        Dim response As String = ""
+        Dim _json As String = "{""shaper"": """ & shaper & """}"
+        Dim JsonPost As String = "{""command"":""set_afe"", ""params"":" & _json & "}"
+        HttpRequest(url, JsonPost, response)
+        Dim w_response As WResponse = JsonConvert.DeserializeObject(Of WResponse)(response)
+
+        If w_response.Result = True Then
+            Return True
+        Else
+            Return False
+        End If
+    End Function
+
+    Public Function SetAfeParam(ByVal param As String, ByVal values As Integer(), ByVal ch As Integer(), ByVal N_Sections As Integer) As Boolean
+        Dim url As String = "http://" & My.Settings.IP1 & ":80/afe_settings"
+        Dim response As String = ""
+        Dim _json As String = ""
+        Dim JsonPost As String = ""
+        CreateJsonString(_json, param, values, ch, N_Sections)
+        JsonPost = "{""command"":""set_afe"", ""params"":" & _json & "}"
+        HttpRequest(url, JsonPost, response)
+        Dim w_response As WResponse = JsonConvert.DeserializeObject(Of WResponse)(response)
+
+        If w_response.Result = True Then
+            Return True
+        Else
+            Return False
+        End If
+    End Function
+
+    Public Sub HttpRequest(ByVal url As String, ByVal JSonPost As String, ByRef StringOut As String, ByVal Optional retry As Boolean = False)
+        Dim request As WebRequest = WebRequest.Create(url)
+        'CType(request, HttpWebRequest).AllowAutoRedirect = False
+        Dim byteArray As Byte() = Encoding.UTF8.GetBytes(JSonPost)
+        request.ContentType = "application/x-www-form-urlencoded"
+        request.ContentLength = byteArray.Length
+        request.Method = "POST"
+        Dim dataStream As Stream = request.GetRequestStream()
+        dataStream.Write(byteArray, 0, byteArray.Length)
+        dataStream.Close()
+
+        Try
+            Dim response As WebResponse = request.GetResponse()
+            Dim dataStreamr As Stream = response.GetResponseStream()
+            Dim reader As StreamReader = New StreamReader(dataStreamr)
+            Dim responseFromServer As String = reader.ReadToEnd()
+            reader.Close()
+            StringOut = responseFromServer
+            response.Close()
+        Catch
+            If retry = False Then HttpRequest(url, JSonPost, StringOut, True)
+        End Try
+    End Sub
+
 
 End Class

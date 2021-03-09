@@ -1,4 +1,5 @@
 ﻿Imports System.ComponentModel
+Imports System.Net
 
 Public Class Connection
 
@@ -59,7 +60,17 @@ Public Class Connection
         DataGridView1.Columns.Add("IP", "IP Address")
         DataGridView1.Columns.Add("Status", "Status")
 
+        Dim connect_column2 As New DataGridViewComboBoxColumn()
+        DataGridView2.Columns.Clear()
+        connect_column2.HeaderText = "Connection"
+        connect_column2.Name = "ConnectionType"
+        connect_column2.MaxDropDownItems = 2
+        connect_column2.Items.Add("Ethernet")
+        connect_column2.Items.Add("USB")
+        DataGridView2.Columns.Add(connect_column2)
 
+        DataGridView2.Columns.Add("IP", "IP Address")
+        DataGridView2.Columns.Add("Status", "Status")
 
     End Sub
     'Private Sub DataGridView1_EditingControlShowing(ByVal sender As System.Object, ByVal e As DataGridViewEditingControlShowingEventArgs) Handles DataGridView1.EditingControlShowing
@@ -336,6 +347,57 @@ Public Class Connection
         End If
     End Sub
 
+    Private Sub Connect_DT5560SE_Click(sender As Object, e As EventArgs) Handles Connect_DT5560SE.Click
+
+        selected_board = communication.tModel.DT5560SE
+        selected_connection = communication.tConnectionMode.ETHERNET2
+        Connect_DT5560SE.Enabled = False
+
+        ComClass.StartConnection(DataGridView2.RowCount, selected_board)
+        Dim _connected_board = 0
+        For d = 0 To DataGridView2.RowCount - 1
+            If DataGridView2.Rows(d).Cells("ConnectionType").Value = "USB" Then
+                MsgBox("USB Connection not supported yet")
+                Exit For
+            End If
+            Dim a As String() = DataGridView2.Rows(d).Cells("IP").Value.split(".")
+            If a.Length <> 4 Then
+                MsgBox("IP Not Valid")
+                Exit For
+            End If
+            For i = 0 To 3
+                If a(i) < 0 Or a(i) > 255 Then
+                    MsgBox("IP Not Valid")
+                    Exit For
+                End If
+            Next
+
+            Dim r As New communication.tError
+            r = ComClass.Connect(selected_connection, selected_board, DataGridView2.Rows(d).Cells("IP").Value, d)
+            If r = communication.tError.OK Then
+                _connected_board += 1
+                DataGridView2.Rows(d).Cells("Status").Value = "OK"
+            Else
+                DataGridView2.Rows(d).Cells("Status").Value = "ERROR"
+                ComClass.GetMessage(r)
+            End If
+        Next
+        Connect_DT5560SE.Enabled = True
+
+        Jsonfile = My.Application.Info.DirectoryPath & "\RegisterFileDT5560SE.json"
+        My.Settings.IP1 = DataGridView2.Rows(0).Cells("IP").Value
+        My.Settings.Save()
+
+        If _connected_board = DataGridView2.RowCount And _connected_board <> 0 Then
+            ComClass._nBoard = _connected_board
+            ComClass._n_ch = 32
+            ComClass._n_ch_oscilloscope = 2
+            ComClass._n_oscilloscope = 32
+            MainForm.Show()
+            Me.Hide()
+        End If
+    End Sub
+
     Private Sub AddButton_Click(sender As Object, e As EventArgs) Handles AddButton.Click
         Dim nRow = DataGridView1.RowCount
         DataGridView1.Rows.Add()
@@ -353,6 +415,25 @@ Public Class Connection
         If DataGridView1.SelectedCells.Count <> 0 Then
             Dim nSel = DataGridView1.SelectedCells.Item(0)
             DataGridView1.Rows.RemoveAt(nSel.RowIndex)
+        End If
+    End Sub
+
+    Private Sub AddDT5560SE_Click(sender As Object, e As EventArgs) Handles Add_DT5560SE.Click
+        Dim nRow = DataGridView2.RowCount
+        DataGridView2.Rows.Add()
+        DataGridView2.Rows(nRow).Cells("ConnectionType").Value = "Ethernet"
+        If nRow = 0 Then
+            DataGridView2.Rows(nRow).Cells("IP").Value = My.Settings.IP1
+        ElseIf nRow > 0 Then
+            DataGridView2.Rows(nRow).Cells("IP").Value = DataGridView2.Rows(nRow - 1).Cells("IP").Value
+        End If
+
+    End Sub
+
+    Private Sub RemoveDT5560SE_Click(sender As Object, e As EventArgs) Handles Remove_DT5560SE.Click
+        If DataGridView2.SelectedCells.Count <> 0 Then
+            Dim nSel = DataGridView2.SelectedCells.Item(0)
+            DataGridView2.Rows.RemoveAt(nSel.RowIndex)
         End If
     End Sub
 
