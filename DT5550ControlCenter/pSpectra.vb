@@ -921,8 +921,8 @@ Public Class pSpectra
                     If fileEnable Then
                         spectracount += 1
                         Try
-                            If Array.IndexOf(EnabledChannel_id, trigger_id + (cp * _n_ch)) Then
-                                If IsRunning = True Then
+                            If (Array.IndexOf(EnabledChannel_id, trigger_id + (cp * _n_ch))) Then
+                                If isRunning = True And (EnabledChannel(trigger_id + (cp * _n_ch))) = True Then
                                     objRawWriter.WriteLine(trigger_id + (cp * _n_ch) & ";" & ev.timecode.ToString & ";" & String.Join(";", ev.energy(0)).Replace(",", "."))
                                 End If
                             End If

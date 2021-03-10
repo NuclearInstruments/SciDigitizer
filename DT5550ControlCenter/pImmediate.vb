@@ -37,10 +37,18 @@ Public Class pImmediate
         Dim xlabel(c - 1) As String
         Dim ylabel(r - 1) As String
         For i = 0 To c - 1
-            xlabel(i) = (i + 1).ToString
+            If Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
+                xlabel(i) = (i).ToString
+            Else
+                xlabel(i) = (i + 1).ToString
+            End If
         Next
         For j = 0 To r - 1
-            ylabel(j) = (j + 1).ToString
+            If Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
+                ylabel(j) = (j).ToString
+            Else
+                ylabel(j) = (j + 1).ToString
+            End If
         Next
         model.Axes.Clear()
         model.Series.Clear()

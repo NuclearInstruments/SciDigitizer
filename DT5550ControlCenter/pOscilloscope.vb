@@ -1053,7 +1053,7 @@ Public Class pOscilloscope
                                 Array.Copy(Digital3Array, nsamples * n, D2, 0, nsamples)
                                 '    Next
                                 MutexFile.WaitOne()
-                                objRawWriter.WriteLine((Now - startTime).TotalMilliseconds / 1000.0 & ";" & ch_id + 1 & ";" & nsamples & ";" & 1 & ";" & String.Join(";", A)) ' & String.Join(";", A2) & String.Join(";", D0) & String.Join(";", D1) & String.Join(";", D2))
+                                objRawWriter.WriteLine((Now - startTime).TotalMilliseconds / 1000.0 & ";" & ch_id & ";" & nsamples & ";" & 1 & ";" & String.Join(";", A)) ' & String.Join(";", A2) & String.Join(";", D0) & String.Join(";", D1) & String.Join(";", D2))
                                 MutexFile.ReleaseMutex()
                             End If
                             ' Next

@@ -515,12 +515,14 @@ Public Class MainForm
                     End If
                 End If
                     acquisition.General_settings.TriggerOscilloscopeEdges = IIf(xmldoc.SelectSingleNode("Settings/Oscilloscope_Settings/Oscilloscope_Trigger_Edge").InnerText = "Rising", edge.RISING, edge.FALLING)
-                acquisition.General_settings.TriggerOscilloscopeLevel = xmldoc.SelectSingleNode("Settings/Oscilloscope_Settings/Oscilloscope_Trigger_Level").InnerText
+                If Connection.ComClass._boardModel <> communication.tModel.DT5560SE Then
+                    acquisition.General_settings.TriggerOscilloscopeLevel = xmldoc.SelectSingleNode("Settings/Oscilloscope_Settings/Oscilloscope_Trigger_Level").InnerText
+                End If
                 acquisition.General_settings.OscilloscopePreTrigger = xmldoc.SelectSingleNode("Settings/Oscilloscope_Settings/Oscilloscope_Pre_Trigger").InnerText
-                acquisition.General_settings.OscilloscopeDecimator = CType(xmldoc.SelectSingleNode("Settings/Oscilloscope_Settings/Oscilloscope_Trigger_Decimator").InnerText, Double) / Ts
-                Dim k = 0
-                For Each node In xmldoc.SelectSingleNode("Settings").LastChild.ChildNodes
-                    acquisition.CHList(k).polarity = IIf(node.ChildNodes.Item(0).innertext = "Positive", signal_polarity.POSITIVE, signal_polarity.NEGATIVE)
+                    acquisition.General_settings.OscilloscopeDecimator = CType(xmldoc.SelectSingleNode("Settings/Oscilloscope_Settings/Oscilloscope_Trigger_Decimator").InnerText, Double) / Ts
+                    Dim k = 0
+                    For Each node In xmldoc.SelectSingleNode("Settings").LastChild.ChildNodes
+                        acquisition.CHList(k).polarity = IIf(node.ChildNodes.Item(0).innertext = "Positive", signal_polarity.POSITIVE, signal_polarity.NEGATIVE)
                     If Connection.ComClass._boardModel = communication.tModel.DT5550 Then
                         acquisition.CHList(k).trigger_level = node.ChildNodes.Item(1).innertext
                         acquisition.CHList(k).trigger_inhibit = node.ChildNodes.Item(2).innertext
@@ -544,7 +546,7 @@ Public Class MainForm
                             acquisition.CHList(k).baseline_sample = node.ChildNodes.Item(11).innertext
                         End If
 
-                    ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.SCIDK Or Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
+                    ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.SCIDK Then
                         acquisition.CHList(k).offset = node.ChildNodes.Item(1).innertext
                         acquisition.CHList(k).trigger_level = node.ChildNodes.Item(2).innertext
                         acquisition.CHList(k).trigger_peaking = node.ChildNodes.Item(3).innertext
@@ -557,23 +559,33 @@ Public Class MainForm
                         acquisition.CHList(k).baseline_inhibit = node.ChildNodes.Item(10).innertext
                         acquisition.CHList(k).baseline_sample = node.ChildNodes.Item(11).innertext
                     ElseIf Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
-                        acquisition.CHList(k).Afe_set.Termination = node.ChildNodes.Item(12).innertext
-                        acquisition.CHList(k).Afe_set.Division = node.ChildNodes.Item(13).innertext
-                        acquisition.CHList(k).Afe_set.Offset = node.ChildNodes.Item(14).innertext
-                        acquisition.CHList(k).Afe_set.Gain = node.ChildNodes.Item(15).innertext
+                        acquisition.CHList(k).offset = node.ChildNodes.Item(1).innertext
+                        acquisition.CHList(k).TriggerOscilloscopeLevel = node.ChildNodes.Item(2).innertext
+                        acquisition.CHList(k).trigger_level = node.ChildNodes.Item(3).innertext
+                        acquisition.CHList(k).trigger_peaking = node.ChildNodes.Item(4).innertext
+                        acquisition.CHList(k).trigger_flat = node.ChildNodes.Item(5).innertext
+                        acquisition.CHList(k).decay_constant = node.ChildNodes.Item(6).innertext
+                        acquisition.CHList(k).peaking_time = node.ChildNodes.Item(7).innertext
+                        acquisition.CHList(k).flat_top = node.ChildNodes.Item(8).innertext
+                        acquisition.CHList(k).energy_sample = node.ChildNodes.Item(9).innertext
+                        acquisition.CHList(k).gain = node.ChildNodes.Item(10).innertext
+                        acquisition.CHList(k).baseline_inhibit = node.ChildNodes.Item(11).innertext
+                        acquisition.CHList(k).baseline_sample = node.ChildNodes.Item(12).innertext
+                        acquisition.CHList(k).Afe_set.Termination = node.ChildNodes.Item(13).innertext
+                        acquisition.CHList(k).Afe_set.Division = node.ChildNodes.Item(14).innertext
+                        acquisition.CHList(k).Afe_set.Offset = node.ChildNodes.Item(15).innertext
+                        acquisition.CHList(k).Afe_set.Gain = node.ChildNodes.Item(16).innertext
                     End If
-
-
                     k += 1
                 Next
-                fs.Close()
-                sets.Settings_reload()
-                sets.Grid_ReLoad()
-                If Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
-                    sets.Grid2_ReLoad()
-                End If
+                    fs.Close()
+                    sets.Settings_reload()
+                    sets.Grid_ReLoad()
+                    If Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
+                        sets.Grid2_ReLoad()
+                    End If
 
-                plog.TextBox1.AppendText("Settings loaded from file." & vbCrLf)
+                    plog.TextBox1.AppendText("Settings loaded from file." & vbCrLf)
                 End If
         Catch ex As Exception
             plog.TextBox1.AppendText("Error: " & ex.Message & vbCrLf)
@@ -610,14 +622,16 @@ Public Class MainForm
                 writer.WriteStartElement("Oscilloscope_Settings")
                 writer.WriteElementString("Oscilloscope_Trigger_Source", sets.TriggerSourceOscilloscope.SelectedItem)
                 writer.WriteElementString("Oscilloscope_Trigger_Edge", sets.TriggerEdge.SelectedItem)
-                writer.WriteElementString("Oscilloscope_Trigger_Level", sets.TriggerLevelOscilloscope.Text)
+                If Connection.ComClass._boardModel <> communication.tModel.DT5560SE Then
+                    writer.WriteElementString("Oscilloscope_Trigger_Level", sets.TriggerLevelOscilloscope.Text)
+                End If
                 writer.WriteElementString("Oscilloscope_Trigger_Decimator", sets.Horizontal.Text)
-                writer.WriteElementString("Oscilloscope_Pre_Trigger", sets.PreTrigger.Text)
-                writer.WriteEndElement()
+                    writer.WriteElementString("Oscilloscope_Pre_Trigger", sets.PreTrigger.Text)
+                    writer.WriteEndElement()
 
-                writer.WriteStartElement("Channels_Settings")
-                For i = 0 To acquisition.CHList.Count - 1
-                    writer.WriteStartElement(sets.DataGridView1.Rows(i).Cells("Channel").Value.Replace(" ", "_"))
+                    writer.WriteStartElement("Channels_Settings")
+                    For i = 0 To acquisition.CHList.Count - 1
+                        writer.WriteStartElement(sets.DataGridView1.Rows(i).Cells("Channel").Value.Replace(" ", "_"))
                     If Connection.ComClass._boardModel = communication.tModel.DT5550 Then
                         writer.WriteElementString("Polarity", sets.DataGridView1.Rows(i).Cells("Polarity").Value)
                         writer.WriteElementString("Trigger_Level", sets.DataGridView1.Rows(i).Cells("Trigger Level").Value)
@@ -639,6 +653,9 @@ Public Class MainForm
                     ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.SCIDK Or Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
                         writer.WriteElementString("Polarity", sets.DataGridView1.Rows(i).Cells("Polarity").Value)
                         writer.WriteElementString("Offset", sets.DataGridView1.Rows(i).Cells("Offset").Value)
+                        If Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
+                            writer.WriteElementString("Oscilloscope_Trigger_Level", sets.DataGridView1.Rows(i).Cells("Oscilloscope Trigger Level").Value)
+                        End If
                         writer.WriteElementString("Trigger_Level", sets.DataGridView1.Rows(i).Cells("Trigger Level").Value)
                         writer.WriteElementString("Trigger_Peaking_Time", sets.DataGridView1.Rows(i).Cells("Trigger Peaking").Value)
                         writer.WriteElementString("Trigger_Flat_Top", sets.DataGridView1.Rows(i).Cells("Trigger Flat").Value)
@@ -649,26 +666,27 @@ Public Class MainForm
                         writer.WriteElementString("Gain", sets.DataGridView1.Rows(i).Cells("Gain").Value)
                         writer.WriteElementString("Baseline_Inhibit_Time", sets.DataGridView1.Rows(i).Cells("Baseline Inhibit Time").Value)
                         writer.WriteElementString("Baseline_Lenght", sets.DataGridView1.Rows(i).Cells("Baseline Lenght").Value)
-                    ElseIf Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
-                        If i Mod 2 Then
-                            writer.WriteElementString("AFE_Termination", sets.DataGridView2.Rows(i).Cells("Termination").Value)
-                            writer.WriteElementString("AFE_Division", sets.DataGridView2.Rows(i).Cells("Division").Value)
-                            writer.WriteElementString("AFE_Offset", sets.DataGridView2.Rows(i).Cells("OffsetEven").Value)
-                            writer.WriteElementString("AFE_Gain", sets.DataGridView2.Rows(i).Cells("Gain").Value)
-                        Else
-                            writer.WriteElementString("AFE_Termination", sets.DataGridView2.Rows(i - 1).Cells("Termination").Value)
-                            writer.WriteElementString("AFE_Division", sets.DataGridView2.Rows(i - 1).Cells("Division").Value)
-                            writer.WriteElementString("AFE_Offset", sets.DataGridView2.Rows(i - 1).Cells("OffsetOdd").Value)
-                            writer.WriteElementString("AFE_Gain", sets.DataGridView2.Rows(i - 1).Cells("Gain").Value)
+                        If Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
+                            If (i Mod 2) = 0 Then
+                                writer.WriteElementString("AFE_Termination", sets.DataGridView2.Rows(i / 2).Cells("Termination").Value)
+                                writer.WriteElementString("AFE_Division", sets.DataGridView2.Rows(i / 2).Cells("Division").Value)
+                                writer.WriteElementString("AFE_Offset", sets.DataGridView2.Rows(i / 2).Cells("OffsetEven").Value)
+                                writer.WriteElementString("AFE_Gain", sets.DataGridView2.Rows(i / 2).Cells("Gain").Value)
+                            Else
+                                writer.WriteElementString("AFE_Termination", sets.DataGridView2.Rows((i - 1) / 2).Cells("Termination").Value)
+                                writer.WriteElementString("AFE_Division", sets.DataGridView2.Rows((i - 1) / 2).Cells("Division").Value)
+                                writer.WriteElementString("AFE_Offset", sets.DataGridView2.Rows((i - 1) / 2).Cells("OffsetOdd").Value)
+                                writer.WriteElementString("AFE_Gain", sets.DataGridView2.Rows((i - 1) / 2).Cells("Gain").Value)
+                            End If
                         End If
                     End If
-                        writer.WriteEndElement()
-                Next
-                writer.WriteEndElement()
-                writer.WriteEndDocument()
-                writer.Close()
-                plog.TextBox1.AppendText("Setting file saved." & vbCrLf)
-            End If
+                    writer.WriteEndElement()
+                    Next
+                    writer.WriteEndElement()
+                    writer.WriteEndDocument()
+                    writer.Close()
+                    plog.TextBox1.AppendText("Setting file saved." & vbCrLf)
+                End If
         Catch ex As Exception
             plog.TextBox1.AppendText("Error: " & ex.Message & vbCrLf)
         End Try
@@ -912,8 +930,8 @@ Public Class MainForm
         scope.Timer1.Enabled = False
         scope.Pesgo1.Dispose()
         scope.Dispose()
-        System.Threading.Thread.Sleep(1000)
-        End
+        'System.Threading.Thread.Sleep(1000)
+        ' End
     End Sub
 
     Private Sub FittingSpectrum_Click(sender As Object, e As EventArgs) Handles FittingSpectrum.Click
