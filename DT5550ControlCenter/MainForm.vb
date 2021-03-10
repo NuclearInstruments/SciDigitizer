@@ -71,7 +71,7 @@ Public Class MainForm
         ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Then
             Ts = 1000 / 125
         ElseIf Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
-            Ts = 1000 / 80
+            Ts = 1000 / 125
         ElseIf Connection.ComClass._boardModel = communication.tModel.SCIDK Then
             Ts = 1000 / 60
         End If
@@ -567,9 +567,13 @@ Public Class MainForm
                     k += 1
                 Next
                 fs.Close()
-                    sets.Settings_reload()
-                    sets.Grid_ReLoad()
-                    plog.TextBox1.AppendText("Settings loaded from file." & vbCrLf)
+                sets.Settings_reload()
+                sets.Grid_ReLoad()
+                If Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
+                    sets.Grid2_ReLoad()
+                End If
+
+                plog.TextBox1.AppendText("Settings loaded from file." & vbCrLf)
                 End If
         Catch ex As Exception
             plog.TextBox1.AppendText("Error: " & ex.Message & vbCrLf)

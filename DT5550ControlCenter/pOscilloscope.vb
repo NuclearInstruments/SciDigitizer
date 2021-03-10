@@ -55,6 +55,8 @@ Public Class pOscilloscope
             sampling_factor = 1000 / 80
         ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Then
             sampling_factor = 1000 / 125
+        ElseIf Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
+            sampling_factor = 1000 / 125
         ElseIf Connection.ComClass._boardModel = communication.tModel.SCIDK Then
             sampling_factor = 1000 / 60
         End If
@@ -116,7 +118,7 @@ Public Class pOscilloscope
             Pesgo1.PeGrid.MultiAxesProportions(2) = 0.05
             Pesgo1.PeGrid.MultiAxesProportions(3) = 0.05
             Pesgo1.PeGrid.MultiAxesProportions(4) = 0.05
-        ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Then
+        ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
             Pesgo1.PeGrid.MultiAxesProportions(0) = 0.65
             Pesgo1.PeGrid.MultiAxesProportions(1) = 0.2
             Pesgo1.PeGrid.MultiAxesProportions(2) = 0.05
@@ -226,7 +228,7 @@ Public Class pOscilloscope
             Pesgo1.PeGrid.Configure.ManualScaleControlY = ManualScaleControl.MinMax
             Pesgo1.PeGrid.Configure.ManualMinY = 0
             Pesgo1.PeGrid.Configure.ManualMaxY = 1.1
-        ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Then
+        ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
             Pesgo1.PeString.YAxisLabel = "ANALOG"
 
             Pesgo1.PeGrid.WorkingAxis = 1
@@ -497,13 +499,22 @@ Public Class pOscilloscope
 
     Public Sub setOscilloscopeParam()
 
+        Dim LevelTriggerValue_arr As Integer()
+        ReDim LevelTriggerValue_arr(n_osc)
+        For i = 0 To n_osc - 1
+            If Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
+                LevelTriggerValue_arr(i) = MainForm.acquisition.CHList(i).TriggerOscilloscopeLevel
+            Else
+                LevelTriggerValue_arr(i) = LevelTriggerValue
+            End If
+        Next
+
         For j = 0 To Connection.ComClass._nBoard - 1
             For i = 0 To n_osc - 1
-
                 If Connection.ComClass.SetRegister(addressDecimator(i), DecimatorValue - 1, j) = 0 Then
                     If Connection.ComClass.SetRegister(addressPre(i), Math.Floor(PreTriggerValue * nsamples / 100), j) = 0 Then
                         If Connection.ComClass.SetRegister(addressMode(i), TriggerModeValue, j) = 0 Then
-                            If Connection.ComClass.SetRegister(addressLevel(i), LevelTriggerValue, j) = 0 Then
+                            If Connection.ComClass.SetRegister(addressLevel(i), LevelTriggerValue_arr(i), j) = 0 Then
                                 If Connection.ComClass.SetRegister(addressArm(i), 0, j) = 0 Then
                                     If Connection.ComClass.SetRegister(addressArm(i), 1, j) = 0 Then
                                     Else
@@ -762,6 +773,210 @@ Public Class pOscilloscope
 
                         End If
                         If Connection.ComClass.SetRegister(addressArm(ch_addr), 1, ind) = 0 Then
+
+                        End If
+
+                        WaveNN += 1
+                        Dim curr As Integer = position - Math.Floor(PreTriggerValue * nsamples / 100)
+                        If curr > 0 Then
+                            Dim k = 0
+                            For i = curr To nsamples - 2
+                                Dim d = data(i + nsamples)
+                                AnalogArray(k + nsamples * n) = (data(i) And 65535) '+ coor(ch)
+                                If ((d And 65535) > 32767) Then
+                                    AnalogArray2(k + nsamples * n) = -(65535 - (d And 65535))
+                                Else
+                                    AnalogArray2(k + nsamples * n) = d And 65535
+                                End If
+                                Digital1Array(k + nsamples * n) = data(i) >> 16 And 1
+                                Digital2Array(k + nsamples * n) = data(i) >> 17 And 1
+                                Digital3Array(k + nsamples * n) = data(i) >> 18 And 1
+                                k += 1
+                            Next
+                            For i = 0 To curr - 1
+                                Dim d = data(i + nsamples)
+                                AnalogArray(k + nsamples * n) = (data(i) And 65535) '+ coor(ch)
+                                If ((d And 65535) > 32767) Then
+                                    AnalogArray2(k + nsamples * n) = -(65535 - (d And 65535))
+                                Else
+                                    AnalogArray2(k + nsamples * n) = d And 65535
+                                End If
+                                Digital1Array(k + nsamples * n) = data(i) >> 16 And 1
+                                Digital2Array(k + nsamples * n) = data(i) >> 17 And 1
+                                Digital3Array(k + nsamples * n) = data(i) >> 18 And 1
+                                k += 1
+                            Next
+                        Else
+                            Dim k = 0
+                            For i = nsamples + curr To nsamples - 2
+                                Dim d = data(i + nsamples)
+                                AnalogArray(k + nsamples * n) = (data(i) And 65535) '+ coor(ch)
+                                If ((d And 65535) > 32767) Then
+                                    AnalogArray2(k + nsamples * n) = -(65535 - (d And 65535))
+                                Else
+                                    AnalogArray2(k + nsamples * n) = d And 65535
+                                End If
+                                Digital1Array(k + nsamples * n) = data(i) >> 16 And 1
+                                Digital2Array(k + nsamples * n) = data(i) >> 17 And 1
+                                Digital3Array(k + nsamples * n) = data(i) >> 18 And 1
+                                k += 1
+                            Next
+                            For i = 0 To nsamples + curr - 1
+                                Dim d = data(i + nsamples)
+                                AnalogArray(k + nsamples * n) = (data(i) And 65535) '+ coor(ch)
+                                If ((d And 65535) > 32767) Then
+                                    AnalogArray2(k + nsamples * n) = -(65535 - (d And 65535))
+                                Else
+                                    AnalogArray2(k + nsamples * n) = d And 65535
+                                End If
+                                Digital1Array(k + nsamples * n) = data(i) >> 16 And 1
+                                Digital2Array(k + nsamples * n) = data(i) >> 17 And 1
+                                Digital3Array(k + nsamples * n) = data(i) >> 18 And 1
+                                k += 1
+                            Next
+                        End If
+
+
+                        If fileEnable = True Then
+                            'For k = 0 To osc_ch - 1
+                            If EnabledChannel(ch_id) Then
+                                Dim A(nsamples), A2(nsamples), D0(nsamples), D1(nsamples), D2(nsamples) As Single
+                                'For j = 0 To nsamples - 1
+                                Array.Copy(AnalogArray, nsamples * n, A, 0, nsamples)
+                                Array.Copy(AnalogArray2, nsamples * n, A2, 0, nsamples)
+                                Array.Copy(Digital1Array, nsamples * n, D0, 0, nsamples)
+                                Array.Copy(Digital2Array, nsamples * n, D1, 0, nsamples)
+                                Array.Copy(Digital3Array, nsamples * n, D2, 0, nsamples)
+                                '    Next
+                                MutexFile.WaitOne()
+                                objRawWriter.WriteLine((Now - startTime).TotalMilliseconds / 1000.0 & ";" & ch_id + 1 & ";" & nsamples & ";" & 1 & ";" & String.Join(";", A)) ' & String.Join(";", A2) & String.Join(";", D0) & String.Join(";", D1) & String.Join(";", D2))
+                                MutexFile.ReleaseMutex()
+                            End If
+                            ' Next
+                            If TargetMode = 1 Then
+                                If totalACQ >= TargetEvent Then
+                                    MainForm.ProgressBar.Value = 100
+                                    StopDataCaptureOnFile()
+                                    MainForm.SaveData.Enabled = True
+                                    MainForm.StopSaveData.Enabled = False
+                                Else
+                                    MainForm.ProgressBar.Value = totalACQ / TargetEvent * 100
+                                End If
+                            End If
+                        End If
+
+                        n += 1
+
+                        Console.WriteLine((Now - lastPlot).TotalMilliseconds)
+
+
+                    End If
+                Next
+
+                For i = 1 To n_ch
+                    For q = 0 To 4
+                        AnalogArray(nsamples * i - q) = AnalogArray(nsamples * i - 4)
+                        AnalogArray2(nsamples * i - q) = AnalogArray2(nsamples * i - 4)
+                        Digital1Array(nsamples * i - q) = Digital1Array(nsamples * i - 4)
+                        Digital2Array(nsamples * i - q) = Digital2Array(nsamples * i - 4)
+                        Digital3Array(nsamples * i - q) = Digital3Array(nsamples * i - 4)
+                    Next
+
+                Next
+
+                If (Now - lastPlot).TotalMilliseconds > 90 Then
+
+
+                    Pesgo1.PeData.Points = nsamples
+                    Pesgo1.PeGrid.MultiAxesSubsets(0) = n_ch
+                    Pesgo1.PeGrid.MultiAxesSubsets(1) = n_ch
+                    Pesgo1.PeGrid.MultiAxesSubsets(2) = n_ch
+                    Pesgo1.PeGrid.MultiAxesSubsets(3) = n_ch
+                    Pesgo1.PeGrid.MultiAxesSubsets(4) = n_ch
+                    Gigasoft.ProEssentials.Api.PEvsetW(Pesgo1.PeSpecial.HObject, Gigasoft.ProEssentials.DllProperties.XData, tmpXData, TOTpoints)
+
+                    Array.Copy(AnalogArray, 0, tmpYData2, 0, nsamples * n_ch)
+                    Array.Copy(AnalogArray2, 0, tmpYData2, nsamples * (n_ch * 1), nsamples * n_ch)
+                    Array.Copy(Digital1Array, 0, tmpYData2, nsamples * (n_ch * 2), nsamples * n_ch)
+                    Array.Copy(Digital2Array, 0, tmpYData2, nsamples * (n_ch * 3), nsamples * n_ch)
+                    Array.Copy(Digital3Array, 0, tmpYData2, nsamples * (n_ch * 4), nsamples * n_ch)
+
+                    Gigasoft.ProEssentials.Api.PEvsetW(Pesgo1.PeSpecial.HObject, Gigasoft.ProEssentials.DllProperties.YData, tmpYData2, TOTpoints)
+
+                    If (Pesgo1.PeConfigure.RenderEngine = RenderEngine.Direct3D) Then
+                        Pesgo1.PeFunction.Force3dxVerticeRebuild = True
+                        Pesgo1.PeFunction.Force3dxNewColors = True
+                    Else
+                        Pesgo1.PeFunction.Reinitialize()
+                        Pesgo1.PeFunction.ResetImage(0, 0)
+                    End If
+                    totalACQ += WaveNN
+                    Pesgo1.PeString.MainTitle = "Real Time Oscilloscope (" & totalACQ & ")"
+                    Pesgo1.Invalidate()
+                    Pesgo1.PeFunction.ReinitializeResetImage()
+                    lastPlot = Now
+                End If
+
+
+            End If
+        ElseIf Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
+            If n_ch > 0 Then
+
+                Dim TOTpoints = tot_points * n_ch
+                Dim tmpYData2(TOTpoints) As Single
+                Dim AnalogArray(nsamples * CheckedListBox1.Items.Count) As Single
+                Dim AnalogArray2(nsamples * CheckedListBox1.Items.Count) As Single
+                Dim Digital1Array(nsamples * CheckedListBox1.Items.Count) As Single
+                Dim Digital2Array(nsamples * CheckedListBox1.Items.Count) As Single
+                Dim Digital3Array(nsamples * CheckedListBox1.Items.Count) As Single
+
+                Dim tmpXData(TOTpoints) As Single
+                For j = 0 To n_ch - 1
+                    For i = 0 To nsamples - 1
+                        tmpXData(i + (nsamples * (n_ch * 0 + j))) = i * (MainForm.acquisition.General_settings.OscilloscopeDecimator) * sampling_factor
+                        tmpXData(i + (nsamples * (n_ch * 1 + j))) = i * (MainForm.acquisition.General_settings.OscilloscopeDecimator) * sampling_factor
+                        tmpXData(i + (nsamples * (n_ch * 2 + j))) = i * (MainForm.acquisition.General_settings.OscilloscopeDecimator) * sampling_factor
+                        tmpXData(i + (nsamples * (n_ch * 3 + j))) = i * (MainForm.acquisition.General_settings.OscilloscopeDecimator) * sampling_factor
+                        tmpXData(i + (nsamples * (n_ch * 4 + j))) = i * (MainForm.acquisition.General_settings.OscilloscopeDecimator) * sampling_factor
+                    Next
+                Next
+
+
+                Dim n = 0
+
+                For Each ch In Checked_id
+                    Dim ch_id = ch - 1
+                    Dim ind = MainForm.acquisition.CHList(ch_id).board_number
+                    Dim ch_addr = MainForm.acquisition.CHList(ch_id).ch_id - 1
+
+                    Dim status As UInt32 = 0
+                    Dim tt = Now
+                    ' While status <> 1
+                    Connection.ComClass.GetRegister(addressStatus(ch_addr), status, 0)
+                    If status <> 1 Then
+                        n += 1
+                        Continue For
+                    End If
+
+                    ' Application.DoEvents()
+                    If MainForm.__Running_OSC = False Then
+                        Exit Sub
+                    End If
+
+                    'End While
+
+
+                    Dim position As UInt32
+                    Connection.ComClass.GetRegister(addressPosition(ch_addr), position, 0)
+
+                    Dim data(length) As UInt32
+                    Dim read_data As UInt32
+                    Dim valid_data As UInt32
+                    If Connection.ComClass.ReadData(addressData(ch_addr), data, length, 0, 1000, read_data, valid_data, 0) = 0 Then
+                        If Connection.ComClass.SetRegister(addressArm(ch_addr), 0, 0) = 0 Then
+
+                        End If
+                        If Connection.ComClass.SetRegister(addressArm(ch_addr), 1, 0) = 0 Then
 
                         End If
 

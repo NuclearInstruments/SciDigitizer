@@ -83,7 +83,7 @@
         Public TriggerOscilloscopeLevel As Double
         Public OscilloscopeDecimator As Double
         Public OscilloscopePreTrigger As Double
-
+        Public AFEShaper As Integer
     End Structure
 
     Structure AFESettings
@@ -127,6 +127,7 @@
         Public spectra_checked As Boolean
         Public scope_checked As Boolean
         Public Afe_set As AFESettings
+        Public TriggerOscilloscopeLevel As Integer
 
         Public Sub New(name As String, id As Integer, ch_id As Integer, x As Integer, y As Integer, board_type As communication.tModel, board_number As Integer)
 
@@ -158,6 +159,37 @@
                 Me.baseline_sample = 256
                 spectra_checked = False
                 scope_checked = False
+            ElseIf board_type = communication.tModel.R5560 Then
+                Me.name = name
+                Me.id = id
+                Me.ch_id = ch_id
+                Me.board_number = board_number
+                Me.x_position = x
+                Me.y_position = y
+                Me.polarity = signal_polarity.POSITIVE
+                Me.offset = 0
+                Me.trigger_level = 20
+                Me.trigger_peaking = 40
+                Me.trigger_flat = 8
+                Me.trigger_inhibit = 0
+                Me.energy_filter = energy_filter_mode.TRAPEZOIDAL
+                Me.decay_constant = 1000
+                Me.peaking_time = 800
+                Me.flat_top = 80
+                Me.energy_sample = 864
+                Me.gain = 2
+                Me.integration_time = 0
+                Me.pre_gate = 200
+                Me.pileup_enable = False
+                Me.pileup_time = 0
+                Me.baseline_inhibit = 8000
+                Me.baseline_sample = 256
+                Me.Afe_set.Termination = True
+                Me.Afe_set.Division = True
+                Me.Afe_set.Offset = 0
+                Me.Afe_set.Gain = 1
+                spectra_checked = False
+                scope_checked = False
             ElseIf board_type = communication.tModel.R5560 Or board_type = communication.tModel.DT5560SE Then
                 Me.name = name
                 Me.id = id
@@ -187,6 +219,7 @@
                 Me.Afe_set.Division = True
                 Me.Afe_set.Offset = 0
                 Me.Afe_set.Gain = 1
+                Me.TriggerOscilloscopeLevel = 9000
                 spectra_checked = False
                 scope_checked = False
             ElseIf board_type = communication.tModel.SCIDK Then
@@ -267,9 +300,11 @@
             General_settings.TriggerOscilloscopeLevel = 10000
             General_settings.OscilloscopeDecimator = 1
             General_settings.OscilloscopePreTrigger = 20
+            General_settings.AFEShaper = 0
 
             For i = 0 To nch - 1
-                Dim ch = New Channel("CHANNEL " + (i + 1).ToString, i + 1, i + 1, x, y, board_type, 1)
+                FindPosition(16, i + 1, x, y)
+                Dim ch = New Channel("CHANNEL " + (i).ToString, i + 1, i + 1, x, y, board_type, 1)
                 CHList.Add(ch)
             Next
             currentMAP = New MAP(2, 16, nch)

@@ -12,6 +12,7 @@ Public Class Settings
     Dim sampling_factor As Double
     Dim AnalogOffsetControl As NumericUpDown
     Public DataGridView2 As New DataGridView
+    Dim shaper As New ComboBox
 
 
     Dim gain_list = {1, 1.06, 1.1, 1.2, 1.26, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 2.1, 2.2, 2.4, 2.5, 2.7, 2.8, 3, 3.2, 3.3, 3.5, 3.8, 4, 4.2, 4.5, 4.7, 5, 5.3, 5.6, 6, 6.3, 6.7, 7.1, 7.5, 7.9, 8.4, 8.9, 9.4, 10, 10.6, 11.2, 11.9, 12.6, 13.3,
@@ -29,7 +30,7 @@ Public Class Settings
         ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Then
             sampling_factor = 1000 / 125
         ElseIf Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
-            sampling_factor = 1000 / 80
+            sampling_factor = 1000 / 125
         ElseIf Connection.ComClass._boardModel = communication.tModel.SCIDK Then
             sampling_factor = 1000 / 60
         End If
@@ -65,14 +66,24 @@ Public Class Settings
                 TriggerSourceOscilloscope.Items.Add(i.name)
             Next
 
-        ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
+        ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Then
             GroupBox1.SetBounds(0, 0, 0, 0)
             TableLayoutPanel1.RowStyles(0).Height = 110
             TriggerSourceOscilloscope.Items.Clear()
             TriggerSourceOscilloscope.Items.Add("Analog Signal")
             TriggerSourceOscilloscope.Items.Add("MCA Trigger")
             TriggerSourceOscilloscope.Items.Add("Free Running")
-
+            TriggerLevelOscilloscope.Visible = False
+            Label14.Visible = False
+        ElseIf Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
+            GroupBox1.SetBounds(0, 0, 0, 0)
+            TableLayoutPanel1.RowStyles(0).Height = 110
+            TriggerSourceOscilloscope.Items.Clear()
+            TriggerSourceOscilloscope.Items.Add("Analog Signal")
+            TriggerSourceOscilloscope.Items.Add("MCA Trigger")
+            TriggerSourceOscilloscope.Items.Add("Free Running")
+            TriggerLevelOscilloscope.Visible = False
+            Label14.Visible = False
         ElseIf Connection.ComClass._boardModel = communication.tModel.SCIDK Then
             Panel2.Controls.Clear()
             Dim lbl As New Label
@@ -126,6 +137,10 @@ Public Class Settings
         pol_column.Items.Add("Negative")
         DataGridView1.Columns.Add(pol_column)
 
+        If Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
+            DataGridView1.Columns.Add("Oscilloscope Trigger Level", "Oscilloscope Trigger Level (lsb)")
+        End If
+
         If Connection.ComClass._boardModel = communication.tModel.DT5550 Then
             DataGridView1.Columns.Add("Trigger Level", "Trigger Level (lsb)")
             DataGridView1.Columns.Add("Trigger Hold-Off", "Trigger Hold-Off (ns)")
@@ -172,9 +187,45 @@ Public Class Settings
             Dim title As String = "AFE Settings"
             Dim myTabPage As TabPage = New TabPage(title)
 
+            Dim myTablelayout As New TableLayoutPanel
+            myTablelayout.ColumnCount = 1
+            myTablelayout.RowCount = 2
+            myTablelayout.RowStyles.Add(New RowStyle(SizeType.Absolute, 100))
+            myTablelayout.BackColor = Color.White
+            myTablelayout.Dock = DockStyle.Fill
+
+            Dim p1 As New Panel
+            Dim p2 As New Panel
+            p1.BackColor = Color.White
+            p2.BackColor = Color.White
+            p1.Dock = DockStyle.Fill
+            p2.Dock = DockStyle.Fill
+
+            Dim l As New Label
+            l.Text = "Shaper"
+            l.Location = New Point(30, 30)
+            l.Width = 50
+
+            shaper.Items.Clear()
+            shaper.Items.Add("DC")
+            shaper.Items.Add("AC 1us")
+            shaper.Items.Add("AC 10us")
+            shaper.Items.Add("AC 30us")
+            shaper.SelectedIndex = 0
+            shaper.Width = 100
+            shaper.DropDownStyle = ComboBoxStyle.DropDownList
+            'shaper.FlatStyle = FlatStyle.Flat
+            shaper.Location = New Point(120, 30)
+            AddHandler shaper.SelectedIndexChanged, AddressOf Shaper_SelectedIndexChanged
+
+
+            p1.Controls.Add(l)
+            p1.Controls.Add(shaper)
+
             AddHandler DataGridView2.Resize, AddressOf DataGridView2_Resize
             AddHandler DataGridView2.CellValueChanged, AddressOf DataGridView2_CellValueChanged
 
+            DataGridView2.BackgroundColor = Color.White
             DataGridView2.AllowUserToAddRows = False
             DataGridView2.AllowUserToDeleteRows = False
             DataGridView2.AllowUserToOrderColumns = False
@@ -209,7 +260,14 @@ Public Class Settings
             Next
             gain.MaxDropDownItems = 10
             DataGridView2.Columns.Add(gain)
-            myTabPage.Controls.Add(DataGridView2)
+
+            p2.Controls.Add(DataGridView2)
+            myTablelayout.Controls.Add(p1, 0, 0)
+
+            myTablelayout.RowStyles.Add(New RowStyle(SizeType.Percent, 90))
+            myTablelayout.Controls.Add(p2, 0, 1)
+
+            myTabPage.Controls.Add(myTablelayout)
             TabControl1.TabPages.Add(myTabPage)
             Grid2_ReLoad()
         End If
@@ -281,6 +339,10 @@ Public Class Settings
         PreTrigger.Text = MainForm.acquisition.General_settings.OscilloscopePreTrigger
         Horizontal.Text = Math.Round(MainForm.acquisition.General_settings.OscilloscopeDecimator * sampling_factor, 1)
 
+        If Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
+            shaper.SelectedItem = MainForm.acquisition.General_settings.AFEShaper
+        End If
+
     End Sub
 
     Public Sub Grid_ReLoad()
@@ -295,6 +357,11 @@ Public Class Settings
             Else
                 DataGridView1.Rows(i).Cells("Polarity").Value = "Negative"
             End If
+
+            If Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
+                DataGridView1.Rows(i).Cells("Oscilloscope Trigger Level").Value = MainForm.acquisition.CHList(i).TriggerOscilloscopeLevel
+            End If
+
             DataGridView1.Rows(i).Cells("Trigger Level").Value = MainForm.acquisition.CHList(i).trigger_level '"CHANNEL " & (i + 1).ToString
 
             If Connection.ComClass._boardModel = communication.tModel.DT5550 Then
@@ -556,6 +623,11 @@ Public Class Settings
             Else
                 MainForm.acquisition.CHList(i).polarity = signal_polarity.NEGATIVE
             End If
+
+            If Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
+                MainForm.acquisition.CHList(i).TriggerOscilloscopeLevel = DataGridView1.Rows(i).Cells("Oscilloscope Trigger Level").Value
+            End If
+
             MainForm.acquisition.CHList(i).trigger_level = DataGridView1.Rows(i).Cells("Trigger Level").Value
 
             If Connection.ComClass._boardModel = communication.tModel.DT5550 Then
@@ -577,8 +649,6 @@ Public Class Settings
                 End If
             End If
 
-
-
             If MainForm.isChargeIntegration Then
                 '    MainForm.oscilloscope.CHList(i).energyfilter = OscilloscopeClass.Channel.energyfiltermode.INTEGRATION
                 MainForm.acquisition.CHList(i).integration_time = DataGridView1.Rows(i).Cells("Integration Time").Value
@@ -591,7 +661,6 @@ Public Class Settings
             End If
             MainForm.acquisition.CHList(i).gain = DataGridView1.Rows(i).Cells("Gain").Value
 
-
             MainForm.acquisition.CHList(i).baseline_inhibit = DataGridView1.Rows(i).Cells("Baseline Inhibit Time").Value
             MainForm.acquisition.CHList(i).baseline_sample = CType(DataGridView1.Rows(i).Cells("Baseline Lenght").Value, Integer)
 
@@ -603,6 +672,8 @@ Public Class Settings
         Next
 
         If Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
+
+            MainForm.acquisition.General_settings.AFEShaper = shaper.SelectedIndex
             Dim k = 0
             For i = 0 To DataGridView2.Rows.Count - 1
                 If DataGridView2.Rows(i).Cells("Termination").Value Then
@@ -731,7 +802,7 @@ Public Class Settings
             Dim index As Integer
             If Connection.ComClass._boardModel = communication.tModel.DT5550 Then
                 index = MainForm.acquisition.CHList.Count - MainForm.acquisition.CHList(i).id
-            ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Then
+            ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
                 index = MainForm.acquisition.CHList(i).ch_id - 1
             ElseIf Connection.ComClass._boardModel = communication.tModel.SCIDK Then
                 index = MainForm.acquisition.CHList(i).ch_id - 1
@@ -1086,29 +1157,45 @@ Public Class Settings
                 k += 1
                 Next
 
-                If Connection.ComClass.SetAfeParam("Termination", term, ch_2, 1) Then
-                MainForm.plog.TextBox1.AppendText("AFE Settings: Termination applied successfully!" & vbCrLf)
-            Else
-                MainForm.plog.TextBox1.AppendText("AFE Settings: Termination Error!" & vbCrLf)
+            Dim s As String = ""
+            If MainForm.acquisition.General_settings.AFEShaper = 0 Then
+                s = "dc"
+            ElseIf MainForm.acquisition.General_settings.AFEShaper = 1 Then
+                s = "1u"
+            ElseIf MainForm.acquisition.General_settings.AFEShaper = 2 Then
+                s = "10u"
+            ElseIf MainForm.acquisition.General_settings.AFEShaper = 3 Then
+                s = "30u"
             End If
-            If Connection.ComClass.SetAfeParam("Division", divis, ch_2, 1) Then
-                MainForm.plog.TextBox1.AppendText("AFE Settings: Division applied successfully!" & vbCrLf)
+            If Connection.ComClass.SetShaper(s) Then
+                MainForm.plog.TextBox1.AppendText("AFE Settings: Shaper applied successfully!" & vbCrLf)
             Else
-                MainForm.plog.TextBox1.AppendText("AFE Settings: Division Error!" & vbCrLf)
+                MainForm.plog.TextBox1.AppendText("AFE Settings: Shaper applied successfully!" & vbCrLf)
             End If
-            If Connection.ComClass.SetAfeParam("Offset", off, ch, 1) Then
-                MainForm.plog.TextBox1.AppendText("AFE Settings: Offset applied successfully!" & vbCrLf)
-            Else
-                MainForm.plog.TextBox1.AppendText("AFE Settings: Offset Error!" & vbCrLf)
-            End If
-            If Connection.ComClass.SetAfeParam("Gain", g, ch_2, 1) Then
-                MainForm.plog.TextBox1.AppendText("AFE Settings: Gain applied successfully!" & vbCrLf)
-            Else
-                MainForm.plog.TextBox1.AppendText("AFE Settings: Gain Error!" & vbCrLf)
-            End If
-        End If
 
-        If n_ok = MainForm.acquisition.CHList.Count Then
+            If Connection.ComClass.SetAfeParam("Termination", term, ch_2, 1) Then
+                    MainForm.plog.TextBox1.AppendText("AFE Settings: Termination applied successfully!" & vbCrLf)
+                Else
+                    MainForm.plog.TextBox1.AppendText("AFE Settings: Termination Error!" & vbCrLf)
+                End If
+                If Connection.ComClass.SetAfeParam("Division", divis, ch_2, 1) Then
+                    MainForm.plog.TextBox1.AppendText("AFE Settings: Division applied successfully!" & vbCrLf)
+                Else
+                    MainForm.plog.TextBox1.AppendText("AFE Settings: Division Error!" & vbCrLf)
+                End If
+                If Connection.ComClass.SetAfeParam("Offset", off, ch, 1) Then
+                    MainForm.plog.TextBox1.AppendText("AFE Settings: Offset applied successfully!" & vbCrLf)
+                Else
+                    MainForm.plog.TextBox1.AppendText("AFE Settings: Offset Error!" & vbCrLf)
+                End If
+                If Connection.ComClass.SetAfeParam("Gain", g, ch_2, 1) Then
+                    MainForm.plog.TextBox1.AppendText("AFE Settings: Gain applied successfully!" & vbCrLf)
+                Else
+                    MainForm.plog.TextBox1.AppendText("AFE Settings: Gain Error!" & vbCrLf)
+                End If
+            End If
+
+            If n_ok = MainForm.acquisition.CHList.Count Then
             Apply.Enabled = False
             Apply.BackColor = Color.LightGray
         Else
@@ -1123,13 +1210,13 @@ Public Class Settings
         Apply.BackColor = Color.DodgerBlue
         If Horizontal.Text <> "" Then
             If Horizontal.Text < sampling_factor Then
-                Horizontal.Text = Math.Round(sampling_factor + 0.05, 1)
+                Horizontal.Text = sampling_factor
             End If
             If Horizontal.Text > 65535 Then
                 Horizontal.Text = 65535
             End If
             Dim dec = Math.Round(Horizontal.Text / sampling_factor)
-            Horizontal.Text = Math.Round(dec * 1000 / 80 + 0.05, 1)
+            Horizontal.Text = Math.Round(dec * sampling_factor, 1)
         End If
 
     End Sub
@@ -1186,6 +1273,11 @@ Public Class Settings
 
     End Sub
 
+    Private Sub Shaper_SelectedIndexChanged(sender As Object, e As EventArgs)
+        Apply.Enabled = True
+        Apply.BackColor = Color.DodgerBlue
+    End Sub
+
     Private Sub TriggerEdge_SelectedIndexChanged(sender As Object, e As EventArgs) Handles TriggerEdge.SelectedIndexChanged
         Apply.Enabled = True
         Apply.BackColor = Color.DodgerBlue
@@ -1204,4 +1296,8 @@ Public Class Settings
         MainForm.ofsc.ShowDialog()
     End Sub
 
+    Private Sub Horizontal_ValueChanged(sender As Object, e As EventArgs) Handles Horizontal.ValueChanged
+        Apply.Enabled = True
+        Apply.BackColor = Color.DodgerBlue
+    End Sub
 End Class

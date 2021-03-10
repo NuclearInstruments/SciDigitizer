@@ -83,7 +83,7 @@ Public Class pSpectra
         n_ch = MainForm.acquisition.CHList.Count
         If Connection.ComClass._boardModel = communication.tModel.DT5550 Then
             addressData = MainForm.CurrentMCA.Address
-        ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.SCIDK Then
+        ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.SCIDK Or Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
             addressData = (MainForm.CurrentCP.Address)
             MaxNumberOfChannel = _n_ch * Connection.ComClass._nBoard
             ReDim spectra(MaxNumberOfChannel, MaxSpectrumLength)
@@ -135,7 +135,7 @@ Public Class pSpectra
                     End If
                 End If
 
-            ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Then
+            ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
                 Dim lenght = (_n_ch + 3) * npacket
                 Dim data(lenght) As UInt32
                 For cp = 0 To Connection.ComClass._nBoard - 1
@@ -297,7 +297,7 @@ Public Class pSpectra
             Else
                 MainForm.plog.TextBox1.AppendText("Error on CONFIG_ARM" & vbCrLf)
             End If
-        ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.SCIDK Then
+        ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.SCIDK Or Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
             For cp = 0 To Connection.ComClass._nBoard - 1
                 If Connection.ComClass.SetRegister(addressRUN, 0, cp) = 0 Then
 
@@ -370,7 +370,7 @@ Public Class pSpectra
 
                 End If
             Next
-        ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.SCIDK Then
+        ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.SCIDK Or Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
 
             For cp = 0 To Connection.ComClass._nBoard - 1
                 If Connection.ComClass.SetRegister(addressRUN, 0, cp) = 0 Then
@@ -602,7 +602,11 @@ Public Class pSpectra
                     Dim dataCorretto As Double
                     Dim selected_ch, selected_ch_id As Integer
                     selected_ch = CInt(MainForm.fit.DataGridView1.Rows(k).Cells("Channel").Value.ToString.Replace("CHANNEL ", ""))
-                    selected_ch_id = MainForm.acquisition.CHList(selected_ch - 1).id - 1
+                    If Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
+                        selected_ch_id = MainForm.acquisition.CHList(selected_ch - 1).id
+                    Else
+                        selected_ch_id = MainForm.acquisition.CHList(selected_ch - 1).id - 1
+                    End If
                     For i = sx To ex
                         dataCorretto = Rebinned_spectra(selected_ch_id, i)
                         mean = mean + dataCorretto * i
