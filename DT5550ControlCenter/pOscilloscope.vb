@@ -1047,14 +1047,14 @@ Public Class pOscilloscope
                                 Dim A(nsamples), A2(nsamples), D0(nsamples), D1(nsamples), D2(nsamples) As Single
                                 'For j = 0 To nsamples - 1
                                 Array.Copy(AnalogArray, nsamples * n, A, 0, nsamples)
-                                Array.Copy(AnalogArray2, nsamples * n, A2, 0, nsamples)
-                                Array.Copy(Digital1Array, nsamples * n, D0, 0, nsamples)
-                                Array.Copy(Digital2Array, nsamples * n, D1, 0, nsamples)
-                                Array.Copy(Digital3Array, nsamples * n, D2, 0, nsamples)
+                                'Array.Copy(AnalogArray2, nsamples * n, A2, 0, nsamples)
+                                'Array.Copy(Digital1Array, nsamples * n, D0, 0, nsamples)
+                                'Array.Copy(Digital2Array, nsamples * n, D1, 0, nsamples)
+                                'Array.Copy(Digital3Array, nsamples * n, D2, 0, nsamples)
                                 '    Next
-                                MutexFile.WaitOne()
+                                'MutexFile.WaitOne()
                                 objRawWriter.WriteLine((Now - startTime).TotalMilliseconds / 1000.0 & ";" & ch_id & ";" & nsamples & ";" & 1 & ";" & String.Join(";", A)) ' & String.Join(";", A2) & String.Join(";", D0) & String.Join(";", D1) & String.Join(";", D2))
-                                MutexFile.ReleaseMutex()
+                                'MutexFile.ReleaseMutex()
                             End If
                             ' Next
                             If TargetMode = 1 Then
@@ -1071,7 +1071,7 @@ Public Class pOscilloscope
 
                         n += 1
 
-                        Console.WriteLine((Now - lastPlot).TotalMilliseconds)
+                        'Console.WriteLine((Now - lastPlot).TotalMilliseconds)
 
 
                     End If

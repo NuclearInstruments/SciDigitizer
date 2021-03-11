@@ -294,107 +294,115 @@ Public Class Connection
 
 
     Private Sub Connect_R5560_Click(sender As Object, e As EventArgs) Handles Connect_R5560.Click
-        selected_board = communication.tModel.R5560
-        selected_connection = communication.tConnectionMode.ETHERNET2
+        If DataGridView1.RowCount > 0 Then
+            selected_board = communication.tModel.R5560
+            selected_connection = communication.tConnectionMode.ETHERNET2
         Connect_R5560.Enabled = False
-
         ComClass.StartConnection(DataGridView1.RowCount, selected_board)
-        Dim _connected_board = 0
-        For d = 0 To DataGridView1.RowCount - 1
-            If DataGridView1.Rows(d).Cells("ConnectionType").Value = "USB" Then
-                MsgBox("USB Connection not supported yet")
-                Exit For
-            End If
-            If DataGridView1.Rows(d).Cells("BoardType").Value = "Baseboard" Then
-                MsgBox("Baseboard Connection not supported yet")
-                Exit For
-            End If
-            Dim a As String() = DataGridView1.Rows(d).Cells("IP").Value.split(".")
-            If a.Length <> 4 Then
-                MsgBox("IP Not Valid")
-                Exit For
-            End If
-            For i = 0 To 3
-                If a(i) < 0 Or a(i) > 255 Then
+            Dim _connected_board = 0
+            For d = 0 To DataGridView1.RowCount - 1
+                If DataGridView1.Rows(d).Cells("ConnectionType").Value = "USB" Then
+                    MsgBox("USB Connection not supported yet")
+                    Exit For
+                End If
+                If DataGridView1.Rows(d).Cells("BoardType").Value = "Baseboard" Then
+                    MsgBox("Baseboard Connection not supported yet")
+                    Exit For
+                End If
+                Dim a As String() = DataGridView1.Rows(d).Cells("IP").Value.split(".")
+                If a.Length <> 4 Then
                     MsgBox("IP Not Valid")
                     Exit For
                 End If
+                For i = 0 To 3
+                    If a(i) < 0 Or a(i) > 255 Then
+                        MsgBox("IP Not Valid")
+                        Exit For
+                    End If
+                Next
+
+                Dim r As New communication.tError
+                r = ComClass.Connect(selected_connection, selected_board, DataGridView1.Rows(d).Cells("IP").Value, d)
+                If r = communication.tError.OK Then
+                    _connected_board += 1
+                    DataGridView1.Rows(d).Cells("Status").Value = "OK"
+                Else
+                    DataGridView1.Rows(d).Cells("Status").Value = "ERROR"
+                    ComClass.GetMessage(r)
+                End If
             Next
+            Connect_R5560.Enabled = True
 
-            Dim r As New communication.tError
-            r = ComClass.Connect(selected_connection, selected_board, DataGridView1.Rows(d).Cells("IP").Value, d)
-            If r = communication.tError.OK Then
-                _connected_board += 1
-                DataGridView1.Rows(d).Cells("Status").Value = "OK"
-            Else
-                DataGridView1.Rows(d).Cells("Status").Value = "ERROR"
-                ComClass.GetMessage(r)
+            Jsonfile = My.Application.Info.DirectoryPath & "\RegisterFileR5560.json"
+            My.Settings.IP1 = DataGridView1.Rows(0).Cells("IP").Value
+            My.Settings.Save()
+
+            If _connected_board = DataGridView1.RowCount And _connected_board <> 0 Then
+                ComClass._nBoard = _connected_board
+                ComClass._n_ch = 32
+                ComClass._n_ch_oscilloscope = 2
+                ComClass._n_oscilloscope = 32
+                MainForm.Show()
+                Me.Hide()
             End If
-        Next
-        Connect_R5560.Enabled = True
-
-        Jsonfile = My.Application.Info.DirectoryPath & "\RegisterFileR5560.json"
-        My.Settings.IP1 = DataGridView1.Rows(0).Cells("IP").Value
-        My.Settings.Save()
-
-        If _connected_board = DataGridView1.RowCount And _connected_board <> 0 Then
-            ComClass._nBoard = _connected_board
-            ComClass._n_ch = 32
-            ComClass._n_ch_oscilloscope = 2
-            ComClass._n_oscilloscope = 32
-            MainForm.Show()
-            Me.Hide()
+        Else
+            MsgBox("Please add a device!")
         End If
     End Sub
 
     Private Sub Connect_DT5560SE_Click(sender As Object, e As EventArgs) Handles Connect_DT5560SE.Click
+        If DataGridView2.RowCount > 0 Then
 
-        selected_board = communication.tModel.DT5560SE
-        selected_connection = communication.tConnectionMode.ETHERNET2
-        Connect_DT5560SE.Enabled = False
+            selected_board = communication.tModel.DT5560SE
+            selected_connection = communication.tConnectionMode.ETHERNET2
+            Connect_DT5560SE.Enabled = False
 
-        ComClass.StartConnection(DataGridView2.RowCount, selected_board)
-        Dim _connected_board = 0
-        For d = 0 To DataGridView2.RowCount - 1
-            If DataGridView2.Rows(d).Cells("ConnectionType").Value = "USB" Then
-                MsgBox("USB Connection not supported yet")
-                Exit For
-            End If
-            Dim a As String() = DataGridView2.Rows(d).Cells("IP").Value.split(".")
-            If a.Length <> 4 Then
-                MsgBox("IP Not Valid")
-                Exit For
-            End If
-            For i = 0 To 3
-                If a(i) < 0 Or a(i) > 255 Then
+            ComClass.StartConnection(DataGridView2.RowCount, selected_board)
+            Dim _connected_board = 0
+
+            For d = 0 To DataGridView2.RowCount - 1
+                If DataGridView2.Rows(d).Cells("ConnectionType").Value = "USB" Then
+                    MsgBox("USB Connection not supported yet")
+                    Exit For
+                End If
+                Dim a As String() = DataGridView2.Rows(d).Cells("IP").Value.split(".")
+                If a.Length <> 4 Then
                     MsgBox("IP Not Valid")
                     Exit For
                 End If
+                For i = 0 To 3
+                    If a(i) < 0 Or a(i) > 255 Then
+                        MsgBox("IP Not Valid")
+                        Exit For
+                    End If
+                Next
+
+                Dim r As New communication.tError
+                r = ComClass.Connect(selected_connection, selected_board, DataGridView2.Rows(d).Cells("IP").Value, d)
+                If r = communication.tError.OK Then
+                    _connected_board += 1
+                    DataGridView2.Rows(d).Cells("Status").Value = "OK"
+                Else
+                    DataGridView2.Rows(d).Cells("Status").Value = "ERROR"
+                    ComClass.GetMessage(r)
+                End If
             Next
+            Connect_DT5560SE.Enabled = True
 
-            Dim r As New communication.tError
-            r = ComClass.Connect(selected_connection, selected_board, DataGridView2.Rows(d).Cells("IP").Value, d)
-            If r = communication.tError.OK Then
-                _connected_board += 1
-                DataGridView2.Rows(d).Cells("Status").Value = "OK"
-            Else
-                DataGridView2.Rows(d).Cells("Status").Value = "ERROR"
-                ComClass.GetMessage(r)
+            Jsonfile = My.Application.Info.DirectoryPath & "\RegisterFileDT5560SE.json"
+            My.Settings.IP1 = DataGridView2.Rows(0).Cells("IP").Value
+            My.Settings.Save()
+
+            If _connected_board = DataGridView2.RowCount And _connected_board <> 0 Then
+                ComClass._nBoard = _connected_board
+                ComClass._n_ch = 32
+                ComClass._n_ch_oscilloscope = 2
+                ComClass._n_oscilloscope = 32
+                MainForm.Show()
+                Me.Hide()
             End If
-        Next
-        Connect_DT5560SE.Enabled = True
-
-        Jsonfile = My.Application.Info.DirectoryPath & "\RegisterFileDT5560SE.json"
-        My.Settings.IP1 = DataGridView2.Rows(0).Cells("IP").Value
-        My.Settings.Save()
-
-        If _connected_board = DataGridView2.RowCount And _connected_board <> 0 Then
-            ComClass._nBoard = _connected_board
-            ComClass._n_ch = 32
-            ComClass._n_ch_oscilloscope = 2
-            ComClass._n_oscilloscope = 32
-            MainForm.Show()
-            Me.Hide()
+        Else
+            MsgBox("Please add a device!")
         End If
     End Sub
 
