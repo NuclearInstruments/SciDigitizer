@@ -71,6 +71,7 @@ Partial Class pOscilloscope
         '
         'Timer1
         '
+        Me.Timer1.Interval = 20
         '
         'BackgroundWorker1
         '
