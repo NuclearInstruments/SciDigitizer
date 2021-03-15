@@ -1173,27 +1173,23 @@ Public Class Settings
                 MainForm.plog.TextBox1.AppendText("AFE Settings: Shaper applied successfully!" & vbCrLf)
             End If
 
-            If Connection.ComClass.SetAfeParam("Termination", term, ch_2, 1) Then
-                    MainForm.plog.TextBox1.AppendText("AFE Settings: Termination applied successfully!" & vbCrLf)
-                Else
-                    MainForm.plog.TextBox1.AppendText("AFE Settings: Termination Error!" & vbCrLf)
-                End If
-                If Connection.ComClass.SetAfeParam("Division", divis, ch_2, 1) Then
-                    MainForm.plog.TextBox1.AppendText("AFE Settings: Division applied successfully!" & vbCrLf)
-                Else
-                    MainForm.plog.TextBox1.AppendText("AFE Settings: Division Error!" & vbCrLf)
-                End If
-                If Connection.ComClass.SetAfeParam("Offset", off, ch, 1) Then
-                    MainForm.plog.TextBox1.AppendText("AFE Settings: Offset applied successfully!" & vbCrLf)
-                Else
-                    MainForm.plog.TextBox1.AppendText("AFE Settings: Offset Error!" & vbCrLf)
-                End If
-                If Connection.ComClass.SetAfeParam("Gain", g, ch_2, 1) Then
-                    MainForm.plog.TextBox1.AppendText("AFE Settings: Gain applied successfully!" & vbCrLf)
-                Else
-                    MainForm.plog.TextBox1.AppendText("AFE Settings: Gain Error!" & vbCrLf)
-                End If
+            If Connection.ComClass.SetAfeParam("Termination", "Division", term, divis, ch_2, ch_2, 1) Then
+                MainForm.plog.TextBox1.AppendText("AFE Settings: Termination applied successfully!" & vbCrLf)
+                MainForm.plog.TextBox1.AppendText("AFE Settings: Division applied successfully!" & vbCrLf)
+            Else
+                MainForm.plog.TextBox1.AppendText("AFE Settings: Termination Error!" & vbCrLf)
+                MainForm.plog.TextBox1.AppendText("AFE Settings: Division Error!" & vbCrLf)
             End If
+
+            If Connection.ComClass.SetAfeParam("Offset", "Gain", off, g, ch, ch_2, 1) Then
+                MainForm.plog.TextBox1.AppendText("AFE Settings: Offset applied successfully!" & vbCrLf)
+                MainForm.plog.TextBox1.AppendText("AFE Settings: Gain applied successfully!" & vbCrLf)
+            Else
+                MainForm.plog.TextBox1.AppendText("AFE Settings: Offset Error!" & vbCrLf)
+                MainForm.plog.TextBox1.AppendText("AFE Settings: Gain Error!" & vbCrLf)
+            End If
+
+        End If
 
             If n_ok = MainForm.acquisition.CHList.Count Then
             Apply.Enabled = False
