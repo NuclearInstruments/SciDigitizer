@@ -809,7 +809,7 @@ Public Class communication
         Public Property Result As Boolean
     End Class
 
-    Public Sub CreateJsonString(ByRef _json As String, ByVal param As String, ByVal values As Integer(), ByVal ch As Integer(), ByVal N_Sections As Integer)
+    Public Sub CreateJsonString(ByRef _json As String, ByVal param As String, ByVal param2 As String, ByVal values As Integer(), ByVal values2 As Integer(), ByVal ch As Integer(), ByVal ch2 As Integer(), ByVal N_Sections As Integer)
         Dim json As String = "["
 
         For k As Integer = 0 To N_Sections - 1
@@ -825,20 +825,51 @@ Public Class communication
         json += "]"
 
         If param = "Termination" Then
-            _json = "{""term"": " & json & "}"
+            _json = "{""term"": " & json
         End If
 
         If param = "Division" Then
-            _json = "{""div"": " & json & "}"
+            _json = "{""div"": " & json
         End If
 
         If param = "Offset" Then
-            _json = "{""offset"": " & json & "}"
+            _json = "{""offset"": " & json
         End If
 
         If param = "Gain" Then
-            _json = "{""gain"": " & json & "}"
+            _json = "{""gain"": " & json
         End If
+
+        Dim json2 As String = "["
+
+        For k As Integer = 0 To N_Sections - 1
+            For j As Integer = 0 To ch2.Length - 1
+                'Dim ch As Integer = (N_Section_Channels * k) + j
+                json2 += "{""ch"": " & ch2(j) & ",""value"": " & values2(j) & "}"
+                If ((k = (N_Sections - 1)) AndAlso (j = (ch2.Length - 1))) = False Then
+                    json2 += ","
+                End If
+            Next
+        Next
+
+        json2 += "]"
+
+        If param2 = "Termination" Then
+            _json += ",""term"": " & json2 & "}"
+        End If
+
+        If param2 = "Division" Then
+            _json += ",""div"": " & json2 & "}"
+        End If
+
+        If param2 = "Offset" Then
+            _json += ",""offset"": " & json2 & "}"
+        End If
+
+        If param2 = "Gain" Then
+            _json += ",""gain"": " & json2 & "}"
+        End If
+
     End Sub
 
     Public Function SetShaper(ByVal shaper As String) As Boolean
@@ -856,12 +887,12 @@ Public Class communication
         End If
     End Function
 
-    Public Function SetAfeParam(ByVal param As String, ByVal values As Integer(), ByVal ch As Integer(), ByVal N_Sections As Integer) As Boolean
+    Public Function SetAfeParam(ByVal param As String, ByVal param2 As String, ByVal values As Integer(), ByVal values2 As Integer(), ByVal ch As Integer(), ByVal ch2 As Integer(), ByVal N_Sections As Integer) As Boolean
         Dim url As String = "http://" & My.Settings.IP1 & ":80/afe_settings"
         Dim response As String = ""
         Dim _json As String = ""
         Dim JsonPost As String = ""
-        CreateJsonString(_json, param, values, ch, N_Sections)
+        CreateJsonString(_json, param, param2, values, values2, ch, ch2, N_Sections)
         JsonPost = "{""command"":""set_afe"", ""params"":" & _json & "}"
         HttpRequest(url, JsonPost, response)
         Dim w_response As WResponse = JsonConvert.DeserializeObject(Of WResponse)(response)
