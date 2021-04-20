@@ -379,10 +379,10 @@ Public Class pOscilloscope
         Pesgo1.PeLegend.Show = True
         copyOscilloscopeParam()
         setOscilloscopeParam()
+        MainForm.plog.TextBox1.AppendText("Starting Oscilloscope Free Running Acquisition..." & vbCrLf)
         Timer1.Enabled = True
         running = True
         'MainForm.sets.Apply.Enabled = False
-        MainForm.plog.TextBox1.AppendText("Starting Oscilloscope Free Running Acquisition..." & vbCrLf)
 
     End Sub
 
@@ -775,14 +775,16 @@ Public Class pOscilloscope
                         End If
                     Next
                     If TargetMode = 1 Then
-                        If totalACQ >= TargetEvent Then
-                            MainForm.ProgressBar.Value = 100
-                            StopDataCaptureOnFile()
-                            MainForm.SaveData.Enabled = True
-                            MainForm.StopSaveData.Enabled = False
-                        Else
-                            MainForm.ProgressBar.Value = totalACQ / TargetEvent * 100
-                        End If
+                        Me.Invoke(Sub()
+                                      If totalACQ >= TargetEvent Then
+                                          MainForm.ProgressBar.Value = 100
+                                          StopDataCaptureOnFile()
+                                          MainForm.SaveData.Enabled = True
+                                          MainForm.StopSaveData.Enabled = False
+                                      Else
+                                          MainForm.ProgressBar.Value = totalACQ / TargetEvent * 100
+                                      End If
+                                  End Sub)
                     End If
                 End If
             End If
@@ -957,14 +959,16 @@ Public Class pOscilloscope
                             End If
                             ' Next
                             If TargetMode = 1 Then
-                                If totalACQ >= TargetEvent Then
-                                    MainForm.ProgressBar.Value = 100
-                                    StopDataCaptureOnFile()
-                                    MainForm.SaveData.Enabled = True
-                                    MainForm.StopSaveData.Enabled = False
-                                Else
-                                    MainForm.ProgressBar.Value = totalACQ / TargetEvent * 100
-                                End If
+                                Me.Invoke(Sub()
+                                              If totalACQ >= TargetEvent Then
+                                                  MainForm.ProgressBar.Value = 100
+                                                  StopDataCaptureOnFile()
+                                                  MainForm.SaveData.Enabled = True
+                                                  MainForm.StopSaveData.Enabled = False
+                                              Else
+                                                  MainForm.ProgressBar.Value = totalACQ / TargetEvent * 100
+                                              End If
+                                          End Sub)
                             End If
                         End If
 
@@ -1193,14 +1197,16 @@ Public Class pOscilloscope
                             End If
 
                             If TargetMode = 1 Then
-                                If totalACQ >= TargetEvent Then
-                                    MainForm.ProgressBar.Value = 100
-                                    StopDataCaptureOnFile()
-                                    MainForm.SaveData.Enabled = True
-                                    MainForm.StopSaveData.Enabled = False
-                                Else
-                                    MainForm.ProgressBar.Value = totalACQ / TargetEvent * 100
-                                End If
+                                Me.Invoke(Sub()
+                                              If totalACQ >= TargetEvent Then
+                                                  MainForm.ProgressBar.Value = 100
+                                                  StopDataCaptureOnFile()
+                                                  MainForm.SaveData.Enabled = True
+                                                  MainForm.StopSaveData.Enabled = False
+                                              Else
+                                                  MainForm.ProgressBar.Value = totalACQ / TargetEvent * 100
+                                              End If
+                                          End Sub)
                             End If
                         End If
                     End If
@@ -1641,14 +1647,16 @@ Public Class pOscilloscope
                         End If
                     Next
                     If TargetMode = 1 Then
-                        If totalACQ >= TargetEvent Then
-                            MainForm.ProgressBar.Value = 100
-                            StopDataCaptureOnFile()
-                            MainForm.SaveData.Enabled = True
-                            MainForm.StopSaveData.Enabled = False
-                        Else
-                            MainForm.ProgressBar.Value = totalACQ / TargetEvent * 100
-                        End If
+                        Me.Invoke(Sub()
+                                      If totalACQ >= TargetEvent Then
+                                          MainForm.ProgressBar.Value = 100
+                                          StopDataCaptureOnFile()
+                                          MainForm.SaveData.Enabled = True
+                                          MainForm.StopSaveData.Enabled = False
+                                      Else
+                                          MainForm.ProgressBar.Value = totalACQ / TargetEvent * 100
+                                      End If
+                                  End Sub)
                     End If
                 End If
             End If
