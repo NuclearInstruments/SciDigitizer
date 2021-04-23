@@ -585,15 +585,21 @@ Public Class pOscilloscope
             If Connection.ComClass.ReadData(addressData(0), data, length, 0, 1000, read_data, valid_data, 0) = 0 Then
 
                 If n_ch > 0 Then
+                    Try
+                        Me.Invoke(Sub()
+                                      Pesgo1.PeData.Points = nsamples
+                                      Pesgo1.PeGrid.MultiAxesSubsets(0) = n_ch
+                                      Pesgo1.PeGrid.MultiAxesSubsets(1) = n_ch
+                                      Pesgo1.PeGrid.MultiAxesSubsets(2) = n_ch
+                                      Pesgo1.PeGrid.MultiAxesSubsets(3) = n_ch
+                                      Pesgo1.PeGrid.MultiAxesSubsets(4) = n_ch
+                                  End Sub)
+                    Catch ex As Exception
+                        Console.WriteLine("Exception Invoke" & ex.Message)
 
-                    Me.Invoke(Sub()
-                                  Pesgo1.PeData.Points = nsamples
-                                  Pesgo1.PeGrid.MultiAxesSubsets(0) = n_ch
-                                  Pesgo1.PeGrid.MultiAxesSubsets(1) = n_ch
-                                  Pesgo1.PeGrid.MultiAxesSubsets(2) = n_ch
-                                  Pesgo1.PeGrid.MultiAxesSubsets(3) = n_ch
-                                  Pesgo1.PeGrid.MultiAxesSubsets(4) = n_ch
-                              End Sub)
+
+                    End Try
+
 
                     Dim TOTpoints = tot_points * n_ch
                     Dim tmpYData2(TOTpoints) As Single
@@ -681,79 +687,85 @@ Public Class pOscilloscope
                     Array.Copy(Digital4Array, 0, tmpYData2, nsamples * (n_ch * 4), nsamples * n_ch)
 
                     Gigasoft.ProEssentials.Api.PEvsetW(Pesgo1.PeSpecial.HObject, Gigasoft.ProEssentials.DllProperties.YData, tmpYData2, TOTpoints)
+                    Try
 
-                    Me.Invoke(Sub()
+                        Me.Invoke(Sub()
 
-                                  Pesgo1.PeString.YAxisLabel = "ANALOG"
+                                      Pesgo1.PeString.YAxisLabel = "ANALOG"
 
-                                  Pesgo1.PeGrid.WorkingAxis = 1
-                                  Pesgo1.PeString.TruncateYAxisLabels = True
-                                  Pesgo1.PeGrid.Configure.YAxisWholeNumbers = True
-                                  If Connection.CustomFirmware Then
-                                      Pesgo1.PeString.YAxisLabel = "Digital 0"
-                                  Else
-                                      Pesgo1.PeString.YAxisLabel = "Integration Gate"
-                                  End If
-                                  Pesgo1.PeGrid.Configure.ManualScaleControlY = ManualScaleControl.MinMax
-                                  Pesgo1.PeGrid.Configure.ManualMinY = 0
-                                  Pesgo1.PeGrid.Configure.ManualMaxY = 1.1
+                                      Pesgo1.PeGrid.WorkingAxis = 1
+                                      Pesgo1.PeString.TruncateYAxisLabels = True
+                                      Pesgo1.PeGrid.Configure.YAxisWholeNumbers = True
+                                      If Connection.CustomFirmware Then
+                                          Pesgo1.PeString.YAxisLabel = "Digital 0"
+                                      Else
+                                          Pesgo1.PeString.YAxisLabel = "Integration Gate"
+                                      End If
+                                      Pesgo1.PeGrid.Configure.ManualScaleControlY = ManualScaleControl.MinMax
+                                      Pesgo1.PeGrid.Configure.ManualMinY = 0
+                                      Pesgo1.PeGrid.Configure.ManualMaxY = 1.1
 
-                                  Pesgo1.PeGrid.WorkingAxis = 2
-                                  Pesgo1.PeGrid.Configure.YAxisWholeNumbers = True
-                                  Pesgo1.PeString.TruncateYAxisLabels = True
-                                  If Connection.CustomFirmware Then
-                                      Pesgo1.PeString.YAxisLabel = "Digital 1"
-                                  Else
-                                      Pesgo1.PeString.YAxisLabel = "Baseline gate"
-                                  End If
-                                  Pesgo1.PeGrid.Configure.ManualScaleControlY = ManualScaleControl.MinMax
-                                  Pesgo1.PeGrid.Configure.ManualMinY = 0
-                                  Pesgo1.PeGrid.Configure.ManualMaxY = 1.1
+                                      Pesgo1.PeGrid.WorkingAxis = 2
+                                      Pesgo1.PeGrid.Configure.YAxisWholeNumbers = True
+                                      Pesgo1.PeString.TruncateYAxisLabels = True
+                                      If Connection.CustomFirmware Then
+                                          Pesgo1.PeString.YAxisLabel = "Digital 1"
+                                      Else
+                                          Pesgo1.PeString.YAxisLabel = "Baseline gate"
+                                      End If
+                                      Pesgo1.PeGrid.Configure.ManualScaleControlY = ManualScaleControl.MinMax
+                                      Pesgo1.PeGrid.Configure.ManualMinY = 0
+                                      Pesgo1.PeGrid.Configure.ManualMaxY = 1.1
 
-                                  Pesgo1.PeGrid.WorkingAxis = 3
-                                  Pesgo1.PeGrid.Configure.YAxisWholeNumbers = True
-                                  Pesgo1.PeString.TruncateYAxisLabels = True
-                                  If Connection.CustomFirmware Then
-                                      Pesgo1.PeString.YAxisLabel = "Digital 2"
-                                  Else
-                                      Pesgo1.PeString.YAxisLabel = "Trigger"
-                                  End If
-                                  Pesgo1.PeGrid.Configure.ManualScaleControlY = ManualScaleControl.MinMax
-                                  Pesgo1.PeGrid.Configure.ManualMinY = 0
-                                  Pesgo1.PeGrid.Configure.ManualMaxY = 1.1
+                                      Pesgo1.PeGrid.WorkingAxis = 3
+                                      Pesgo1.PeGrid.Configure.YAxisWholeNumbers = True
+                                      Pesgo1.PeString.TruncateYAxisLabels = True
+                                      If Connection.CustomFirmware Then
+                                          Pesgo1.PeString.YAxisLabel = "Digital 2"
+                                      Else
+                                          Pesgo1.PeString.YAxisLabel = "Trigger"
+                                      End If
+                                      Pesgo1.PeGrid.Configure.ManualScaleControlY = ManualScaleControl.MinMax
+                                      Pesgo1.PeGrid.Configure.ManualMinY = 0
+                                      Pesgo1.PeGrid.Configure.ManualMaxY = 1.1
 
-                                  Pesgo1.PeGrid.WorkingAxis = 4
-                                  Pesgo1.PeGrid.Configure.YAxisWholeNumbers = True
-                                  Pesgo1.PeString.TruncateYAxisLabels = True
-                                  If Connection.CustomFirmware Then
-                                      Pesgo1.PeString.YAxisLabel = "Digital 3"
-                                  Else
-                                      Pesgo1.PeString.YAxisLabel = "Pile Up"
-                                  End If
-                                  Pesgo1.PeGrid.Configure.ManualScaleControlY = ManualScaleControl.MinMax
-                                  Pesgo1.PeGrid.Configure.ManualMinY = 0
-                                  Pesgo1.PeGrid.Configure.ManualMaxY = 1.1
+                                      Pesgo1.PeGrid.WorkingAxis = 4
+                                      Pesgo1.PeGrid.Configure.YAxisWholeNumbers = True
+                                      Pesgo1.PeString.TruncateYAxisLabels = True
+                                      If Connection.CustomFirmware Then
+                                          Pesgo1.PeString.YAxisLabel = "Digital 3"
+                                      Else
+                                          Pesgo1.PeString.YAxisLabel = "Pile Up"
+                                      End If
+                                      Pesgo1.PeGrid.Configure.ManualScaleControlY = ManualScaleControl.MinMax
+                                      Pesgo1.PeGrid.Configure.ManualMinY = 0
+                                      Pesgo1.PeGrid.Configure.ManualMaxY = 1.1
 
-                                  Pesgo1.PeGrid.MultiAxesProportions(0) = 0.8F
-                                  Pesgo1.PeGrid.MultiAxesProportions(1) = 0.05F
-                                  Pesgo1.PeGrid.MultiAxesProportions(2) = 0.05F
-                                  Pesgo1.PeGrid.MultiAxesProportions(3) = 0.05F
-                                  Pesgo1.PeGrid.MultiAxesProportions(4) = 0.05F
+                                      Pesgo1.PeGrid.MultiAxesProportions(0) = 0.8F
+                                      Pesgo1.PeGrid.MultiAxesProportions(1) = 0.05F
+                                      Pesgo1.PeGrid.MultiAxesProportions(2) = 0.05F
+                                      Pesgo1.PeGrid.MultiAxesProportions(3) = 0.05F
+                                      Pesgo1.PeGrid.MultiAxesProportions(4) = 0.05F
 
 
-                                  If (Pesgo1.PeConfigure.RenderEngine = RenderEngine.Direct3D) Then
-                                      Pesgo1.PeFunction.Force3dxVerticeRebuild = True
-                                      Pesgo1.PeFunction.Force3dxNewColors = True
-                                  Else
-                                      Pesgo1.PeFunction.Reinitialize()
-                                      Pesgo1.PeFunction.ResetImage(0, 0)
-                                  End If
-                                  totalACQ += 1
-                                  Pesgo1.PeString.MainTitle = "Real Time Oscilloscope (" & totalACQ & ")"
-                                  Pesgo1.Invalidate()
-                                  Pesgo1.PeFunction.ReinitializeResetImage()
-                                  lastPlot = Now
-                              End Sub)
+                                      If (Pesgo1.PeConfigure.RenderEngine = RenderEngine.Direct3D) Then
+                                          Pesgo1.PeFunction.Force3dxVerticeRebuild = True
+                                          Pesgo1.PeFunction.Force3dxNewColors = True
+                                      Else
+                                          Pesgo1.PeFunction.Reinitialize()
+                                          Pesgo1.PeFunction.ResetImage(0, 0)
+                                      End If
+                                      totalACQ += 1
+                                      Pesgo1.PeString.MainTitle = "Real Time Oscilloscope (" & totalACQ & ")"
+                                      Pesgo1.Invalidate()
+                                      Pesgo1.PeFunction.ReinitializeResetImage()
+                                      lastPlot = Now
+                                  End Sub)
+                    Catch ex As Exception
+                        Console.WriteLine("Exception Invoke" & ex.Message)
+
+
+                    End Try
                 End If
 
                 ' wavecount += 1
@@ -775,16 +787,23 @@ Public Class pOscilloscope
                         End If
                     Next
                     If TargetMode = 1 Then
-                        Me.Invoke(Sub()
-                                      If totalACQ >= TargetEvent Then
-                                          MainForm.ProgressBar.Value = 100
-                                          StopDataCaptureOnFile()
-                                          MainForm.SaveData.Enabled = True
-                                          MainForm.StopSaveData.Enabled = False
-                                      Else
-                                          MainForm.ProgressBar.Value = totalACQ / TargetEvent * 100
-                                      End If
-                                  End Sub)
+                        Try
+                            Me.Invoke(Sub()
+                                          If totalACQ >= TargetEvent Then
+                                              MainForm.ProgressBar.Value = 100
+                                              StopDataCaptureOnFile()
+                                              MainForm.SaveData.Enabled = True
+                                              MainForm.StopSaveData.Enabled = False
+                                          Else
+                                              MainForm.ProgressBar.Value = totalACQ / TargetEvent * 100
+                                          End If
+                                      End Sub)
+                        Catch ex As Exception
+                            Console.WriteLine("Exception Invoke" & ex.Message)
+
+
+                        End Try
+
                     End If
                 End If
             End If
@@ -819,29 +838,39 @@ Public Class pOscilloscope
                 Dim read_data As UInt32
                 Dim valid_data As UInt32
                 Dim test(length) As UInt32
-                Dim gdata(n_ch, length) As UInt32
-                Dim gstatus(n_ch) As UInt32
-                Dim gposition(n_ch) As UInt32
+                Dim gdata(4096, length) As UInt32
+                Dim gstatus(4096) As UInt32
+                Dim gposition(4096) As UInt32
 
-                For qq = 0 To n_ch - 1
-                    Connection.ComClass.GetRegister(addressStatus(qq), status, 0)
-                    gstatus(qq) = status
-                    Connection.ComClass.GetRegister(addressPosition(qq), position, 0)
-                    gposition(qq) = position
-                    Connection.ComClass.ReadData(addressData(qq), test, length, 0, 1000, read_data, valid_data, 0)
+                For Each ch In Checked_id
+                    Dim ch_id = ch - 1
+                    Dim ind = MainForm.acquisition.CHList(ch_id).board_number
+                    Dim ch_addr = MainForm.acquisition.CHList(ch_id).ch_id - 1
+
+                    Connection.ComClass.GetRegister(addressStatus(ch_addr), status, ind)
+                    gstatus(ch_id) = status
+                    Connection.ComClass.GetRegister(addressPosition(ch_addr), position, ind)
+                    gposition(ch_id) = position
+                    Connection.ComClass.ReadData(addressData(ch_addr), test, length, 0, 1000, read_data, valid_data, ind)
                     For t = 0 To length - 1
-                        gdata(qq, t) = test(t)
+                        gdata(ch_id, t) = test(t)
                     Next
 
                 Next
 
-                For qq = 0 To n_ch - 1
+                For Each ch In Checked_id
+                    Dim ch_id = ch - 1
+                    Dim ind = MainForm.acquisition.CHList(ch_id).board_number
+                    Dim ch_addr = MainForm.acquisition.CHList(ch_id).ch_id - 1
                     'If gstatus(qq) <> 1 Then
                     '    n += 1
                     '    Continue For
                     'End If
-                    Connection.ComClass.SetRegister(addressArm(qq), 0, 0)
-                    Connection.ComClass.SetRegister(addressArm(qq), 1, 0)
+                    '
+                    If gstatus(ch_id) = 1 Then
+                        Connection.ComClass.SetRegister(addressArm(ch_addr), 0, ind)
+                        Connection.ComClass.SetRegister(addressArm(ch_addr), 1, ind)
+                    End If
                 Next
 
 
@@ -881,62 +910,62 @@ Public Class pOscilloscope
                     '       If Connection.ComClass.SetRegister(addressArm(ch_addr), 1, ind) = 0 Then
 
                     ' End If
-                    If gstatus(ch_addr) = 1 Then
-                        Dim curr As Integer = gposition(ch_addr) - Math.Floor(PreTriggerValue * nsamples / 100)
+                    If gstatus(ch_id) = 1 Then
+                        Dim curr As Integer = gposition(ch_id) - Math.Floor(PreTriggerValue * nsamples / 100)
                         If curr > 0 Then
                             Dim k = 0
                             For i = curr To nsamples - 2
-                                Dim d = gdata(ch_addr, i + nsamples)
-                                AnalogArray(k + nsamples * n) = (gdata(ch_addr, i) And 65535) '+ coor(ch)
+                                Dim d = gdata(ch_id, i + nsamples)
+                                AnalogArray(k + nsamples * n) = (gdata(ch_id, i) And 65535) '+ coor(ch)
                                 If ((d And 65535) > 32767) Then
                                     AnalogArray2(k + nsamples * n) = -(65535 - (d And 65535))
                                 Else
                                     AnalogArray2(k + nsamples * n) = d And 65535
                                 End If
-                                Digital1Array(k + nsamples * n) = gdata(ch_addr, i) >> 16 And 1
-                                Digital2Array(k + nsamples * n) = gdata(ch_addr, i) >> 17 And 1
-                                Digital3Array(k + nsamples * n) = gdata(ch_addr, i) >> 18 And 1
+                                Digital1Array(k + nsamples * n) = gdata(ch_id, i) >> 16 And 1
+                                Digital2Array(k + nsamples * n) = gdata(ch_id, i) >> 17 And 1
+                                Digital3Array(k + nsamples * n) = gdata(ch_id, i) >> 18 And 1
                                 k += 1
                             Next
                             For i = 0 To curr - 1
-                                Dim d = gdata(ch_addr, i + nsamples)
-                                AnalogArray(k + nsamples * n) = (gdata(ch_addr, i) And 65535) '+ coor(ch)
+                                Dim d = gdata(ch_id, i + nsamples)
+                                AnalogArray(k + nsamples * n) = (gdata(ch_id, i) And 65535) '+ coor(ch)
                                 If ((d And 65535) > 32767) Then
                                     AnalogArray2(k + nsamples * n) = -(65535 - (d And 65535))
                                 Else
                                     AnalogArray2(k + nsamples * n) = d And 65535
                                 End If
-                                Digital1Array(k + nsamples * n) = gdata(ch_addr, i) >> 16 And 1
-                                Digital2Array(k + nsamples * n) = gdata(ch_addr, i) >> 17 And 1
-                                Digital3Array(k + nsamples * n) = gdata(ch_addr, i) >> 18 And 1
+                                Digital1Array(k + nsamples * n) = gdata(ch_id, i) >> 16 And 1
+                                Digital2Array(k + nsamples * n) = gdata(ch_id, i) >> 17 And 1
+                                Digital3Array(k + nsamples * n) = gdata(ch_id, i) >> 18 And 1
                                 k += 1
                             Next
                         Else
                             Dim k = 0
                             For i = nsamples + curr To nsamples - 2
-                                Dim d = gdata(ch_addr, i + nsamples)
-                                AnalogArray(k + nsamples * n) = (gdata(ch_addr, i) And 65535) '+ coor(ch)
+                                Dim d = gdata(ch_id, i + nsamples)
+                                AnalogArray(k + nsamples * n) = (gdata(ch_id, i) And 65535) '+ coor(ch)
                                 If ((d And 65535) > 32767) Then
                                     AnalogArray2(k + nsamples * n) = -(65535 - (d And 65535))
                                 Else
                                     AnalogArray2(k + nsamples * n) = d And 65535
                                 End If
-                                Digital1Array(k + nsamples * n) = gdata(ch_addr, i) >> 16 And 1
-                                Digital2Array(k + nsamples * n) = gdata(ch_addr, i) >> 17 And 1
-                                Digital3Array(k + nsamples * n) = gdata(ch_addr, i) >> 18 And 1
+                                Digital1Array(k + nsamples * n) = gdata(ch_id, i) >> 16 And 1
+                                Digital2Array(k + nsamples * n) = gdata(ch_id, i) >> 17 And 1
+                                Digital3Array(k + nsamples * n) = gdata(ch_id, i) >> 18 And 1
                                 k += 1
                             Next
                             For i = 0 To nsamples + curr - 1
-                                Dim d = gdata(ch_addr, i + nsamples)
-                                AnalogArray(k + nsamples * n) = (gdata(ch_addr, i) And 65535) '+ coor(ch)
+                                Dim d = gdata(ch_id, i + nsamples)
+                                AnalogArray(k + nsamples * n) = (gdata(ch_id, i) And 65535) '+ coor(ch)
                                 If ((d And 65535) > 32767) Then
                                     AnalogArray2(k + nsamples * n) = -(65535 - (d And 65535))
                                 Else
                                     AnalogArray2(k + nsamples * n) = d And 65535
                                 End If
-                                Digital1Array(k + nsamples * n) = gdata(ch_addr, i) >> 16 And 1
-                                Digital2Array(k + nsamples * n) = gdata(ch_addr, i) >> 17 And 1
-                                Digital3Array(k + nsamples * n) = gdata(ch_addr, i) >> 18 And 1
+                                Digital1Array(k + nsamples * n) = gdata(ch_id, i) >> 16 And 1
+                                Digital2Array(k + nsamples * n) = gdata(ch_id, i) >> 17 And 1
+                                Digital3Array(k + nsamples * n) = gdata(ch_id, i) >> 18 And 1
                                 k += 1
                             Next
                         End If
@@ -959,16 +988,23 @@ Public Class pOscilloscope
                             End If
                             ' Next
                             If TargetMode = 1 Then
-                                Me.Invoke(Sub()
-                                              If totalACQ >= TargetEvent Then
-                                                  MainForm.ProgressBar.Value = 100
-                                                  StopDataCaptureOnFile()
-                                                  MainForm.SaveData.Enabled = True
-                                                  MainForm.StopSaveData.Enabled = False
-                                              Else
-                                                  MainForm.ProgressBar.Value = totalACQ / TargetEvent * 100
-                                              End If
-                                          End Sub)
+                                Try
+                                    Me.Invoke(Sub()
+                                                  If totalACQ >= TargetEvent Then
+                                                      MainForm.ProgressBar.Value = 100
+                                                      StopDataCaptureOnFile()
+                                                      MainForm.SaveData.Enabled = True
+                                                      MainForm.StopSaveData.Enabled = False
+                                                  Else
+                                                      MainForm.ProgressBar.Value = totalACQ / TargetEvent * 100
+                                                  End If
+                                              End Sub)
+                                Catch ex As Exception
+                                    Console.WriteLine("Exception Invoke" & ex.Message)
+
+
+                                End Try
+
                             End If
                         End If
 
@@ -990,15 +1026,21 @@ Public Class pOscilloscope
                 Next
 
                 If (Now - lastPlot).TotalMilliseconds > 90 Then
+                    Try
+                        Me.Invoke(Sub()
+                                      Pesgo1.PeData.Points = nsamples
+                                      Pesgo1.PeGrid.MultiAxesSubsets(0) = n_ch
+                                      Pesgo1.PeGrid.MultiAxesSubsets(1) = n_ch
+                                      Pesgo1.PeGrid.MultiAxesSubsets(2) = n_ch
+                                      Pesgo1.PeGrid.MultiAxesSubsets(3) = n_ch
+                                      Pesgo1.PeGrid.MultiAxesSubsets(4) = n_ch
+                                  End Sub)
+                    Catch ex As Exception
+                        Console.WriteLine("Exception Invoke" & ex.Message)
 
-                    Me.Invoke(Sub()
-                                  Pesgo1.PeData.Points = nsamples
-                                  Pesgo1.PeGrid.MultiAxesSubsets(0) = n_ch
-                                  Pesgo1.PeGrid.MultiAxesSubsets(1) = n_ch
-                                  Pesgo1.PeGrid.MultiAxesSubsets(2) = n_ch
-                                  Pesgo1.PeGrid.MultiAxesSubsets(3) = n_ch
-                                  Pesgo1.PeGrid.MultiAxesSubsets(4) = n_ch
-                              End Sub)
+
+                    End Try
+
 
                     Gigasoft.ProEssentials.Api.PEvsetW(Pesgo1.PeSpecial.HObject, Gigasoft.ProEssentials.DllProperties.XData, tmpXData, TOTpoints)
 
@@ -1010,58 +1052,65 @@ Public Class pOscilloscope
 
                     Gigasoft.ProEssentials.Api.PEvsetW(Pesgo1.PeSpecial.HObject, Gigasoft.ProEssentials.DllProperties.YData, tmpYData2, TOTpoints)
 
-                    Me.Invoke(Sub()
+                    Try
+                        Me.Invoke(Sub()
 
-                                  Pesgo1.PeString.YAxisLabel = "ANALOG"
+                                      Pesgo1.PeString.YAxisLabel = "ANALOG"
 
-                                  Pesgo1.PeGrid.WorkingAxis = 1
-                                  Pesgo1.PeString.TruncateYAxisLabels = True
-                                  Pesgo1.PeString.YAxisLabel = "TRAPEZOIDAL"
+                                      Pesgo1.PeGrid.WorkingAxis = 1
+                                      Pesgo1.PeString.TruncateYAxisLabels = True
+                                      Pesgo1.PeString.YAxisLabel = "TRAPEZOIDAL"
 
-                                  Pesgo1.PeGrid.WorkingAxis = 2
-                                  Pesgo1.PeGrid.Configure.YAxisWholeNumbers = True
-                                  Pesgo1.PeString.TruncateYAxisLabels = True
-                                  Pesgo1.PeString.YAxisLabel = "Trigger"
-                                  Pesgo1.PeGrid.Configure.ManualScaleControlY = ManualScaleControl.MinMax
-                                  Pesgo1.PeGrid.Configure.ManualMinY = 0
-                                  Pesgo1.PeGrid.Configure.ManualMaxY = 1.1
+                                      Pesgo1.PeGrid.WorkingAxis = 2
+                                      Pesgo1.PeGrid.Configure.YAxisWholeNumbers = True
+                                      Pesgo1.PeString.TruncateYAxisLabels = True
+                                      Pesgo1.PeString.YAxisLabel = "Trigger"
+                                      Pesgo1.PeGrid.Configure.ManualScaleControlY = ManualScaleControl.MinMax
+                                      Pesgo1.PeGrid.Configure.ManualMinY = 0
+                                      Pesgo1.PeGrid.Configure.ManualMaxY = 1.1
 
-                                  Pesgo1.PeGrid.WorkingAxis = 3
-                                  Pesgo1.PeGrid.Configure.YAxisWholeNumbers = True
-                                  Pesgo1.PeString.TruncateYAxisLabels = True
-                                  Pesgo1.PeString.YAxisLabel = "Energy Sample"
-                                  Pesgo1.PeGrid.Configure.ManualScaleControlY = ManualScaleControl.MinMax
-                                  Pesgo1.PeGrid.Configure.ManualMinY = 0
-                                  Pesgo1.PeGrid.Configure.ManualMaxY = 1.1
+                                      Pesgo1.PeGrid.WorkingAxis = 3
+                                      Pesgo1.PeGrid.Configure.YAxisWholeNumbers = True
+                                      Pesgo1.PeString.TruncateYAxisLabels = True
+                                      Pesgo1.PeString.YAxisLabel = "Energy Sample"
+                                      Pesgo1.PeGrid.Configure.ManualScaleControlY = ManualScaleControl.MinMax
+                                      Pesgo1.PeGrid.Configure.ManualMinY = 0
+                                      Pesgo1.PeGrid.Configure.ManualMaxY = 1.1
 
-                                  Pesgo1.PeGrid.WorkingAxis = 4
-                                  Pesgo1.PeGrid.Configure.YAxisWholeNumbers = True
-                                  Pesgo1.PeString.TruncateYAxisLabels = True
-                                  Pesgo1.PeString.YAxisLabel = "Baseline Hold"
-                                  Pesgo1.PeGrid.Configure.ManualScaleControlY = ManualScaleControl.MinMax
-                                  Pesgo1.PeGrid.Configure.ManualMinY = 0
-                                  Pesgo1.PeGrid.Configure.ManualMaxY = 1.1
+                                      Pesgo1.PeGrid.WorkingAxis = 4
+                                      Pesgo1.PeGrid.Configure.YAxisWholeNumbers = True
+                                      Pesgo1.PeString.TruncateYAxisLabels = True
+                                      Pesgo1.PeString.YAxisLabel = "Baseline Hold"
+                                      Pesgo1.PeGrid.Configure.ManualScaleControlY = ManualScaleControl.MinMax
+                                      Pesgo1.PeGrid.Configure.ManualMinY = 0
+                                      Pesgo1.PeGrid.Configure.ManualMaxY = 1.1
 
-                                  Pesgo1.PeGrid.MultiAxesProportions(0) = 0.65F
-                                  Pesgo1.PeGrid.MultiAxesProportions(1) = 0.2F
-                                  Pesgo1.PeGrid.MultiAxesProportions(2) = 0.05F
-                                  Pesgo1.PeGrid.MultiAxesProportions(3) = 0.05F
-                                  Pesgo1.PeGrid.MultiAxesProportions(4) = 0.05F
+                                      Pesgo1.PeGrid.MultiAxesProportions(0) = 0.65F
+                                      Pesgo1.PeGrid.MultiAxesProportions(1) = 0.2F
+                                      Pesgo1.PeGrid.MultiAxesProportions(2) = 0.05F
+                                      Pesgo1.PeGrid.MultiAxesProportions(3) = 0.05F
+                                      Pesgo1.PeGrid.MultiAxesProportions(4) = 0.05F
 
 
-                                  If (Pesgo1.PeConfigure.RenderEngine = RenderEngine.Direct3D) Then
-                                      Pesgo1.PeFunction.Force3dxVerticeRebuild = True
-                                      Pesgo1.PeFunction.Force3dxNewColors = True
-                                  Else
-                                      Pesgo1.PeFunction.Reinitialize()
-                                      Pesgo1.PeFunction.ResetImage(0, 0)
-                                  End If
-                                  totalACQ += WaveNN
-                                  Pesgo1.PeString.MainTitle = "Real Time Oscilloscope (" & totalACQ & ")"
-                                  Pesgo1.Invalidate()
-                                  Pesgo1.PeFunction.ReinitializeResetImage()
-                                  lastPlot = Now
-                              End Sub)
+                                      If (Pesgo1.PeConfigure.RenderEngine = RenderEngine.Direct3D) Then
+                                          Pesgo1.PeFunction.Force3dxVerticeRebuild = True
+                                          Pesgo1.PeFunction.Force3dxNewColors = True
+                                      Else
+                                          Pesgo1.PeFunction.Reinitialize()
+                                          Pesgo1.PeFunction.ResetImage(0, 0)
+                                      End If
+                                      totalACQ += WaveNN
+                                      Pesgo1.PeString.MainTitle = "Real Time Oscilloscope (" & totalACQ & ")"
+                                      Pesgo1.Invalidate()
+                                      Pesgo1.PeFunction.ReinitializeResetImage()
+                                      lastPlot = Now
+                                  End Sub)
+                    Catch ex As Exception
+                        Console.WriteLine("Exception Invoke" & ex.Message)
+
+
+                    End Try
+
                 End If
 
 
@@ -1197,16 +1246,23 @@ Public Class pOscilloscope
                             End If
 
                             If TargetMode = 1 Then
-                                Me.Invoke(Sub()
-                                              If totalACQ >= TargetEvent Then
-                                                  MainForm.ProgressBar.Value = 100
-                                                  StopDataCaptureOnFile()
-                                                  MainForm.SaveData.Enabled = True
-                                                  MainForm.StopSaveData.Enabled = False
-                                              Else
-                                                  MainForm.ProgressBar.Value = totalACQ / TargetEvent * 100
-                                              End If
-                                          End Sub)
+                                Try
+                                    Me.Invoke(Sub()
+                                                  If totalACQ >= TargetEvent Then
+                                                      MainForm.ProgressBar.Value = 100
+                                                      StopDataCaptureOnFile()
+                                                      MainForm.SaveData.Enabled = True
+                                                      MainForm.StopSaveData.Enabled = False
+                                                  Else
+                                                      MainForm.ProgressBar.Value = totalACQ / TargetEvent * 100
+                                                  End If
+                                              End Sub)
+                                Catch ex As Exception
+                                    Console.WriteLine("Exception Invoke" & ex.Message)
+
+
+                                End Try
+
                             End If
                         End If
                     End If
@@ -1363,16 +1419,22 @@ Public Class pOscilloscope
                 Next
 
                 If (Now - lastPlot).TotalMilliseconds > 90 Then
+                    Try
+                        Me.Invoke(Sub()
+                                      Pesgo1.PeData.Points = nsamples
+                                      Pesgo1.PeGrid.MultiAxesSubsets(0) = n_ch
+                                      Pesgo1.PeGrid.MultiAxesSubsets(1) = n_ch
+                                      Pesgo1.PeGrid.MultiAxesSubsets(2) = n_ch
+                                      Pesgo1.PeGrid.MultiAxesSubsets(3) = n_ch
+                                      Pesgo1.PeGrid.MultiAxesSubsets(4) = n_ch
+                                  End Sub)
+                    Catch ex As Exception
+                        Console.WriteLine("Exception Invoke" & ex.Message)
 
 
-                    Me.Invoke(Sub()
-                                  Pesgo1.PeData.Points = nsamples
-                                  Pesgo1.PeGrid.MultiAxesSubsets(0) = n_ch
-                                  Pesgo1.PeGrid.MultiAxesSubsets(1) = n_ch
-                                  Pesgo1.PeGrid.MultiAxesSubsets(2) = n_ch
-                                  Pesgo1.PeGrid.MultiAxesSubsets(3) = n_ch
-                                  Pesgo1.PeGrid.MultiAxesSubsets(4) = n_ch
-                              End Sub)
+                    End Try
+
+
                     Gigasoft.ProEssentials.Api.PEvsetW(Pesgo1.PeSpecial.HObject, Gigasoft.ProEssentials.DllProperties.XData, tmpXData, TOTpoints)
 
                     Array.Copy(AnalogArray, 0, tmpYData2, 0, nsamples * n_ch)
@@ -1383,58 +1445,65 @@ Public Class pOscilloscope
 
                     Gigasoft.ProEssentials.Api.PEvsetW(Pesgo1.PeSpecial.HObject, Gigasoft.ProEssentials.DllProperties.YData, tmpYData2, TOTpoints)
 
-                    Me.Invoke(Sub()
+                    Try
+                        Me.Invoke(Sub()
 
-                                  Pesgo1.PeString.YAxisLabel = "ANALOG"
+                                      Pesgo1.PeString.YAxisLabel = "ANALOG"
 
-                                  Pesgo1.PeGrid.WorkingAxis = 1
-                                  Pesgo1.PeString.TruncateYAxisLabels = True
-                                  Pesgo1.PeString.YAxisLabel = "TRAPEZOIDAL"
+                                      Pesgo1.PeGrid.WorkingAxis = 1
+                                      Pesgo1.PeString.TruncateYAxisLabels = True
+                                      Pesgo1.PeString.YAxisLabel = "TRAPEZOIDAL"
 
-                                  Pesgo1.PeGrid.WorkingAxis = 2
-                                  Pesgo1.PeGrid.Configure.YAxisWholeNumbers = True
-                                  Pesgo1.PeString.TruncateYAxisLabels = True
-                                  Pesgo1.PeString.YAxisLabel = "Trigger"
-                                  Pesgo1.PeGrid.Configure.ManualScaleControlY = ManualScaleControl.MinMax
-                                  Pesgo1.PeGrid.Configure.ManualMinY = 0
-                                  Pesgo1.PeGrid.Configure.ManualMaxY = 1.1
+                                      Pesgo1.PeGrid.WorkingAxis = 2
+                                      Pesgo1.PeGrid.Configure.YAxisWholeNumbers = True
+                                      Pesgo1.PeString.TruncateYAxisLabels = True
+                                      Pesgo1.PeString.YAxisLabel = "Trigger"
+                                      Pesgo1.PeGrid.Configure.ManualScaleControlY = ManualScaleControl.MinMax
+                                      Pesgo1.PeGrid.Configure.ManualMinY = 0
+                                      Pesgo1.PeGrid.Configure.ManualMaxY = 1.1
 
-                                  Pesgo1.PeGrid.WorkingAxis = 3
-                                  Pesgo1.PeGrid.Configure.YAxisWholeNumbers = True
-                                  Pesgo1.PeString.TruncateYAxisLabels = True
-                                  Pesgo1.PeString.YAxisLabel = "Energy Sample"
-                                  Pesgo1.PeGrid.Configure.ManualScaleControlY = ManualScaleControl.MinMax
-                                  Pesgo1.PeGrid.Configure.ManualMinY = 0
-                                  Pesgo1.PeGrid.Configure.ManualMaxY = 1.1
+                                      Pesgo1.PeGrid.WorkingAxis = 3
+                                      Pesgo1.PeGrid.Configure.YAxisWholeNumbers = True
+                                      Pesgo1.PeString.TruncateYAxisLabels = True
+                                      Pesgo1.PeString.YAxisLabel = "Energy Sample"
+                                      Pesgo1.PeGrid.Configure.ManualScaleControlY = ManualScaleControl.MinMax
+                                      Pesgo1.PeGrid.Configure.ManualMinY = 0
+                                      Pesgo1.PeGrid.Configure.ManualMaxY = 1.1
 
-                                  Pesgo1.PeGrid.WorkingAxis = 4
-                                  Pesgo1.PeGrid.Configure.YAxisWholeNumbers = True
-                                  Pesgo1.PeString.TruncateYAxisLabels = True
-                                  Pesgo1.PeString.YAxisLabel = "Baseline Hold"
-                                  Pesgo1.PeGrid.Configure.ManualScaleControlY = ManualScaleControl.MinMax
-                                  Pesgo1.PeGrid.Configure.ManualMinY = 0
-                                  Pesgo1.PeGrid.Configure.ManualMaxY = 1.1
+                                      Pesgo1.PeGrid.WorkingAxis = 4
+                                      Pesgo1.PeGrid.Configure.YAxisWholeNumbers = True
+                                      Pesgo1.PeString.TruncateYAxisLabels = True
+                                      Pesgo1.PeString.YAxisLabel = "Baseline Hold"
+                                      Pesgo1.PeGrid.Configure.ManualScaleControlY = ManualScaleControl.MinMax
+                                      Pesgo1.PeGrid.Configure.ManualMinY = 0
+                                      Pesgo1.PeGrid.Configure.ManualMaxY = 1.1
 
-                                  Pesgo1.PeGrid.MultiAxesProportions(0) = 0.65F
-                                  Pesgo1.PeGrid.MultiAxesProportions(1) = 0.2F
-                                  Pesgo1.PeGrid.MultiAxesProportions(2) = 0.05F
-                                  Pesgo1.PeGrid.MultiAxesProportions(3) = 0.05F
-                                  Pesgo1.PeGrid.MultiAxesProportions(4) = 0.05F
+                                      Pesgo1.PeGrid.MultiAxesProportions(0) = 0.65F
+                                      Pesgo1.PeGrid.MultiAxesProportions(1) = 0.2F
+                                      Pesgo1.PeGrid.MultiAxesProportions(2) = 0.05F
+                                      Pesgo1.PeGrid.MultiAxesProportions(3) = 0.05F
+                                      Pesgo1.PeGrid.MultiAxesProportions(4) = 0.05F
 
 
-                                  If (Pesgo1.PeConfigure.RenderEngine = RenderEngine.Direct3D) Then
-                                      Pesgo1.PeFunction.Force3dxVerticeRebuild = True
-                                      Pesgo1.PeFunction.Force3dxNewColors = True
-                                  Else
-                                      Pesgo1.PeFunction.Reinitialize()
-                                      Pesgo1.PeFunction.ResetImage(0, 0)
-                                  End If
-                                  totalACQ += WaveNN
-                                  Pesgo1.PeString.MainTitle = "Real Time Oscilloscope (" & totalACQ & ")"
-                                  Pesgo1.Invalidate()
-                                  Pesgo1.PeFunction.ReinitializeResetImage()
-                                  lastPlot = Now
-                              End Sub)
+                                      If (Pesgo1.PeConfigure.RenderEngine = RenderEngine.Direct3D) Then
+                                          Pesgo1.PeFunction.Force3dxVerticeRebuild = True
+                                          Pesgo1.PeFunction.Force3dxNewColors = True
+                                      Else
+                                          Pesgo1.PeFunction.Reinitialize()
+                                          Pesgo1.PeFunction.ResetImage(0, 0)
+                                      End If
+                                      totalACQ += WaveNN
+                                      Pesgo1.PeString.MainTitle = "Real Time Oscilloscope (" & totalACQ & ")"
+                                      Pesgo1.Invalidate()
+                                      Pesgo1.PeFunction.ReinitializeResetImage()
+                                      lastPlot = Now
+                                  End Sub)
+                    Catch ex As Exception
+                        Console.WriteLine("Exception Invoke" & ex.Message)
+
+
+                    End Try
+
                 End If
 
 
@@ -1471,15 +1540,21 @@ Public Class pOscilloscope
 
                 End If
                 If n_ch > 0 Then
+                    Try
+                        Me.Invoke(Sub()
+                                      Pesgo1.PeData.Points = nsamples
+                                      Pesgo1.PeGrid.MultiAxesSubsets(0) = n_ch
+                                      Pesgo1.PeGrid.MultiAxesSubsets(1) = n_ch
+                                      Pesgo1.PeGrid.MultiAxesSubsets(2) = n_ch
+                                      Pesgo1.PeGrid.MultiAxesSubsets(3) = n_ch
+                                      Pesgo1.PeGrid.MultiAxesSubsets(4) = n_ch
+                                  End Sub)
+                    Catch ex As Exception
+                        Console.WriteLine("Exception Invoke" & ex.Message)
 
-                    Me.Invoke(Sub()
-                                  Pesgo1.PeData.Points = nsamples
-                                  Pesgo1.PeGrid.MultiAxesSubsets(0) = n_ch
-                                  Pesgo1.PeGrid.MultiAxesSubsets(1) = n_ch
-                                  Pesgo1.PeGrid.MultiAxesSubsets(2) = n_ch
-                                  Pesgo1.PeGrid.MultiAxesSubsets(3) = n_ch
-                                  Pesgo1.PeGrid.MultiAxesSubsets(4) = n_ch
-                              End Sub)
+
+                    End Try
+
 
                     Dim TOTpoints As Integer = 5 * nsamples * n_ch
                     Dim tmpYData2(TOTpoints) As Single
@@ -1576,58 +1651,64 @@ Public Class pOscilloscope
 
 
                     Gigasoft.ProEssentials.Api.PEvsetW(Pesgo1.PeSpecial.HObject, Gigasoft.ProEssentials.DllProperties.YData, tmpYData2, TOTpoints)
+                    Try
+                        Me.Invoke(Sub()
 
-                    Me.Invoke(Sub()
+                                      Pesgo1.PeString.YAxisLabel = "ANALOG"
 
-                                  Pesgo1.PeString.YAxisLabel = "ANALOG"
+                                      Pesgo1.PeGrid.WorkingAxis = 1
+                                      Pesgo1.PeString.TruncateYAxisLabels = True
+                                      Pesgo1.PeString.YAxisLabel = "TRAPEZOIDAL"
 
-                                  Pesgo1.PeGrid.WorkingAxis = 1
-                                  Pesgo1.PeString.TruncateYAxisLabels = True
-                                  Pesgo1.PeString.YAxisLabel = "TRAPEZOIDAL"
+                                      Pesgo1.PeGrid.WorkingAxis = 2
+                                      Pesgo1.PeGrid.Configure.YAxisWholeNumbers = True
+                                      Pesgo1.PeString.TruncateYAxisLabels = True
+                                      Pesgo1.PeString.YAxisLabel = "Trigger"
+                                      Pesgo1.PeGrid.Configure.ManualScaleControlY = ManualScaleControl.MinMax
+                                      Pesgo1.PeGrid.Configure.ManualMinY = 0
+                                      Pesgo1.PeGrid.Configure.ManualMaxY = 1.1
 
-                                  Pesgo1.PeGrid.WorkingAxis = 2
-                                  Pesgo1.PeGrid.Configure.YAxisWholeNumbers = True
-                                  Pesgo1.PeString.TruncateYAxisLabels = True
-                                  Pesgo1.PeString.YAxisLabel = "Trigger"
-                                  Pesgo1.PeGrid.Configure.ManualScaleControlY = ManualScaleControl.MinMax
-                                  Pesgo1.PeGrid.Configure.ManualMinY = 0
-                                  Pesgo1.PeGrid.Configure.ManualMaxY = 1.1
+                                      Pesgo1.PeGrid.WorkingAxis = 3
+                                      Pesgo1.PeGrid.Configure.YAxisWholeNumbers = True
+                                      Pesgo1.PeString.TruncateYAxisLabels = True
+                                      Pesgo1.PeString.YAxisLabel = "Energy Sample"
+                                      Pesgo1.PeGrid.Configure.ManualScaleControlY = ManualScaleControl.MinMax
+                                      Pesgo1.PeGrid.Configure.ManualMinY = 0
+                                      Pesgo1.PeGrid.Configure.ManualMaxY = 1.1
 
-                                  Pesgo1.PeGrid.WorkingAxis = 3
-                                  Pesgo1.PeGrid.Configure.YAxisWholeNumbers = True
-                                  Pesgo1.PeString.TruncateYAxisLabels = True
-                                  Pesgo1.PeString.YAxisLabel = "Energy Sample"
-                                  Pesgo1.PeGrid.Configure.ManualScaleControlY = ManualScaleControl.MinMax
-                                  Pesgo1.PeGrid.Configure.ManualMinY = 0
-                                  Pesgo1.PeGrid.Configure.ManualMaxY = 1.1
+                                      Pesgo1.PeGrid.WorkingAxis = 4
+                                      Pesgo1.PeGrid.Configure.YAxisWholeNumbers = True
+                                      Pesgo1.PeString.TruncateYAxisLabels = True
+                                      Pesgo1.PeString.YAxisLabel = "Baseline Hold"
+                                      Pesgo1.PeGrid.Configure.ManualScaleControlY = ManualScaleControl.MinMax
+                                      Pesgo1.PeGrid.Configure.ManualMinY = 0
+                                      Pesgo1.PeGrid.Configure.ManualMaxY = 1.1
 
-                                  Pesgo1.PeGrid.WorkingAxis = 4
-                                  Pesgo1.PeGrid.Configure.YAxisWholeNumbers = True
-                                  Pesgo1.PeString.TruncateYAxisLabels = True
-                                  Pesgo1.PeString.YAxisLabel = "Baseline Hold"
-                                  Pesgo1.PeGrid.Configure.ManualScaleControlY = ManualScaleControl.MinMax
-                                  Pesgo1.PeGrid.Configure.ManualMinY = 0
-                                  Pesgo1.PeGrid.Configure.ManualMaxY = 1.1
-
-                                  Pesgo1.PeGrid.MultiAxesProportions(0) = 0.65F
-                                  Pesgo1.PeGrid.MultiAxesProportions(1) = 0.2F
-                                  Pesgo1.PeGrid.MultiAxesProportions(2) = 0.05F
-                                  Pesgo1.PeGrid.MultiAxesProportions(3) = 0.05F
-                                  Pesgo1.PeGrid.MultiAxesProportions(4) = 0.05F
+                                      Pesgo1.PeGrid.MultiAxesProportions(0) = 0.65F
+                                      Pesgo1.PeGrid.MultiAxesProportions(1) = 0.2F
+                                      Pesgo1.PeGrid.MultiAxesProportions(2) = 0.05F
+                                      Pesgo1.PeGrid.MultiAxesProportions(3) = 0.05F
+                                      Pesgo1.PeGrid.MultiAxesProportions(4) = 0.05F
 
 
-                                  If (Pesgo1.PeConfigure.RenderEngine = RenderEngine.Direct3D) Then
-                                      Pesgo1.PeFunction.Force3dxVerticeRebuild = True
-                                      Pesgo1.PeFunction.Force3dxNewColors = True
-                                  Else
-                                      Pesgo1.PeFunction.Reinitialize()
-                                      Pesgo1.PeFunction.ResetImage(0, 0)
-                                  End If
-                                  totalACQ += 1
-                                  Pesgo1.PeString.MainTitle = "Real Time Oscilloscope (" & totalACQ & ")"
-                                  Pesgo1.Invalidate()
-                                  Pesgo1.PeFunction.ReinitializeResetImage()
-                              End Sub)
+                                      If (Pesgo1.PeConfigure.RenderEngine = RenderEngine.Direct3D) Then
+                                          Pesgo1.PeFunction.Force3dxVerticeRebuild = True
+                                          Pesgo1.PeFunction.Force3dxNewColors = True
+                                      Else
+                                          Pesgo1.PeFunction.Reinitialize()
+                                          Pesgo1.PeFunction.ResetImage(0, 0)
+                                      End If
+                                      totalACQ += 1
+                                      Pesgo1.PeString.MainTitle = "Real Time Oscilloscope (" & totalACQ & ")"
+                                      Pesgo1.Invalidate()
+                                      Pesgo1.PeFunction.ReinitializeResetImage()
+                                  End Sub)
+                    Catch ex As Exception
+                        Console.WriteLine("Exception Invoke" & ex.Message)
+
+
+                    End Try
+
 
 
                 End If
@@ -1647,16 +1728,23 @@ Public Class pOscilloscope
                         End If
                     Next
                     If TargetMode = 1 Then
-                        Me.Invoke(Sub()
-                                      If totalACQ >= TargetEvent Then
-                                          MainForm.ProgressBar.Value = 100
-                                          StopDataCaptureOnFile()
-                                          MainForm.SaveData.Enabled = True
-                                          MainForm.StopSaveData.Enabled = False
-                                      Else
-                                          MainForm.ProgressBar.Value = totalACQ / TargetEvent * 100
-                                      End If
-                                  End Sub)
+                        Try
+                            Me.Invoke(Sub()
+                                          If totalACQ >= TargetEvent Then
+                                              MainForm.ProgressBar.Value = 100
+                                              StopDataCaptureOnFile()
+                                              MainForm.SaveData.Enabled = True
+                                              MainForm.StopSaveData.Enabled = False
+                                          Else
+                                              MainForm.ProgressBar.Value = totalACQ / TargetEvent * 100
+                                          End If
+                                      End Sub)
+                        Catch ex As Exception
+                            Console.WriteLine("Exception Invoke" & ex.Message)
+
+
+                        End Try
+
                     End If
                 End If
             End If

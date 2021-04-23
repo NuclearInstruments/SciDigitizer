@@ -73,8 +73,8 @@ Public Class Settings
             TriggerSourceOscilloscope.Items.Add("Analog Signal")
             TriggerSourceOscilloscope.Items.Add("MCA Trigger")
             TriggerSourceOscilloscope.Items.Add("Free Running")
-            TriggerLevelOscilloscope.Visible = False
-            Label14.Visible = False
+            TriggerLevelOscilloscope.Visible = True
+            Label14.Visible = True
         ElseIf Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
             GroupBox1.SetBounds(0, 0, 0, 0)
             TableLayoutPanel1.RowStyles(0).Height = 110
@@ -1295,5 +1295,9 @@ Public Class Settings
     Private Sub Horizontal_ValueChanged(sender As Object, e As EventArgs) Handles Horizontal.ValueChanged
         Apply.Enabled = True
         Apply.BackColor = Color.DodgerBlue
+    End Sub
+
+    Private Sub Panel5_Paint(sender As Object, e As PaintEventArgs) Handles Panel5.Paint
+
     End Sub
 End Class
