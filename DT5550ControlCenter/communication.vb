@@ -475,8 +475,8 @@ Public Class communication
                 mtx.WaitOne()
                 Dim ierror = USB3_WriteReg(value, address, DT5550Handle)
                 mtx.ReleaseMutex()
-                If ierror < &HFFFFFFFF& Then
-                    Return ierror
+                If ierror = 0 Then
+                    Return tError.OK
                 Else
                     Return tError.ERROR_FPGA
                 End If
@@ -487,8 +487,8 @@ Public Class communication
                 mtx.WaitOne()
                 Dim ierror = R5560_WriteReg(value, address, R5560Handle(Handle_indx))
                 mtx.ReleaseMutex()
-                If ierror < &HFFFFFFFF& Then
-                    Return ierror
+                If ierror = 0 Then
+                    Return tError.OK
                 Else
                     Return tError.ERROR_FPGA
                 End If
@@ -499,8 +499,8 @@ Public Class communication
                 mtx.WaitOne()
                 Dim ierror = R5560_WriteReg(value, address, DT5560SEHandle(Handle_indx))
                 mtx.ReleaseMutex()
-                If ierror < &HFFFFFFFF& Then
-                    Return ierror
+                If ierror = 0 Then
+                    Return tError.OK
                 Else
                     Return tError.ERROR_FPGA
                 End If
@@ -511,8 +511,8 @@ Public Class communication
                 mtx.WaitOne()
                 Dim ierror = USB2_WriteReg(value, address, SCIDKHandle)
                 mtx.ReleaseMutex()
-                If ierror < &HFFFFFFFF& Then
-                    Return ierror
+                If ierror = 0 Then
+                    Return tError.OK
                 Else
                     Return tError.ERROR_FPGA
                 End If
@@ -560,8 +560,8 @@ Public Class communication
                 mtx.WaitOne()
                 Dim ierror = USB3_ReadReg(value, address, DT5550Handle)
                 mtx.ReleaseMutex()
-                If ierror < &HFFFFFFFF& Then
-                    Return ierror
+                If ierror = 0 Then
+                    Return tError.OK
                 Else
                     Return tError.ERROR_FPGA
                 End If
@@ -572,8 +572,8 @@ Public Class communication
                 mtx.WaitOne()
                 Dim ierror = R5560_ReadReg(value, address, R5560Handle(Handle_indx))
                 mtx.ReleaseMutex()
-                If ierror < &HFFFFFFFF& Then
-                    Return ierror
+                If ierror = 0 Then
+                    Return tError.OK
                 Else
                     Return tError.ERROR_FPGA
                 End If
@@ -584,8 +584,8 @@ Public Class communication
                 mtx.WaitOne()
                 Dim ierror = R5560_ReadReg(value, address, DT5560SEHandle(Handle_indx))
                 mtx.ReleaseMutex()
-                If ierror < &HFFFFFFFF& Then
-                    Return ierror
+                If ierror = 0 Then
+                    Return tError.OK
                 Else
                     Return tError.ERROR_FPGA
                 End If
@@ -596,8 +596,8 @@ Public Class communication
                 mtx.WaitOne()
                 Dim ierror = USB2_ReadReg(value, address, SCIDKHandle)
                 mtx.ReleaseMutex()
-                If ierror < &HFFFFFFFF& Then
-                    Return ierror
+                If ierror = 0 Then
+                    Return tError.OK
                 Else
                     Return tError.ERROR_FPGA
                 End If

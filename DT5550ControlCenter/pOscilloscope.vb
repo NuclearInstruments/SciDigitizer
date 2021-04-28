@@ -619,7 +619,6 @@ Public Class pOscilloscope
                             tmpXData(i + (nsamples * (n_ch * 4 + j))) = i * (MainForm.acquisition.General_settings.OscilloscopeDecimator) * sampling_factor
                         Next
                     Next
-                    Gigasoft.ProEssentials.Api.PEvsetW(Pesgo1.PeSpecial.HObject, Gigasoft.ProEssentials.DllProperties.XData, tmpXData, TOTpoints)
 
                     Dim curr As Integer = position - Math.Floor(PreTriggerValue * nsamples / 100)
                     Dim n = 0
@@ -680,16 +679,18 @@ Public Class pOscilloscope
 
                     Next
 
-                    Array.Copy(AnalogArray, 0, tmpYData2, 0, nsamples * n_ch)
-                    Array.Copy(Digital1Array, 0, tmpYData2, nsamples * (n_ch * 1), nsamples * n_ch)
-                    Array.Copy(Digital2Array, 0, tmpYData2, nsamples * (n_ch * 2), nsamples * n_ch)
-                    Array.Copy(Digital3Array, 0, tmpYData2, nsamples * (n_ch * 3), nsamples * n_ch)
-                    Array.Copy(Digital4Array, 0, tmpYData2, nsamples * (n_ch * 4), nsamples * n_ch)
-
-                    Gigasoft.ProEssentials.Api.PEvsetW(Pesgo1.PeSpecial.HObject, Gigasoft.ProEssentials.DllProperties.YData, tmpYData2, TOTpoints)
                     Try
 
                         Me.Invoke(Sub()
+                                      Gigasoft.ProEssentials.Api.PEvsetW(Pesgo1.PeSpecial.HObject, Gigasoft.ProEssentials.DllProperties.XData, tmpXData, TOTpoints)
+
+                                      Array.Copy(AnalogArray, 0, tmpYData2, 0, nsamples * n_ch)
+                                      Array.Copy(Digital1Array, 0, tmpYData2, nsamples * (n_ch * 1), nsamples * n_ch)
+                                      Array.Copy(Digital2Array, 0, tmpYData2, nsamples * (n_ch * 2), nsamples * n_ch)
+                                      Array.Copy(Digital3Array, 0, tmpYData2, nsamples * (n_ch * 3), nsamples * n_ch)
+                                      Array.Copy(Digital4Array, 0, tmpYData2, nsamples * (n_ch * 4), nsamples * n_ch)
+
+                                      Gigasoft.ProEssentials.Api.PEvsetW(Pesgo1.PeSpecial.HObject, Gigasoft.ProEssentials.DllProperties.YData, tmpYData2, TOTpoints)
 
                                       Pesgo1.PeString.YAxisLabel = "ANALOG"
 
@@ -1041,19 +1042,17 @@ Public Class pOscilloscope
 
                     End Try
 
-
-                    Gigasoft.ProEssentials.Api.PEvsetW(Pesgo1.PeSpecial.HObject, Gigasoft.ProEssentials.DllProperties.XData, tmpXData, TOTpoints)
-
-                    Array.Copy(AnalogArray, 0, tmpYData2, 0, nsamples * n_ch)
-                    Array.Copy(AnalogArray2, 0, tmpYData2, nsamples * (n_ch * 1), nsamples * n_ch)
-                    Array.Copy(Digital1Array, 0, tmpYData2, nsamples * (n_ch * 2), nsamples * n_ch)
-                    Array.Copy(Digital2Array, 0, tmpYData2, nsamples * (n_ch * 3), nsamples * n_ch)
-                    Array.Copy(Digital3Array, 0, tmpYData2, nsamples * (n_ch * 4), nsamples * n_ch)
-
-                    Gigasoft.ProEssentials.Api.PEvsetW(Pesgo1.PeSpecial.HObject, Gigasoft.ProEssentials.DllProperties.YData, tmpYData2, TOTpoints)
-
                     Try
                         Me.Invoke(Sub()
+                                      Gigasoft.ProEssentials.Api.PEvsetW(Pesgo1.PeSpecial.HObject, Gigasoft.ProEssentials.DllProperties.XData, tmpXData, TOTpoints)
+
+                                      Array.Copy(AnalogArray, 0, tmpYData2, 0, nsamples * n_ch)
+                                      Array.Copy(AnalogArray2, 0, tmpYData2, nsamples * (n_ch * 1), nsamples * n_ch)
+                                      Array.Copy(Digital1Array, 0, tmpYData2, nsamples * (n_ch * 2), nsamples * n_ch)
+                                      Array.Copy(Digital2Array, 0, tmpYData2, nsamples * (n_ch * 3), nsamples * n_ch)
+                                      Array.Copy(Digital3Array, 0, tmpYData2, nsamples * (n_ch * 4), nsamples * n_ch)
+
+                                      Gigasoft.ProEssentials.Api.PEvsetW(Pesgo1.PeSpecial.HObject, Gigasoft.ProEssentials.DllProperties.YData, tmpYData2, TOTpoints)
 
                                       Pesgo1.PeString.YAxisLabel = "ANALOG"
 
@@ -1119,14 +1118,14 @@ Public Class pOscilloscope
             If n_ch > 0 Then
 
                 Dim TOTpoints = tot_points * n_ch
-                Dim tmpYData2(TOTpoints) As Single
-                Dim AnalogArray(nsamples * CheckedListBox1.Items.Count) As Single
-                Dim AnalogArray2(nsamples * CheckedListBox1.Items.Count) As Single
-                Dim Digital1Array(nsamples * CheckedListBox1.Items.Count) As Single
-                Dim Digital2Array(nsamples * CheckedListBox1.Items.Count) As Single
-                Dim Digital3Array(nsamples * CheckedListBox1.Items.Count) As Single
+                Dim tmpYData2(TOTpoints - 1) As Single
+                Dim AnalogArray(nsamples * CheckedListBox1.Items.Count - 1) As Single
+                Dim AnalogArray2(nsamples * CheckedListBox1.Items.Count - 1) As Single
+                Dim Digital1Array(nsamples * CheckedListBox1.Items.Count - 1) As Single
+                Dim Digital2Array(nsamples * CheckedListBox1.Items.Count - 1) As Single
+                Dim Digital3Array(nsamples * CheckedListBox1.Items.Count - 1) As Single
 
-                Dim tmpXData(TOTpoints) As Single
+                Dim tmpXData(TOTpoints - 1) As Single
                 For j = 0 To n_ch - 1
                     For i = 0 To nsamples - 1
                         tmpXData(i + (nsamples * (n_ch * 0 + j))) = i * (MainForm.acquisition.General_settings.OscilloscopeDecimator) * sampling_factor
@@ -1144,10 +1143,10 @@ Public Class pOscilloscope
                 Dim position As UInt32
                 Dim read_data As UInt32
                 Dim valid_data As UInt32
-                Dim test(length) As UInt32
-                Dim gdata(32, length) As UInt32
-                Dim gstatus(32) As UInt32
-                Dim gposition(32) As UInt32
+                Dim test(length - 1) As UInt32
+                Dim gdata(32 - 1, length - 1) As UInt32
+                Dim gstatus(32 - 1) As UInt32
+                Dim gposition(32 - 1) As UInt32
 
                 For qq = 0 To 31
                     Connection.ComClass.GetRegister(addressStatus(qq), status, 0)
@@ -1434,19 +1433,17 @@ Public Class pOscilloscope
 
                     End Try
 
-
-                    Gigasoft.ProEssentials.Api.PEvsetW(Pesgo1.PeSpecial.HObject, Gigasoft.ProEssentials.DllProperties.XData, tmpXData, TOTpoints)
-
-                    Array.Copy(AnalogArray, 0, tmpYData2, 0, nsamples * n_ch)
-                    Array.Copy(AnalogArray2, 0, tmpYData2, nsamples * (n_ch * 1), nsamples * n_ch)
-                    Array.Copy(Digital1Array, 0, tmpYData2, nsamples * (n_ch * 2), nsamples * n_ch)
-                    Array.Copy(Digital2Array, 0, tmpYData2, nsamples * (n_ch * 3), nsamples * n_ch)
-                    Array.Copy(Digital3Array, 0, tmpYData2, nsamples * (n_ch * 4), nsamples * n_ch)
-
-                    Gigasoft.ProEssentials.Api.PEvsetW(Pesgo1.PeSpecial.HObject, Gigasoft.ProEssentials.DllProperties.YData, tmpYData2, TOTpoints)
-
                     Try
                         Me.Invoke(Sub()
+                                      Gigasoft.ProEssentials.Api.PEvsetW(Pesgo1.PeSpecial.HObject, Gigasoft.ProEssentials.DllProperties.XData, tmpXData, TOTpoints)
+
+                                      Array.Copy(AnalogArray, 0, tmpYData2, 0, nsamples * n_ch)
+                                      Array.Copy(AnalogArray2, 0, tmpYData2, nsamples * (n_ch * 1), nsamples * n_ch)
+                                      Array.Copy(Digital1Array, 0, tmpYData2, nsamples * (n_ch * 2), nsamples * n_ch)
+                                      Array.Copy(Digital2Array, 0, tmpYData2, nsamples * (n_ch * 3), nsamples * n_ch)
+                                      Array.Copy(Digital3Array, 0, tmpYData2, nsamples * (n_ch * 4), nsamples * n_ch)
+
+                                      Gigasoft.ProEssentials.Api.PEvsetW(Pesgo1.PeSpecial.HObject, Gigasoft.ProEssentials.DllProperties.YData, tmpYData2, TOTpoints)
 
                                       Pesgo1.PeString.YAxisLabel = "ANALOG"
 
@@ -1575,7 +1572,6 @@ Public Class pOscilloscope
                             tmpXData(i + (nsamples * (n_ch * 4 + j))) = i * (MainForm.acquisition.General_settings.OscilloscopeDecimator) * sampling_factor
                         Next
                     Next
-                    Gigasoft.ProEssentials.Api.PEvsetW(Pesgo1.PeSpecial.HObject, Gigasoft.ProEssentials.DllProperties.XData, tmpXData, TOTpoints)
 
                     Dim curr As Integer = position - Math.Floor(PreTriggerValue * nsamples / 100)
                     Dim n = 0
@@ -1641,19 +1637,21 @@ Public Class pOscilloscope
 
                     Next
 
-                    Array.Copy(AnalogArray, 0, tmpYData2, 0, nsamples * n_ch)
-                    Array.Copy(AnalogArray2, 0, tmpYData2, nsamples * (n_ch * 1), nsamples * n_ch)
-                    Array.Copy(Digital1Array, 0, tmpYData2, nsamples * (n_ch * 2), nsamples * n_ch)
-                    Array.Copy(Digital2Array, 0, tmpYData2, nsamples * (n_ch * 3), nsamples * n_ch)
-                    Array.Copy(Digital3Array, 0, tmpYData2, nsamples * (n_ch * 4), nsamples * n_ch)
-                    'Array.Copy(Digital4Array, 0, tmpYData2, nsamples * (n_ch * 4), nsamples * n_ch)
 
-
-
-                    Gigasoft.ProEssentials.Api.PEvsetW(Pesgo1.PeSpecial.HObject, Gigasoft.ProEssentials.DllProperties.YData, tmpYData2, TOTpoints)
                     Try
                         Me.Invoke(Sub()
+                                      Gigasoft.ProEssentials.Api.PEvsetW(Pesgo1.PeSpecial.HObject, Gigasoft.ProEssentials.DllProperties.XData, tmpXData, TOTpoints)
 
+                                      Array.Copy(AnalogArray, 0, tmpYData2, 0, nsamples * n_ch)
+                                      Array.Copy(AnalogArray2, 0, tmpYData2, nsamples * (n_ch * 1), nsamples * n_ch)
+                                      Array.Copy(Digital1Array, 0, tmpYData2, nsamples * (n_ch * 2), nsamples * n_ch)
+                                      Array.Copy(Digital2Array, 0, tmpYData2, nsamples * (n_ch * 3), nsamples * n_ch)
+                                      Array.Copy(Digital3Array, 0, tmpYData2, nsamples * (n_ch * 4), nsamples * n_ch)
+                                      'Array.Copy(Digital4Array, 0, tmpYData2, nsamples * (n_ch * 4), nsamples * n_ch)
+
+
+
+                                      Gigasoft.ProEssentials.Api.PEvsetW(Pesgo1.PeSpecial.HObject, Gigasoft.ProEssentials.DllProperties.YData, tmpYData2, TOTpoints)
                                       Pesgo1.PeString.YAxisLabel = "ANALOG"
 
                                       Pesgo1.PeGrid.WorkingAxis = 1

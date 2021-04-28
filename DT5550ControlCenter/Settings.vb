@@ -13,7 +13,7 @@ Public Class Settings
     Dim AnalogOffsetControl As NumericUpDown
     Public DataGridView2 As New DataGridView
     Dim shaper As New ComboBox
-
+    Dim first_load = True
 
     Dim gain_list = {1, 1.06, 1.1, 1.2, 1.26, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 2.1, 2.2, 2.4, 2.5, 2.7, 2.8, 3, 3.2, 3.3, 3.5, 3.8, 4, 4.2, 4.5, 4.7, 5, 5.3, 5.6, 6, 6.3, 6.7, 7.1, 7.5, 7.9, 8.4, 8.9, 9.4, 10, 10.6, 11.2, 11.9, 12.6, 13.3,
                     14.1, 15, 15.8, 16.8, 17.8, 18.8, 20, 21.1, 22.4, 23.7, 25.1, 26.6, 28.2, 29.9, 31.6, 33.5, 37.6, 39.8, 42.2, 44.7, 47.3, 50.1, 53.1, 56.2, 59.6, 63.1, 66.8, 70.8, 75, 79.4, 84.1, 89.1, 94.4, 100}
@@ -184,92 +184,95 @@ Public Class Settings
         DataGridView1.Columns.Add(baseline)
 
         If Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
-            Dim title As String = "AFE Settings"
-            Dim myTabPage As TabPage = New TabPage(title)
+            If (first_load) Then
+                Dim title As String = "AFE Settings"
+                Dim myTabPage As TabPage = New TabPage(title)
 
-            Dim myTablelayout As New TableLayoutPanel
-            myTablelayout.ColumnCount = 1
-            myTablelayout.RowCount = 2
-            myTablelayout.RowStyles.Add(New RowStyle(SizeType.Absolute, 100))
-            myTablelayout.BackColor = Color.White
-            myTablelayout.Dock = DockStyle.Fill
+                Dim myTablelayout As New TableLayoutPanel
+                myTablelayout.ColumnCount = 1
+                myTablelayout.RowCount = 2
+                myTablelayout.RowStyles.Add(New RowStyle(SizeType.Absolute, 100))
+                myTablelayout.BackColor = Color.White
+                myTablelayout.Dock = DockStyle.Fill
 
-            Dim p1 As New Panel
-            Dim p2 As New Panel
-            p1.BackColor = Color.White
-            p2.BackColor = Color.White
-            p1.Dock = DockStyle.Fill
-            p2.Dock = DockStyle.Fill
+                Dim p1 As New Panel
+                Dim p2 As New Panel
+                p1.BackColor = Color.White
+                p2.BackColor = Color.White
+                p1.Dock = DockStyle.Fill
+                p2.Dock = DockStyle.Fill
 
-            Dim l As New Label
-            l.Text = "Shaper"
-            l.Location = New Point(30, 30)
-            l.Width = 50
+                Dim l As New Label
+                l.Text = "Shaper"
+                l.Location = New Point(30, 30)
+                l.Width = 50
 
-            shaper.Items.Clear()
-            shaper.Items.Add("DC")
-            shaper.Items.Add("AC 1us")
-            shaper.Items.Add("AC 10us")
-            shaper.Items.Add("AC 30us")
-            shaper.SelectedIndex = 0
-            shaper.Width = 100
-            shaper.DropDownStyle = ComboBoxStyle.DropDownList
-            'shaper.FlatStyle = FlatStyle.Flat
-            shaper.Location = New Point(120, 30)
-            AddHandler shaper.SelectedIndexChanged, AddressOf Shaper_SelectedIndexChanged
+                shaper.Items.Clear()
+                shaper.Items.Add("DC")
+                shaper.Items.Add("AC 1us")
+                shaper.Items.Add("AC 10us")
+                shaper.Items.Add("AC 30us")
+                shaper.SelectedIndex = 0
+                shaper.Width = 100
+                shaper.DropDownStyle = ComboBoxStyle.DropDownList
+                'shaper.FlatStyle = FlatStyle.Flat
+                shaper.Location = New Point(120, 30)
+                AddHandler shaper.SelectedIndexChanged, AddressOf Shaper_SelectedIndexChanged
 
 
-            p1.Controls.Add(l)
-            p1.Controls.Add(shaper)
+                p1.Controls.Add(l)
+                p1.Controls.Add(shaper)
 
-            AddHandler DataGridView2.Resize, AddressOf DataGridView2_Resize
-            AddHandler DataGridView2.CellValueChanged, AddressOf DataGridView2_CellValueChanged
+                AddHandler DataGridView2.Resize, AddressOf DataGridView2_Resize
+                AddHandler DataGridView2.CellValueChanged, AddressOf DataGridView2_CellValueChanged
 
-            DataGridView2.BackgroundColor = Color.White
-            DataGridView2.AllowUserToAddRows = False
-            DataGridView2.AllowUserToDeleteRows = False
-            DataGridView2.AllowUserToOrderColumns = False
-            DataGridView2.AllowUserToResizeColumns = False
-            DataGridView2.AllowUserToResizeRows = False
-            DataGridView2.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill
-            DataGridView2.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells
-            DataGridView2.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize
-            DataGridView2.Dock = DockStyle.Fill
-            DataGridView2.EditMode = DataGridViewEditMode.EditOnEnter
-            DataGridView2.RowHeadersVisible = False
+                DataGridView2.BackgroundColor = Color.White
+                DataGridView2.AllowUserToAddRows = False
+                DataGridView2.AllowUserToDeleteRows = False
+                DataGridView2.AllowUserToOrderColumns = False
+                DataGridView2.AllowUserToResizeColumns = False
+                DataGridView2.AllowUserToResizeRows = False
+                DataGridView2.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill
+                DataGridView2.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells
+                DataGridView2.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize
+                DataGridView2.Dock = DockStyle.Fill
+                DataGridView2.EditMode = DataGridViewEditMode.EditOnEnter
+                DataGridView2.RowHeadersVisible = False
 
-            DataGridView2.Columns.Clear()
-            DataGridView2.Columns.Add("Channel", "Channel")
-            Dim imp As New DataGridViewCheckBoxColumn
-            imp.HeaderText = "50 Ohm Termination"
-            imp.Name = "Termination"
-            DataGridView2.Columns.Add(imp)
-            Dim div As New DataGridViewCheckBoxColumn
-            div.HeaderText = "Division by 5"
-            div.Name = "Division"
-            DataGridView2.Columns.Add(div)
-            DataGridView2.Columns.Add("OffsetEven", "Offset Even (mV)")
-            DataGridView2.Columns.Add("OffsetOdd", "Offset Odd (mV)")
-            Dim gain As New DataGridViewComboBoxColumn()
-            gain.HeaderText = "Gain"
-            gain.Name = "Gain"
-            gain.MaxDropDownItems = 80
-            Dim i As Integer
-            For i = 0 To gain_list.Length - 1
-                gain.Items.Add(gain_list(i).ToString())
-            Next
-            gain.MaxDropDownItems = 10
-            DataGridView2.Columns.Add(gain)
+                DataGridView2.Columns.Clear()
+                DataGridView2.Columns.Add("Channel", "Channel")
+                Dim imp As New DataGridViewCheckBoxColumn
+                imp.HeaderText = "50 Ohm Termination"
+                imp.Name = "Termination"
+                DataGridView2.Columns.Add(imp)
+                Dim div As New DataGridViewCheckBoxColumn
+                div.HeaderText = "Division by 5"
+                div.Name = "Division"
+                DataGridView2.Columns.Add(div)
+                DataGridView2.Columns.Add("OffsetEven", "Offset Even (mV)")
+                DataGridView2.Columns.Add("OffsetOdd", "Offset Odd (mV)")
+                Dim gain As New DataGridViewComboBoxColumn()
+                gain.HeaderText = "Gain"
+                gain.Name = "Gain"
+                gain.MaxDropDownItems = 80
+                Dim i As Integer
+                For i = 0 To gain_list.Length - 1
+                    gain.Items.Add(gain_list(i).ToString())
+                Next
+                gain.MaxDropDownItems = 10
+                DataGridView2.Columns.Add(gain)
 
-            p2.Controls.Add(DataGridView2)
-            myTablelayout.Controls.Add(p1, 0, 0)
+                p2.Controls.Add(DataGridView2)
+                myTablelayout.Controls.Add(p1, 0, 0)
 
-            myTablelayout.RowStyles.Add(New RowStyle(SizeType.Percent, 90))
-            myTablelayout.Controls.Add(p2, 0, 1)
+                myTablelayout.RowStyles.Add(New RowStyle(SizeType.Percent, 90))
+                myTablelayout.Controls.Add(p2, 0, 1)
 
-            myTabPage.Controls.Add(myTablelayout)
-            TabControl1.TabPages.Add(myTabPage)
-            Grid2_ReLoad()
+                myTabPage.Controls.Add(myTablelayout)
+                TabControl1.TabPages.Add(myTabPage)
+                Grid2_ReLoad()
+                first_load = False
+            End If
         End If
 
         Settings_reload()
