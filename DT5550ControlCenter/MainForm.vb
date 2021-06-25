@@ -60,7 +60,8 @@ Public Class MainForm
 
 
         If Connection.ComClass._boardModel = communication.tModel.R5560 Or
-            Connection.ComClass._boardModel = communication.tModel.SCIDK Then
+            Connection.ComClass._boardModel = communication.tModel.SCIDK Or
+            Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
             OffsetCalibrationToolToolStripMenuItem.Visible = False
         End If
 
@@ -668,12 +669,20 @@ Public Class MainForm
                         writer.WriteElementString("Baseline_Lenght", sets.DataGridView1.Rows(i).Cells("Baseline Lenght").Value)
                         If Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
                             If (i Mod 2) = 0 Then
-                                writer.WriteElementString("AFE_Termination", sets.DataGridView2.Rows(i / 2).Cells("Termination").Value)
+                                If (sets.DataGridView2.Rows(i / 2).Cells("Termination").Value = "50 Ohm") Then
+                                    writer.WriteElementString("AFE_Termination", True)
+                                Else
+                                    writer.WriteElementString("AFE_Termination", False)
+                                End If
                                 writer.WriteElementString("AFE_Division", sets.DataGridView2.Rows(i / 2).Cells("Division").Value)
                                 writer.WriteElementString("AFE_Offset", sets.DataGridView2.Rows(i / 2).Cells("OffsetEven").Value)
                                 writer.WriteElementString("AFE_Gain", sets.DataGridView2.Rows(i / 2).Cells("Gain").Value)
                             Else
-                                writer.WriteElementString("AFE_Termination", sets.DataGridView2.Rows((i - 1) / 2).Cells("Termination").Value)
+                                If (sets.DataGridView2.Rows((i - 1) / 2).Cells("Termination").Value = "50 Ohm") Then
+                                    writer.WriteElementString("AFE_Termination", True)
+                                Else
+                                    writer.WriteElementString("AFE_Termination", False)
+                                End If
                                 writer.WriteElementString("AFE_Division", sets.DataGridView2.Rows((i - 1) / 2).Cells("Division").Value)
                                 writer.WriteElementString("AFE_Offset", sets.DataGridView2.Rows((i - 1) / 2).Cells("OffsetOdd").Value)
                                 writer.WriteElementString("AFE_Gain", sets.DataGridView2.Rows((i - 1) / 2).Cells("Gain").Value)

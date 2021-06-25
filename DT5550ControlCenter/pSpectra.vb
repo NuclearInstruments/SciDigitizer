@@ -848,6 +848,11 @@ Public Class pSpectra
 
     End Sub
 
+    Public Sub ClearRealtime()
+        For k = 0 To n_ch - 1
+            realtimeimage(k) = 0
+        Next
+    End Sub
 
     Public Sub UnpackDataPacketR(ByRef data As Queue(Of UInt32), cp As Integer)
 
@@ -905,12 +910,16 @@ Public Class pSpectra
                         ev.valid = False
                     End If
 
+                    'For k = 0 To n_ch - 1
+                    ' realtimeimage(k) = 0
+                    ' Next
+
                     If (trigger_id < 32) Then
                         MutexSpe.WaitOne()
                         spectra(trigger_id + (cp * _n_ch), ev.energy(0)) += 1
                         MutexSpe.ReleaseMutex()
                         MutexCumulative.WaitOne()
-                        realtimeimage(trigger_id + (cp * _n_ch)) = ev.energy(0)
+                        realtimeimage(trigger_id + (cp * _n_ch)) += ev.energy(0)
                         integralimage(trigger_id + (cp * _n_ch)) += ev.energy(0)
                         T = ev.timecode
                         MutexCumulative.ReleaseMutex()

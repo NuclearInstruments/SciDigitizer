@@ -138,6 +138,9 @@ Public Class pImmediate
                 '  q += 1
                 '  End If
             Next
+            If Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
+                MainForm.spect.ClearRealtime()
+            End If
 
         Else
             Dim tmp() = MainForm.spect.integralimage
@@ -169,6 +172,7 @@ Public Class pImmediate
         plot1.InvalidatePlot(True)
 
         Timer1.Enabled = True
+
     End Sub
 
     Private Sub plot1_Click(sender As Object, e As EventArgs) Handles plot1.Click

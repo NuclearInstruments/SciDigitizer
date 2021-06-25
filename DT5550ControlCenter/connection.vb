@@ -361,10 +361,10 @@ Public Class Connection
             Dim _connected_board = 0
 
             For d = 0 To DataGridView2.RowCount - 1
-                If DataGridView2.Rows(d).Cells("ConnectionType").Value = "USB" Then
-                    MsgBox("USB Connection not supported yet")
-                    Exit For
-                End If
+                'If DataGridView2.Rows(d).Cells("ConnectionType").Value = "USB" Then
+                '    MsgBox("USB Connection not supported yet")
+                '    Exit For
+                'End If
                 Dim a As String() = DataGridView2.Rows(d).Cells("IP").Value.split(".")
                 If a.Length <> 4 Then
                     MsgBox("IP Not Valid")

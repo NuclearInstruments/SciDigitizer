@@ -15,9 +15,10 @@ Public Class Settings
     Dim shaper As New ComboBox
     Dim first_load = True
 
-    Dim gain_list = {1, 1.06, 1.1, 1.2, 1.26, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 2.1, 2.2, 2.4, 2.5, 2.7, 2.8, 3, 3.2, 3.3, 3.5, 3.8, 4, 4.2, 4.5, 4.7, 5, 5.3, 5.6, 6, 6.3, 6.7, 7.1, 7.5, 7.9, 8.4, 8.9, 9.4, 10, 10.6, 11.2, 11.9, 12.6, 13.3,
-                    14.1, 15, 15.8, 16.8, 17.8, 18.8, 20, 21.1, 22.4, 23.7, 25.1, 26.6, 28.2, 29.9, 31.6, 33.5, 37.6, 39.8, 42.2, 44.7, 47.3, 50.1, 53.1, 56.2, 59.6, 63.1, 66.8, 70.8, 75, 79.4, 84.1, 89.1, 94.4, 100}
+    'Dim gain_list = {1, 1.06, 1.1, 1.2, 1.26, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 2.1, 2.2, 2.4, 2.5, 2.7, 2.8, 3, 3.2, 3.3, 3.5, 3.8, 4, 4.2, 4.5, 4.7, 5, 5.3, 5.6, 6, 6.3, 6.7, 7.1, 7.5, 7.9, 8.4, 8.9, 9.4, 10, 10.6, 11.2, 11.9, 12.6, 13.3,
+    '                14.1, 15, 15.8, 16.8, 17.8, 18.8, 20, 21.1, 22.4, 23.7, 25.1, 26.6, 28.2, 29.9, 31.6, 33.5, 37.6, 39.8, 42.2, 44.7, 47.3, 50.1, 53.1, 56.2, 59.6, 63.1, 66.8, 70.8, 75, 79.4, 84.1, 89.1, 94.4, 100}
 
+    Dim gain_list = {1, 2, 3, 4, 5, 6, 10, 15, 20, 30, 50, 75, 100}
 
     Public Sub UpdateButtonStatusApply()
         Apply.Enabled = True
@@ -241,10 +242,19 @@ Public Class Settings
 
                 DataGridView2.Columns.Clear()
                 DataGridView2.Columns.Add("Channel", "Channel")
-                Dim imp As New DataGridViewCheckBoxColumn
-                imp.HeaderText = "50 Ohm Termination"
+
+                Dim imp As New DataGridViewComboBoxColumn()
+                imp.HeaderText = "Termination"
                 imp.Name = "Termination"
+                imp.MaxDropDownItems = 2
+                Dim i As Integer
+                imp.Items.Add("50 Ohm")
+                imp.Items.Add("1 kOhm")
                 DataGridView2.Columns.Add(imp)
+                'Dim imp As New DataGridViewCheckBoxColumn
+                'imp.HeaderText = "50 Ohm Termination"
+                'imp.Name = "Termination"
+                'DataGridView2.Columns.Add(imp)
                 Dim div As New DataGridViewCheckBoxColumn
                 div.HeaderText = "Division by 5"
                 div.Name = "Division"
@@ -255,7 +265,6 @@ Public Class Settings
                 gain.HeaderText = "Gain"
                 gain.Name = "Gain"
                 gain.MaxDropDownItems = 80
-                Dim i As Integer
                 For i = 0 To gain_list.Length - 1
                     gain.Items.Add(gain_list(i).ToString())
                 Next
@@ -412,7 +421,7 @@ Public Class Settings
         For i = 0 To n - 1 Step 2
             DataGridView2.Rows.Add()
             DataGridView2.Rows(k).Cells("Channel").Value = "CHANNELS " + i.ToString() + "-" + (i + 1).ToString() '"CHANNEL " & (i + 1).ToString
-            DataGridView2.Rows(k).Cells("Termination").Value = MainForm.acquisition.CHList(i).Afe_set.Termination
+            DataGridView2.Rows(k).Cells("Termination").Value = IIf(MainForm.acquisition.CHList(i).Afe_set.Termination = True, "50 Ohm", "1 kOhm")
             DataGridView2.Rows(k).Cells("Division").Value = MainForm.acquisition.CHList(i).Afe_set.Division
             DataGridView2.Rows(k).Cells("OffsetEven").Value = MainForm.acquisition.CHList(i).Afe_set.Offset
             DataGridView2.Rows(k).Cells("OffsetOdd").Value = MainForm.acquisition.CHList(i + 1).Afe_set.Offset
@@ -468,6 +477,63 @@ Public Class Settings
                 DataGridView1.Rows(e.RowIndex).Cells("Peaking Time").Style.BackColor = Color.White
                 DataGridView1.Rows(e.RowIndex).Cells("Flat Top").Style.BackColor = Color.White
             End If
+
+            If (CInt(DataGridView1.Rows(e.RowIndex).Cells("Trigger Peaking").Value) + CInt(DataGridView1.Rows(e.RowIndex).Cells("Trigger Flat").Value)) / sampling_factor > 128 Then
+                DataGridView1.Rows(e.RowIndex).Cells("Trigger Peaking").Style.BackColor = Color.Red
+                DataGridView1.Rows(e.RowIndex).Cells("Trigger Flat").Style.BackColor = Color.Red
+                Apply.Enabled = False
+                Apply.BackColor = Color.LightGray
+                MainForm.plog.TextBox1.AppendText("Trigger Peaking Time plus Trigger Flat Top Time could not exceeds 1024 ns!" & vbCrLf)
+            Else
+                DataGridView1.Rows(e.RowIndex).Cells("Trigger Peaking").Style.BackColor = Color.White
+                DataGridView1.Rows(e.RowIndex).Cells("Trigger Flat").Style.BackColor = Color.White
+            End If
+
+            If (CInt(DataGridView1.Rows(e.RowIndex).Cells("Oscilloscope Trigger Level").Value) > 16384) Then
+                DataGridView1.Rows(e.RowIndex).Cells("Oscilloscope Trigger Level").Style.BackColor = Color.Red
+                Apply.Enabled = False
+                Apply.BackColor = Color.LightGray
+                MainForm.plog.TextBox1.AppendText("Oscilloscope Trigger Level could not exceeds 16384 lsb!" & vbCrLf)
+            Else
+                DataGridView1.Rows(e.RowIndex).Cells("Oscilloscope Trigger Level").Style.BackColor = Color.White
+            End If
+
+            If (CInt(DataGridView1.Rows(e.RowIndex).Cells("Offset").Value) > 16384) Then
+                DataGridView1.Rows(e.RowIndex).Cells("Offset").Style.BackColor = Color.Red
+                Apply.Enabled = False
+                Apply.BackColor = Color.LightGray
+                MainForm.plog.TextBox1.AppendText("Offset could not exceeds 16384 lsb!" & vbCrLf)
+            Else
+                DataGridView1.Rows(e.RowIndex).Cells("Offset").Style.BackColor = Color.White
+            End If
+
+            If (CInt(DataGridView1.Rows(e.RowIndex).Cells("Trigger Level").Value) > 16384) Then
+                DataGridView1.Rows(e.RowIndex).Cells("Trigger Level").Style.BackColor = Color.Red
+                Apply.Enabled = False
+                Apply.BackColor = Color.LightGray
+                MainForm.plog.TextBox1.AppendText("Trigger Level could not exceeds 16384 lsb!" & vbCrLf)
+            Else
+                DataGridView1.Rows(e.RowIndex).Cells("Trigger Level").Style.BackColor = Color.White
+            End If
+
+            If (CInt(DataGridView1.Rows(e.RowIndex).Cells("Energy Sample").Value) > 4096) Then
+                DataGridView1.Rows(e.RowIndex).Cells("Energy Sample").Style.BackColor = Color.Red
+                Apply.Enabled = False
+                Apply.BackColor = Color.LightGray
+                MainForm.plog.TextBox1.AppendText("Energy Sample could not exceeds 4096 ns!" & vbCrLf)
+            Else
+                DataGridView1.Rows(e.RowIndex).Cells("Energy Sample").Style.BackColor = Color.White
+            End If
+
+            If (CInt(DataGridView1.Rows(e.RowIndex).Cells("Baseline Inhibit Time").Value) > 520000) Then
+                DataGridView1.Rows(e.RowIndex).Cells("Baseline Inhibit Time").Style.BackColor = Color.Red
+                Apply.Enabled = False
+                Apply.BackColor = Color.LightGray
+                MainForm.plog.TextBox1.AppendText("Baseline Inhibit Time could not exceeds 520000 ns!" & vbCrLf)
+            Else
+                DataGridView1.Rows(e.RowIndex).Cells("Baseline Inhibit Time").Style.BackColor = Color.White
+            End If
+
         End If
     End Sub
 
@@ -679,7 +745,7 @@ Public Class Settings
             MainForm.acquisition.General_settings.AFEShaper = shaper.SelectedIndex
             Dim k = 0
             For i = 0 To DataGridView2.Rows.Count - 1
-                If DataGridView2.Rows(i).Cells("Termination").Value Then
+                If DataGridView2.Rows(i).Cells("Termination").Value = "50 Ohm" Then
                     MainForm.acquisition.CHList(k).Afe_set.Termination = True
                     MainForm.acquisition.CHList(k + 1).Afe_set.Termination = True
                 Else
@@ -1149,16 +1215,19 @@ Public Class Settings
                 off(j) = MainForm.acquisition.CHList(j).Afe_set.Offset
                 off(j + 1) = MainForm.acquisition.CHList(j + 1).Afe_set.Offset
 
-                Dim index = 0
-                For l = 0 To gain_list.Length - 1
-                    If gain_list(l) = MainForm.acquisition.CHList(j).Afe_set.Gain Then
-                        index = l
-                        Exit For
-                    End If
-                Next
-                g(k) = index
+                'Dim index = 0
+                'For l = 0 To gain_list.Length - 1
+                '    If gain_list(l) = MainForm.acquisition.CHList(j).Afe_set.Gain Then
+                '        index = l
+                '        Exit For
+                '    End If
+                'Next
+                'g(k) = index
+
+                g(k) = CType(Math.Log10(MainForm.acquisition.CHList(j).Afe_set.Gain) * 40, Int16)
+
                 k += 1
-                Next
+            Next
 
             Dim s As String = ""
             If MainForm.acquisition.General_settings.AFEShaper = 0 Then
