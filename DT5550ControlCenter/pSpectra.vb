@@ -273,6 +273,10 @@ Public Class pSpectra
         For k = 0 To n_ch - 1
             integralimage(k) = 0
         Next
+
+        For k = 0 To n_ch - 1
+            realtimeimage(k) = 0
+        Next
         MainForm.plog.TextBox1.AppendText("Reset Spectrum" & vbCrLf)
         MutexCumulative.ReleaseMutex()
 

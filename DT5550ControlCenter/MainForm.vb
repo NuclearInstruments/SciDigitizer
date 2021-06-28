@@ -806,8 +806,9 @@ Public Class MainForm
         If IsNothing(spect) Then
         Else
             spect.resetspectrum()
+            pImm1.Reload_Image()
+            pImm2.Reload_Image()
         End If
-
     End Sub
 
     Private Sub StopSpectrum_Click(sender As Object, e As EventArgs) Handles StopSpectrum.Click
