@@ -1,6 +1,7 @@
 ﻿Imports System.ComponentModel
 Imports System.Globalization
 Imports System.Reflection
+Imports System.Text.RegularExpressions
 Imports DT5550ControlCenter.AcquisitionClass
 
 Public Class Settings
@@ -112,8 +113,8 @@ Public Class Settings
             TriggerSource.Items.Add("External")
 
             TriggerSourceOscilloscope.Items.Clear()
-            TriggerSourceOscilloscope.Items.Add("Internal")
-            TriggerSourceOscilloscope.Items.Add("External")
+            'TriggerSourceOscilloscope.Items.Add("Internal")
+            TriggerSourceOscilloscope.Items.Add("MCA Trigger")
             TriggerSourceOscilloscope.Items.Add("Free Running")
 
             For Each i In MainForm.acquisition.CHList
@@ -327,17 +328,23 @@ Public Class Settings
         End If
 
         If MainForm.acquisition.General_settings.TriggerSourceOscilloscope = trigger_source.FREE Then
-            TriggerSourceOscilloscope.SelectedIndex = 2
-        ElseIf MainForm.acquisition.General_settings.TriggerSourceOscilloscope = trigger_source.EXTERNAL Then
-            TriggerSourceOscilloscope.SelectedIndex = 1
-        ElseIf MainForm.acquisition.General_settings.TriggerSourceOscilloscope = trigger_source.LEVEL Then
-            If Connection.ComClass._boardModel = communication.tModel.DT5550 Or
-                Connection.ComClass._boardModel = communication.tModel.SCIDK Then
-                TriggerSourceOscilloscope.SelectedIndex = MainForm.acquisition.General_settings.TriggerChannelOscilloscope + 3
-            ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
-                TriggerSourceOscilloscope.SelectedIndex = 0
+            If Connection.ComClass._boardModel = communication.tModel.SCIDK Then
+                TriggerSourceOscilloscope.SelectedIndex = 1
+            Else
+                TriggerSourceOscilloscope.SelectedIndex = 2
             End If
-        ElseIf MainForm.acquisition.General_settings.TriggerSourceOscilloscope = trigger_source.INTERNAL Then
+
+        ElseIf MainForm.acquisition.General_settings.TriggerSourceOscilloscope = trigger_source.EXTERNAL Then
+                TriggerSourceOscilloscope.SelectedIndex = 1
+            ElseIf MainForm.acquisition.General_settings.TriggerSourceOscilloscope = trigger_source.LEVEL Then
+                If Connection.ComClass._boardModel = communication.tModel.DT5550 Then
+                    TriggerSourceOscilloscope.SelectedIndex = MainForm.acquisition.General_settings.TriggerChannelOscilloscope + 3
+                ElseIf Connection.ComClass._boardModel = communication.tModel.SCIDK Then
+                    TriggerSourceOscilloscope.SelectedIndex = MainForm.acquisition.General_settings.TriggerChannelOscilloscope + 2
+                ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
+                    TriggerSourceOscilloscope.SelectedIndex = 0
+                End If
+            ElseIf MainForm.acquisition.General_settings.TriggerSourceOscilloscope = trigger_source.INTERNAL Then
                 TriggerSourceOscilloscope.SelectedIndex = 0
         End If
 
@@ -665,7 +672,9 @@ Public Class Settings
             MainForm.acquisition.General_settings.TriggerChannelOscilloscope = 0
         Else
             MainForm.acquisition.General_settings.TriggerSourceOscilloscope = AcquisitionClass.trigger_source.LEVEL
-            MainForm.acquisition.General_settings.TriggerChannelOscilloscope = MainForm.acquisition.CHList(TriggerSourceOscilloscope.SelectedIndex - 3).id - 1
+            Dim idc = Regex.Replace(TriggerSourceOscilloscope.SelectedItem, "[^\r\n0-9]", "") - 1
+
+            MainForm.acquisition.General_settings.TriggerChannelOscilloscope = MainForm.acquisition.CHList(idc).id - 1 'MainForm.acquisition.CHList(TriggerSourceOscilloscope.SelectedIndex - 3).id - 1
         End If
         'If selectmux.SelectedItem = "Analog" Then
         '    MainForm.acquisition.General_settings.mux = AcquisitionClass.muxmode.ANALOG
@@ -1263,7 +1272,7 @@ Public Class Settings
 
         End If
 
-            If n_ok = MainForm.acquisition.CHList.Count Then
+        If n_ok = MainForm.acquisition.CHList.Count Then
             Apply.Enabled = False
             Apply.BackColor = Color.LightGray
         Else

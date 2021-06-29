@@ -497,7 +497,11 @@ Public Class pOscilloscope
 
         Else
             Dim wword As UInt32
-            wword = ((MainForm.acquisition.General_settings.TriggerChannelOscilloscope) << 8) + (MainForm.acquisition.General_settings.TriggerOscilloscopeEdges << 3) + 1
+            Dim idc = MainForm.acquisition.General_settings.TriggerChannelOscilloscope
+            If Connection.ComClass._boardModel = communication.tModel.SCIDK Then
+                idc = idc * 2
+            End If
+            wword = ((idc) << 8) + (MainForm.acquisition.General_settings.TriggerOscilloscopeEdges << 3) + 1
             TriggerModeValue = wword
         End If
 
