@@ -86,7 +86,7 @@ Public Class Settings
             TriggerLevelOscilloscope.Visible = False
             Label14.Visible = False
         ElseIf Connection.ComClass._boardModel = communication.tModel.SCIDK Then
-            Panel2.Controls.Clear()
+            Panel4.Controls.Clear()
             Dim lbl As New Label
             lbl.Top = 10
             lbl.Left = 10
@@ -103,8 +103,8 @@ Public Class Settings
             Apply.Enabled = True
             Apply.BackColor = Color.DodgerBlue
 
-            Panel2.Controls.Add(lbl)
-            Panel2.Controls.Add(AnalogOffsetControl)
+            Panel4.Controls.Add(lbl)
+            Panel4.Controls.Add(AnalogOffsetControl)
 
             GroupBox1.Height = 65
             TableLayoutPanel1.RowStyles(0).Height = 10 + GroupBox1.Height + GroupBox2.Height
