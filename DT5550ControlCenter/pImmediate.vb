@@ -37,14 +37,14 @@ Public Class pImmediate
         Dim xlabel(c - 1) As String
         Dim ylabel(r - 1) As String
         For i = 0 To c - 1
-            If Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
+            If Connection.ComClass._boardModel = communication.tModel.DT5560SE Or Connection.ComClass._boardModel = communication.tModel.R5560SE Then
                 xlabel(i) = (i).ToString
             Else
                 xlabel(i) = (i + 1).ToString
             End If
         Next
         For j = 0 To r - 1
-            If Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
+            If Connection.ComClass._boardModel = communication.tModel.DT5560SE Or Connection.ComClass._boardModel = communication.tModel.R5560SE Then
                 ylabel(j) = (j).ToString
             Else
                 ylabel(j) = (j + 1).ToString
@@ -138,7 +138,7 @@ Public Class pImmediate
                 '  q += 1
                 '  End If
             Next
-            If Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
+            If Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.DT5560SE Or Connection.ComClass._boardModel = communication.tModel.R5560SE Then
                 MainForm.spect.ClearRealtime()
             End If
 
@@ -198,7 +198,7 @@ Public Class pImmediate
                 '  q += 1
                 '  End If
             Next
-            If Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
+            If Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.DT5560SE Or Connection.ComClass._boardModel = communication.tModel.R5560SE Then
                 MainForm.spect.ClearRealtime()
             End If
 

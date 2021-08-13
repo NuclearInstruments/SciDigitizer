@@ -190,7 +190,7 @@
                 Me.Afe_set.Gain = 1
                 spectra_checked = False
                 scope_checked = False
-            ElseIf board_type = communication.tModel.R5560 Or board_type = communication.tModel.DT5560SE Then
+            ElseIf board_type = communication.tModel.R5560 Or board_type = communication.tModel.DT5560SE Or board_type = communication.tModel.R5560SE Then
                 Me.name = name
                 Me.id = id
                 Me.ch_id = ch_id
@@ -293,7 +293,7 @@
                 Next
             Next
             currentMAP = New MAP(2 * nBoard, 16, nch * nBoard)
-        ElseIf board_type = communication.tModel.DT5560SE Then
+        ElseIf board_type = communication.tModel.DT5560SE Or board_type = communication.tModel.R5560SE Then
             General_settings.TriggerSourceOscilloscope = trigger_source.FREE
             General_settings.TriggerChannelOscilloscope = 0
             General_settings.TriggerOscilloscopeEdges = edge.RISING
@@ -301,13 +301,17 @@
             General_settings.OscilloscopeDecimator = 1
             General_settings.OscilloscopePreTrigger = 20
             General_settings.AFEShaper = 0
-
-            For i = 0 To nch - 1
-                FindPosition(16, i + 1, x, y)
-                Dim ch = New Channel("CHANNEL " + (i).ToString, i + 1, i + 1, x, y, board_type, 1)
-                CHList.Add(ch)
+            For b = 0 To nBoard - 1
+                For i = 0 To nch - 1
+                    'FindPosition(16, i + 1, x, y)
+                    'Dim ch = New Channel("CHANNEL " + (i).ToString, i + 1, i + 1, x, y, board_type, 1)
+                    FindPosition(16, (i + 1) + (b * nch), x, y)
+                    Dim ch = New Channel("CHANNEL " + ((i + 1) + (b * nch)).ToString, (i + 1) + (b * nch), i + 1, x, y, board_type, b + 1)
+                    CHList.Add(ch)
+                Next
             Next
-            currentMAP = New MAP(2, 16, nch)
+            'currentMAP = New MAP(2, 16, nch)
+            currentMAP = New MAP(2 * nBoard, 16, nch * nBoard)
 
         ElseIf board_type = communication.tModel.SCIDK Then
 

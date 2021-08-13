@@ -31,7 +31,7 @@ Public Class Settings
             sampling_factor = 1000 / 80
         ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Then
             sampling_factor = 1000 / 125
-        ElseIf Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
+        ElseIf Connection.ComClass._boardModel = communication.tModel.DT5560SE Or Connection.ComClass._boardModel = communication.tModel.R5560SE Then
             sampling_factor = 1000 / 125
         ElseIf Connection.ComClass._boardModel = communication.tModel.SCIDK Then
             sampling_factor = 1000 / 60
@@ -77,7 +77,7 @@ Public Class Settings
             TriggerSourceOscilloscope.Items.Add("Free Running")
             TriggerLevelOscilloscope.Visible = True
             Label14.Visible = True
-        ElseIf Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
+        ElseIf Connection.ComClass._boardModel = communication.tModel.DT5560SE Or Connection.ComClass._boardModel = communication.tModel.R5560SE Then
             GroupBox1.SetBounds(0, 0, 0, 0)
             TableLayoutPanel1.RowStyles(0).Height = 110
             TriggerSourceOscilloscope.Items.Clear()
@@ -139,14 +139,14 @@ Public Class Settings
         pol_column.Items.Add("Negative")
         DataGridView1.Columns.Add(pol_column)
 
-        If Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
+        If Connection.ComClass._boardModel = communication.tModel.DT5560SE Or Connection.ComClass._boardModel = communication.tModel.R5560SE Then
             DataGridView1.Columns.Add("Oscilloscope Trigger Level", "Oscilloscope Trigger Level (lsb)")
         End If
 
         If Connection.ComClass._boardModel = communication.tModel.DT5550 Then
             DataGridView1.Columns.Add("Trigger Level", "Trigger Level (lsb)")
             DataGridView1.Columns.Add("Trigger Hold-Off", "Trigger Hold-Off (ns)")
-        ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.SCIDK Or Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
+        ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.SCIDK Or Connection.ComClass._boardModel = communication.tModel.DT5560SE Or Connection.ComClass._boardModel = communication.tModel.R5560SE Then
             DataGridView1.Columns.Add("Offset", "Offset (lsb)")
             DataGridView1.Columns.Add("Trigger Level", "Trigger Level (lsb)")
             DataGridView1.Columns.Add("Trigger Peaking", "Trigger Peaking Time (ns)")
@@ -185,7 +185,7 @@ Public Class Settings
         baseline.Items.Add("1024")
         DataGridView1.Columns.Add(baseline)
 
-        If Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
+        If Connection.ComClass._boardModel = communication.tModel.DT5560SE Or Connection.ComClass._boardModel = communication.tModel.R5560SE Then
             If (first_load) Then
                 Dim title As String = "AFE Settings"
                 Dim myTabPage As TabPage = New TabPage(title)
@@ -337,12 +337,12 @@ Public Class Settings
         ElseIf MainForm.acquisition.General_settings.TriggerSourceOscilloscope = trigger_source.EXTERNAL Then
                 TriggerSourceOscilloscope.SelectedIndex = 1
             ElseIf MainForm.acquisition.General_settings.TriggerSourceOscilloscope = trigger_source.LEVEL Then
-                If Connection.ComClass._boardModel = communication.tModel.DT5550 Then
-                    TriggerSourceOscilloscope.SelectedIndex = MainForm.acquisition.General_settings.TriggerChannelOscilloscope + 3
-                ElseIf Connection.ComClass._boardModel = communication.tModel.SCIDK Then
-                    TriggerSourceOscilloscope.SelectedIndex = MainForm.acquisition.General_settings.TriggerChannelOscilloscope + 2
-                ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
-                    TriggerSourceOscilloscope.SelectedIndex = 0
+            If Connection.ComClass._boardModel = communication.tModel.DT5550 Then
+                TriggerSourceOscilloscope.SelectedIndex = MainForm.acquisition.General_settings.TriggerChannelOscilloscope + 3
+            ElseIf Connection.ComClass._boardModel = communication.tModel.SCIDK Then
+                TriggerSourceOscilloscope.SelectedIndex = MainForm.acquisition.General_settings.TriggerChannelOscilloscope + 2
+            ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.DT5560SE Or Connection.ComClass._boardModel = communication.tModel.R5560SE Then
+                TriggerSourceOscilloscope.SelectedIndex = 0
                 End If
             ElseIf MainForm.acquisition.General_settings.TriggerSourceOscilloscope = trigger_source.INTERNAL Then
                 TriggerSourceOscilloscope.SelectedIndex = 0
@@ -358,7 +358,7 @@ Public Class Settings
         PreTrigger.Text = MainForm.acquisition.General_settings.OscilloscopePreTrigger
         Horizontal.Text = Math.Round(MainForm.acquisition.General_settings.OscilloscopeDecimator * sampling_factor, 1)
 
-        If Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
+        If Connection.ComClass._boardModel = communication.tModel.DT5560SE Or Connection.ComClass._boardModel = communication.tModel.R5560SE Then
             shaper.SelectedItem = MainForm.acquisition.General_settings.AFEShaper
         End If
 
@@ -377,7 +377,7 @@ Public Class Settings
                 DataGridView1.Rows(i).Cells("Polarity").Value = "Negative"
             End If
 
-            If Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
+            If Connection.ComClass._boardModel = communication.tModel.DT5560SE Or Connection.ComClass._boardModel = communication.tModel.R5560SE Then
                 DataGridView1.Rows(i).Cells("Oscilloscope Trigger Level").Value = MainForm.acquisition.CHList(i).TriggerOscilloscopeLevel
             End If
 
@@ -398,7 +398,7 @@ Public Class Settings
                 DataGridView1.Rows(i).Cells("Pileup Rejection").Value = MainForm.acquisition.CHList(i).pileup_enable
                 DataGridView1.Rows(i).Cells("Pileup Rejection Time").Value = MainForm.acquisition.CHList(i).pileup_time
             End If
-            If Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.SCIDK Or Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
+            If Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.SCIDK Or Connection.ComClass._boardModel = communication.tModel.DT5560SE Or Connection.ComClass._boardModel = communication.tModel.R5560SE Then
                 DataGridView1.Rows(i).Cells("Trigger Peaking").Value = MainForm.acquisition.CHList(i).trigger_peaking
                 DataGridView1.Rows(i).Cells("Trigger Flat").Value = MainForm.acquisition.CHList(i).trigger_flat
                 DataGridView1.Rows(i).Cells("Offset").Value = MainForm.acquisition.CHList(i).offset
@@ -472,7 +472,7 @@ Public Class Settings
                 End If
             End If
         End If
-        If Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
+        If Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.DT5560SE Or Connection.ComClass._boardModel = communication.tModel.R5560SE Then
 
             If (CInt(DataGridView1.Rows(e.RowIndex).Cells("Peaking Time").Value) + CInt(DataGridView1.Rows(e.RowIndex).Cells("Flat Top").Value)) / sampling_factor > 512 Then
                 DataGridView1.Rows(e.RowIndex).Cells("Peaking Time").Style.BackColor = Color.Red
@@ -702,7 +702,7 @@ Public Class Settings
                 MainForm.acquisition.CHList(i).polarity = signal_polarity.NEGATIVE
             End If
 
-            If Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
+            If Connection.ComClass._boardModel = communication.tModel.DT5560SE Or Connection.ComClass._boardModel = communication.tModel.R5560SE Then
                 MainForm.acquisition.CHList(i).TriggerOscilloscopeLevel = DataGridView1.Rows(i).Cells("Oscilloscope Trigger Level").Value
             End If
 
@@ -742,14 +742,14 @@ Public Class Settings
             MainForm.acquisition.CHList(i).baseline_inhibit = DataGridView1.Rows(i).Cells("Baseline Inhibit Time").Value
             MainForm.acquisition.CHList(i).baseline_sample = CType(DataGridView1.Rows(i).Cells("Baseline Lenght").Value, Integer)
 
-            If Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.SCIDK Or Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
+            If Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.SCIDK Or Connection.ComClass._boardModel = communication.tModel.DT5560SE Or Connection.ComClass._boardModel = communication.tModel.R5560SE Then
                 MainForm.acquisition.CHList(i).offset = DataGridView1.Rows(i).Cells("Offset").Value
                 MainForm.acquisition.CHList(i).trigger_peaking = DataGridView1.Rows(i).Cells("Trigger Peaking").Value
                 MainForm.acquisition.CHList(i).trigger_flat = DataGridView1.Rows(i).Cells("Trigger Flat").Value
             End If
         Next
 
-        If Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
+        If Connection.ComClass._boardModel = communication.tModel.DT5560SE Or Connection.ComClass._boardModel = communication.tModel.R5560SE Then
 
             MainForm.acquisition.General_settings.AFEShaper = shaper.SelectedIndex
             Dim k = 0
@@ -880,7 +880,7 @@ Public Class Settings
             Dim index As Integer
             If Connection.ComClass._boardModel = communication.tModel.DT5550 Then
                 index = MainForm.acquisition.CHList.Count - MainForm.acquisition.CHList(i).id
-            ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
+            ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.DT5560SE Or Connection.ComClass._boardModel = communication.tModel.R5560SE Then
                 index = MainForm.acquisition.CHList(i).ch_id - 1
             ElseIf Connection.ComClass._boardModel = communication.tModel.SCIDK Then
                 index = MainForm.acquisition.CHList(i).ch_id - 1
@@ -1114,7 +1114,7 @@ Public Class Settings
                     MainForm.plog.TextBox1.AppendText("Run Set Register Error!" & vbCrLf)
                 End If
 
-            ElseIf Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
+            ElseIf Connection.ComClass._boardModel = communication.tModel.DT5560SE Or Connection.ComClass._boardModel = communication.tModel.R5560SE Then
                 If Connection.ComClass.SetRegister(RunAddress, 0, ind - 1) = 0 Then
                     If Connection.ComClass.SetRegister(GainAddress, MainForm.acquisition.CHList(i).gain * 65536, ind - 1) = 0 Then
                         If Connection.ComClass.SetRegister(OffsetAddress, MainForm.acquisition.CHList(i).offset, ind - 1) = 0 Then
@@ -1196,79 +1196,114 @@ Public Class Settings
             End If
         Next
 
-        If Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
-            Dim j = 0
-            Dim n_2 = n / 2 - 1
+        If Connection.ComClass._boardModel = communication.tModel.DT5560SE Or Connection.ComClass._boardModel = communication.tModel.R5560SE Then
+
+
+
+            Dim n_2 = 16 - 1
             Dim term(n_2) As Integer
             Dim divis(n_2) As Integer
             Dim off(n) As Integer
             Dim g(n_2) As Integer
             Dim ch_2(n_2) As Integer
-            Dim ch(n - 1) As Integer
-            Dim k = 0
-            For j = 0 To n - 2 Step 2
-                If MainForm.acquisition.CHList(j).Afe_set.Termination Then
-                    term(k) = 1
-                Else
-                    term(k) = 0
+            Dim ch(32 - 1) As Integer
+
+
+            Dim id_boards = MainForm.acquisition.CHList.GroupBy(Function(x) x.board_number).Select(Function(x) x.First.board_number).ToList
+
+            For Each b In id_boards
+                Dim chsel = MainForm.acquisition.CHList.Where(Function(a) a.board_number.Equals(b)).ToArray()
+                Dim k = 0
+
+                For j = 0 To chsel.Count - 1 Step 2
+                    If chsel(j).Afe_set.Termination Then
+                        term(k) = 1
+                    Else
+                        term(k) = 0
+                    End If
+
+                    If chsel(j).Afe_set.Division Then
+                        divis(k) = 0
+                    Else
+                        divis(k) = 1
+                    End If
+                    ch_2(k) = j + 1
+                    ch(j) = j
+                    ch(j + 1) = j + 1
+                    off(j) = chsel(j).Afe_set.Offset
+                    off(j + 1) = chsel(j + 1).Afe_set.Offset
+
+                    'Dim index = 0
+                    'For l = 0 To gain_list.Length - 1
+                    '    If gain_list(l) = MainForm.acquisition.CHList(j).Afe_set.Gain Then
+                    '        index = l
+                    '        Exit For
+                    '    End If
+                    'Next
+                    'g(k) = index
+
+                    g(k) = CType(Math.Log10(chsel(j).Afe_set.Gain) * 40, Int16)
+
+                    k += 1
+                Next
+
+                Dim s As String = ""
+                If MainForm.acquisition.General_settings.AFEShaper = 0 Then
+                    s = "dc"
+                ElseIf MainForm.acquisition.General_settings.AFEShaper = 1 Then
+                    s = "1u"
+                ElseIf MainForm.acquisition.General_settings.AFEShaper = 2 Then
+                    s = "10u"
+                ElseIf MainForm.acquisition.General_settings.AFEShaper = 3 Then
+                    s = "30u"
                 End If
 
-                If MainForm.acquisition.CHList(j).Afe_set.Division Then
-                    divis(k) = 0
+                If Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
+                    If Connection.ComClass.SetShaper(s, b - 1) Then
+                        MainForm.plog.TextBox1.AppendText("AFE Settings: Shaper applied successfully!" & vbCrLf)
+                    Else
+                        MainForm.plog.TextBox1.AppendText("AFE Settings: Shaper applied successfully!" & vbCrLf)
+                    End If
+
+                    If Connection.ComClass.SetAfeParam("Termination", "Division", term, divis, ch_2, ch_2, 1, b - 1) Then
+                        MainForm.plog.TextBox1.AppendText("AFE Settings: Termination applied successfully!" & vbCrLf)
+                        MainForm.plog.TextBox1.AppendText("AFE Settings: Division applied successfully!" & vbCrLf)
+                    Else
+                        MainForm.plog.TextBox1.AppendText("AFE Settings: Termination Error!" & vbCrLf)
+                        MainForm.plog.TextBox1.AppendText("AFE Settings: Division Error!" & vbCrLf)
+                    End If
+
+                    If Connection.ComClass.SetAfeParam("Offset", "Gain", off, g, ch, ch_2, 1, b - 1) Then
+                        MainForm.plog.TextBox1.AppendText("AFE Settings: Offset applied successfully!" & vbCrLf)
+                        MainForm.plog.TextBox1.AppendText("AFE Settings: Gain applied successfully!" & vbCrLf)
+                    Else
+                        MainForm.plog.TextBox1.AppendText("AFE Settings: Offset Error!" & vbCrLf)
+                        MainForm.plog.TextBox1.AppendText("AFE Settings: Gain Error!" & vbCrLf)
+                    End If
                 Else
-                    divis(k) = 1
+                    If Connection.ComClass.SetShaperR(s, b - 1) Then
+                        MainForm.plog.TextBox1.AppendText("AFE Settings: Shaper applied successfully!" & vbCrLf)
+                    Else
+                        MainForm.plog.TextBox1.AppendText("AFE Settings: Shaper applied successfully!" & vbCrLf)
+                    End If
+
+                    If Connection.ComClass.SetAfeParamR("Termination", "Division", term, divis, ch_2, ch_2, 1, b - 1) Then
+                        MainForm.plog.TextBox1.AppendText("AFE Settings: Termination applied successfully!" & vbCrLf)
+                        MainForm.plog.TextBox1.AppendText("AFE Settings: Division applied successfully!" & vbCrLf)
+                    Else
+                        MainForm.plog.TextBox1.AppendText("AFE Settings: Termination Error!" & vbCrLf)
+                        MainForm.plog.TextBox1.AppendText("AFE Settings: Division Error!" & vbCrLf)
+                    End If
+
+                    If Connection.ComClass.SetAfeParamR("Offset", "Gain", off, g, ch, ch_2, 1, b - 1) Then
+                        MainForm.plog.TextBox1.AppendText("AFE Settings: Offset applied successfully!" & vbCrLf)
+                        MainForm.plog.TextBox1.AppendText("AFE Settings: Gain applied successfully!" & vbCrLf)
+                    Else
+                        MainForm.plog.TextBox1.AppendText("AFE Settings: Offset Error!" & vbCrLf)
+                        MainForm.plog.TextBox1.AppendText("AFE Settings: Gain Error!" & vbCrLf)
+                    End If
                 End If
-                ch_2(k) = j + 1
-                ch(j) = j
-                ch(j + 1) = j + 1
-                off(j) = MainForm.acquisition.CHList(j).Afe_set.Offset
-                off(j + 1) = MainForm.acquisition.CHList(j + 1).Afe_set.Offset
-
-                'Dim index = 0
-                'For l = 0 To gain_list.Length - 1
-                '    If gain_list(l) = MainForm.acquisition.CHList(j).Afe_set.Gain Then
-                '        index = l
-                '        Exit For
-                '    End If
-                'Next
-                'g(k) = index
-
-                g(k) = CType(Math.Log10(MainForm.acquisition.CHList(j).Afe_set.Gain) * 40, Int16)
-
-                k += 1
             Next
-
-            Dim s As String = ""
-            If MainForm.acquisition.General_settings.AFEShaper = 0 Then
-                s = "dc"
-            ElseIf MainForm.acquisition.General_settings.AFEShaper = 1 Then
-                s = "1u"
-            ElseIf MainForm.acquisition.General_settings.AFEShaper = 2 Then
-                s = "10u"
-            ElseIf MainForm.acquisition.General_settings.AFEShaper = 3 Then
-                s = "30u"
-            End If
-            If Connection.ComClass.SetShaper(s) Then
-                MainForm.plog.TextBox1.AppendText("AFE Settings: Shaper applied successfully!" & vbCrLf)
-            Else
-                MainForm.plog.TextBox1.AppendText("AFE Settings: Shaper applied successfully!" & vbCrLf)
-            End If
-
-            If Connection.ComClass.SetAfeParam("Termination", "Division", term, divis, ch_2, ch_2, 1) Then
-                MainForm.plog.TextBox1.AppendText("AFE Settings: Termination applied successfully!" & vbCrLf)
-                MainForm.plog.TextBox1.AppendText("AFE Settings: Division applied successfully!" & vbCrLf)
-            Else
-                MainForm.plog.TextBox1.AppendText("AFE Settings: Termination Error!" & vbCrLf)
-                MainForm.plog.TextBox1.AppendText("AFE Settings: Division Error!" & vbCrLf)
-            End If
-
-            If Connection.ComClass.SetAfeParam("Offset", "Gain", off, g, ch, ch_2, 1) Then
-                MainForm.plog.TextBox1.AppendText("AFE Settings: Offset applied successfully!" & vbCrLf)
-                MainForm.plog.TextBox1.AppendText("AFE Settings: Gain applied successfully!" & vbCrLf)
-            Else
-                MainForm.plog.TextBox1.AppendText("AFE Settings: Offset Error!" & vbCrLf)
-                MainForm.plog.TextBox1.AppendText("AFE Settings: Gain Error!" & vbCrLf)
-            End If
 
         End If
 
@@ -1379,6 +1414,18 @@ Public Class Settings
     End Sub
 
     Private Sub Panel5_Paint(sender As Object, e As PaintEventArgs) Handles Panel5.Paint
+
+    End Sub
+
+    Private Sub DataGridView1_CellContentClick(sender As Object, e As DataGridViewCellEventArgs) Handles DataGridView1.CellContentClick
+
+    End Sub
+
+    Private Sub GroupBox1_Enter(sender As Object, e As EventArgs) Handles GroupBox1.Enter
+
+    End Sub
+
+    Private Sub Panel3_Paint(sender As Object, e As PaintEventArgs) Handles Panel3.Paint
 
     End Sub
 End Class

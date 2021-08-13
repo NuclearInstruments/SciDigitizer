@@ -57,7 +57,7 @@ Public Class pOscilloscope
             sampling_factor = 1000 / 80
         ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Then
             sampling_factor = 1000 / 125
-        ElseIf Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
+        ElseIf Connection.ComClass._boardModel = communication.tModel.DT5560SE Or Connection.ComClass._boardModel = communication.tModel.R5560SE Then
             sampling_factor = 1000 / 125
         ElseIf Connection.ComClass._boardModel = communication.tModel.SCIDK Then
             sampling_factor = 1000 / 60
@@ -218,7 +218,7 @@ Public Class pOscilloscope
             Pesgo1.PeGrid.Configure.ManualScaleControlY = ManualScaleControl.MinMax
             Pesgo1.PeGrid.Configure.ManualMinY = 0
             Pesgo1.PeGrid.Configure.ManualMaxY = 1.1
-        ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.DT5560SE Or Connection.ComClass._boardModel = communication.tModel.SCIDK Then
+        ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.DT5560SE Or Connection.ComClass._boardModel = communication.tModel.R5560SE Or Connection.ComClass._boardModel = communication.tModel.SCIDK Then
             Pesgo1.PeString.YAxisLabel = "ANALOG"
 
             Pesgo1.PeGrid.WorkingAxis = 1
@@ -292,7 +292,7 @@ Public Class pOscilloscope
             Pesgo1.PeGrid.MultiAxesProportions(2) = 0.05
             Pesgo1.PeGrid.MultiAxesProportions(3) = 0.05
             Pesgo1.PeGrid.MultiAxesProportions(4) = 0.05
-        ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.DT5560SE Or Connection.ComClass._boardModel = communication.tModel.SCIDK Then
+        ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.DT5560SE Or Connection.ComClass._boardModel = communication.tModel.R5560SE Or Connection.ComClass._boardModel = communication.tModel.SCIDK Then
             Pesgo1.PeGrid.MultiAxesProportions(0) = 0.65F
             Pesgo1.PeGrid.MultiAxesProportions(1) = 0.2F
             Pesgo1.PeGrid.MultiAxesProportions(2) = 0.05F
@@ -512,7 +512,7 @@ Public Class pOscilloscope
         Dim LevelTriggerValue_arr As Integer()
         ReDim LevelTriggerValue_arr(n_osc)
         For i = 0 To n_osc - 1
-            If Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
+            If Connection.ComClass._boardModel = communication.tModel.DT5560SE Or Connection.ComClass._boardModel = communication.tModel.R5560SE Then
                 LevelTriggerValue_arr(i) = MainForm.acquisition.CHList(i).TriggerOscilloscopeLevel
             Else
                 LevelTriggerValue_arr(i) = LevelTriggerValue
@@ -1118,7 +1118,7 @@ Public Class pOscilloscope
 
 
             End If
-        ElseIf Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
+        ElseIf Connection.ComClass._boardModel = communication.tModel.DT5560SE Or Connection.ComClass._boardModel = communication.tModel.R5560SE Then
             If n_ch > 0 Then
 
                 Dim TOTpoints = tot_points * n_ch
@@ -1148,29 +1148,29 @@ Public Class pOscilloscope
                 Dim read_data As UInt32
                 Dim valid_data As UInt32
                 Dim test(length - 1) As UInt32
-                Dim gdata(32 - 1, length - 1) As UInt32
-                Dim gstatus(32 - 1) As UInt32
-                Dim gposition(32 - 1) As UInt32
+                Dim gdata(MainForm.acquisition.CHList.Count - 1, length - 1) As UInt32
+                Dim gstatus(MainForm.acquisition.CHList.Count - 1) As UInt32
+                Dim gposition(MainForm.acquisition.CHList.Count - 1) As UInt32
 
-                For qq = 0 To 31
-                    Connection.ComClass.GetRegister(addressStatus(qq), status, 0)
+                For qq = 0 To MainForm.acquisition.CHList.Count - 1
+                    Connection.ComClass.GetRegister(addressStatus(MainForm.acquisition.CHList(qq).ch_id - 1), status, MainForm.acquisition.CHList(qq).board_number - 1)
                     gstatus(qq) = status
-                    Connection.ComClass.GetRegister(addressPosition(qq), position, 0)
+                    Connection.ComClass.GetRegister(addressPosition(MainForm.acquisition.CHList(qq).ch_id - 1), position, 0)
                     gposition(qq) = position
-                    Connection.ComClass.ReadData(addressData(qq), test, length, 0, 1000, read_data, valid_data, 0)
+                    Connection.ComClass.ReadData(addressData(MainForm.acquisition.CHList(qq).ch_id - 1), test, length, 0, 1000, read_data, valid_data, MainForm.acquisition.CHList(qq).board_number - 1)
                     For t = 0 To length - 1
                         gdata(qq, t) = test(t)
                     Next
 
                 Next
 
-                For qq = 0 To 31
+                For qq = 0 To MainForm.acquisition.CHList.Count - 1
                     'If gstatus(qq) <> 1 Then
                     '    n += 1
                     '    Continue For
                     'End If
-                    Connection.ComClass.SetRegister(addressArm(qq), 0, 0)
-                    Connection.ComClass.SetRegister(addressArm(qq), 1, 0)
+                    Connection.ComClass.SetRegister(addressArm(MainForm.acquisition.CHList(qq).ch_id - 1), 0, MainForm.acquisition.CHList(qq).board_number - 1)
+                    Connection.ComClass.SetRegister(addressArm(MainForm.acquisition.CHList(qq).ch_id - 1), 1, MainForm.acquisition.CHList(qq).board_number - 1)
                 Next
 
                 For Each ch In Checked_id

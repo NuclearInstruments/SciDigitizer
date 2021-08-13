@@ -61,7 +61,8 @@ Public Class MainForm
 
         If Connection.ComClass._boardModel = communication.tModel.R5560 Or
             Connection.ComClass._boardModel = communication.tModel.SCIDK Or
-            Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
+            Connection.ComClass._boardModel = communication.tModel.DT5560SE Or
+            Connection.ComClass._boardModel = communication.tModel.R5560SE Then
             OffsetCalibrationToolToolStripMenuItem.Visible = False
         End If
 
@@ -72,6 +73,8 @@ Public Class MainForm
         ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Then
             Ts = 1000 / 125
         ElseIf Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
+            Ts = 1000 / 125
+        ElseIf Connection.ComClass._boardModel = communication.tModel.R5560SE Then
             Ts = 1000 / 125
         ElseIf Connection.ComClass._boardModel = communication.tModel.SCIDK Then
             Ts = 1000 / 60
@@ -160,7 +163,8 @@ Public Class MainForm
 
                     If Connection.ComClass._boardModel = communication.tModel.R5560 Or
                         Connection.ComClass._boardModel = communication.tModel.SCIDK Or
-                        Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
+                        Connection.ComClass._boardModel = communication.tModel.DT5560SE Or
+                        Connection.ComClass._boardModel = communication.tModel.R5560SE Then
                         If r.Name = "RUN" Then
                             spect.addressRUN = r.Address
                         End If
@@ -267,7 +271,8 @@ Public Class MainForm
 
                     If Connection.ComClass._boardModel = communication.tModel.R5560 Or
                        Connection.ComClass._boardModel = communication.tModel.SCIDK Or
-                       Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
+                       Connection.ComClass._boardModel = communication.tModel.DT5560SE Or
+                       Connection.ComClass._boardModel = communication.tModel.R5560SE Then
                         If r.Name = "RUN" Then
                             spect.addressRUN = r.Address
                         End If
@@ -511,12 +516,12 @@ Public Class MainForm
                     acquisition.General_settings.TriggerSourceOscilloscope = trigger_source.LEVEL
                     If Connection.ComClass._boardModel = communication.tModel.DT5550 Or Connection.ComClass._boardModel = communication.tModel.SCIDK Then
                         acquisition.General_settings.TriggerChannelOscilloscope = xmldoc.SelectSingleNode("Settings/Oscilloscope_Settings/Oscilloscope_Trigger_Source").InnerText.Replace("CHANNEL ", "") - 1
-                    ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
+                    ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.DT5560SE Or Connection.ComClass._boardModel = communication.tModel.R5560SE Then
                         acquisition.General_settings.TriggerChannelOscilloscope = 0
                     End If
                 End If
                     acquisition.General_settings.TriggerOscilloscopeEdges = IIf(xmldoc.SelectSingleNode("Settings/Oscilloscope_Settings/Oscilloscope_Trigger_Edge").InnerText = "Rising", edge.RISING, edge.FALLING)
-                If Connection.ComClass._boardModel <> communication.tModel.DT5560SE Then
+                If Connection.ComClass._boardModel <> communication.tModel.DT5560SE Or Connection.ComClass._boardModel <> communication.tModel.R5560SE Then
                     acquisition.General_settings.TriggerOscilloscopeLevel = xmldoc.SelectSingleNode("Settings/Oscilloscope_Settings/Oscilloscope_Trigger_Level").InnerText
                 End If
                 acquisition.General_settings.OscilloscopePreTrigger = xmldoc.SelectSingleNode("Settings/Oscilloscope_Settings/Oscilloscope_Pre_Trigger").InnerText
@@ -559,7 +564,7 @@ Public Class MainForm
                         acquisition.CHList(k).gain = node.ChildNodes.Item(9).innertext
                         acquisition.CHList(k).baseline_inhibit = node.ChildNodes.Item(10).innertext
                         acquisition.CHList(k).baseline_sample = node.ChildNodes.Item(11).innertext
-                    ElseIf Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
+                    ElseIf Connection.ComClass._boardModel = communication.tModel.DT5560SE Or Connection.ComClass._boardModel = communication.tModel.R5560SE Then
                         acquisition.CHList(k).offset = node.ChildNodes.Item(1).innertext
                         acquisition.CHList(k).TriggerOscilloscopeLevel = node.ChildNodes.Item(2).innertext
                         acquisition.CHList(k).trigger_level = node.ChildNodes.Item(3).innertext
@@ -582,11 +587,11 @@ Public Class MainForm
                     fs.Close()
                     sets.Settings_reload()
                     sets.Grid_ReLoad()
-                    If Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
-                        sets.Grid2_ReLoad()
-                    End If
+                If Connection.ComClass._boardModel = communication.tModel.DT5560SE Or Connection.ComClass._boardModel = communication.tModel.R5560SE Then
+                    sets.Grid2_ReLoad()
+                End If
 
-                    plog.TextBox1.AppendText("Settings loaded from file." & vbCrLf)
+                plog.TextBox1.AppendText("Settings loaded from file." & vbCrLf)
                 End If
         Catch ex As Exception
             plog.TextBox1.AppendText("Error: " & ex.Message & vbCrLf)
@@ -623,7 +628,7 @@ Public Class MainForm
                 writer.WriteStartElement("Oscilloscope_Settings")
                 writer.WriteElementString("Oscilloscope_Trigger_Source", sets.TriggerSourceOscilloscope.SelectedItem)
                 writer.WriteElementString("Oscilloscope_Trigger_Edge", sets.TriggerEdge.SelectedItem)
-                If Connection.ComClass._boardModel <> communication.tModel.DT5560SE Then
+                If Connection.ComClass._boardModel <> communication.tModel.DT5560SE And Connection.ComClass._boardModel <> communication.tModel.R5560SE Then
                     writer.WriteElementString("Oscilloscope_Trigger_Level", sets.TriggerLevelOscilloscope.Text)
                 End If
                 writer.WriteElementString("Oscilloscope_Trigger_Decimator", sets.Horizontal.Text)
@@ -651,10 +656,10 @@ Public Class MainForm
                         writer.WriteElementString("Pileup_Rejection_Time", sets.DataGridView1.Rows(i).Cells("Pileup Rejection Time").Value)
                         writer.WriteElementString("Baseline_Inhibit_Time", sets.DataGridView1.Rows(i).Cells("Baseline Inhibit Time").Value)
                         writer.WriteElementString("Baseline_Lenght", sets.DataGridView1.Rows(i).Cells("Baseline Lenght").Value)
-                    ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.SCIDK Or Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
+                    ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.SCIDK Or Connection.ComClass._boardModel = communication.tModel.DT5560SE Or Connection.ComClass._boardModel = communication.tModel.R5560SE Then
                         writer.WriteElementString("Polarity", sets.DataGridView1.Rows(i).Cells("Polarity").Value)
                         writer.WriteElementString("Offset", sets.DataGridView1.Rows(i).Cells("Offset").Value)
-                        If Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
+                        If Connection.ComClass._boardModel = communication.tModel.DT5560SE Or Connection.ComClass._boardModel = communication.tModel.R5560SE Then
                             writer.WriteElementString("Oscilloscope_Trigger_Level", sets.DataGridView1.Rows(i).Cells("Oscilloscope Trigger Level").Value)
                         End If
                         writer.WriteElementString("Trigger_Level", sets.DataGridView1.Rows(i).Cells("Trigger Level").Value)
@@ -667,7 +672,7 @@ Public Class MainForm
                         writer.WriteElementString("Gain", sets.DataGridView1.Rows(i).Cells("Gain").Value)
                         writer.WriteElementString("Baseline_Inhibit_Time", sets.DataGridView1.Rows(i).Cells("Baseline Inhibit Time").Value)
                         writer.WriteElementString("Baseline_Lenght", sets.DataGridView1.Rows(i).Cells("Baseline Lenght").Value)
-                        If Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
+                        If Connection.ComClass._boardModel = communication.tModel.DT5560SE Or Connection.ComClass._boardModel = communication.tModel.R5560SE Then
                             If (i Mod 2) = 0 Then
                                 If (sets.DataGridView2.Rows(i / 2).Cells("Termination").Value = "50 Ohm") Then
                                     writer.WriteElementString("AFE_Termination", True)

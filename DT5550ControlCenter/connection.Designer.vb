@@ -51,20 +51,27 @@ Partial Class Connection
         Me.Label5 = New System.Windows.Forms.Label()
         Me.DeviceListSciDK = New System.Windows.Forms.ComboBox()
         Me.ConnectSciDK = New System.Windows.Forms.Button()
-        Me.PictureBox1 = New System.Windows.Forms.PictureBox()
         Me.TabPage4 = New System.Windows.Forms.TabPage()
         Me.Remove_DT5560SE = New System.Windows.Forms.Button()
         Me.DataGridView2 = New System.Windows.Forms.DataGridView()
         Me.Add_DT5560SE = New System.Windows.Forms.Button()
         Me.Connect_DT5560SE = New System.Windows.Forms.Button()
+        Me.TabPage5 = New System.Windows.Forms.TabPage()
+        Me.Remove_R5560SE = New System.Windows.Forms.Button()
+        Me.DataGridView3 = New System.Windows.Forms.DataGridView()
+        Me.Add_R5560SE = New System.Windows.Forms.Button()
+        Me.Connect_R5560SE = New System.Windows.Forms.Button()
+        Me.PictureBox1 = New System.Windows.Forms.PictureBox()
         Me.TabControl1.SuspendLayout()
         Me.TabPage1.SuspendLayout()
         Me.TabPage2.SuspendLayout()
         CType(Me.DataGridView1, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.TabPage3.SuspendLayout()
-        CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.TabPage4.SuspendLayout()
         CType(Me.DataGridView2, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.TabPage5.SuspendLayout()
+        CType(Me.DataGridView3, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
         'Label3
@@ -103,6 +110,7 @@ Partial Class Connection
         Me.TabControl1.Controls.Add(Me.TabPage2)
         Me.TabControl1.Controls.Add(Me.TabPage3)
         Me.TabControl1.Controls.Add(Me.TabPage4)
+        Me.TabControl1.Controls.Add(Me.TabPage5)
         Me.TabControl1.Location = New System.Drawing.Point(-2, 115)
         Me.TabControl1.Name = "TabControl1"
         Me.TabControl1.SelectedIndex = 0
@@ -361,16 +369,6 @@ Partial Class Connection
         Me.ConnectSciDK.Text = "Connect"
         Me.ConnectSciDK.UseVisualStyleBackColor = True
         '
-        'PictureBox1
-        '
-        Me.PictureBox1.Image = CType(resources.GetObject("PictureBox1.Image"), System.Drawing.Image)
-        Me.PictureBox1.Location = New System.Drawing.Point(-2, -1)
-        Me.PictureBox1.Name = "PictureBox1"
-        Me.PictureBox1.Size = New System.Drawing.Size(558, 110)
-        Me.PictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
-        Me.PictureBox1.TabIndex = 24
-        Me.PictureBox1.TabStop = False
-        '
         'TabPage4
         '
         Me.TabPage4.Controls.Add(Me.Remove_DT5560SE)
@@ -429,6 +427,74 @@ Partial Class Connection
         Me.Connect_DT5560SE.Text = "Connect"
         Me.Connect_DT5560SE.UseVisualStyleBackColor = True
         '
+        'TabPage5
+        '
+        Me.TabPage5.Controls.Add(Me.Remove_R5560SE)
+        Me.TabPage5.Controls.Add(Me.DataGridView3)
+        Me.TabPage5.Controls.Add(Me.Add_R5560SE)
+        Me.TabPage5.Controls.Add(Me.Connect_R5560SE)
+        Me.TabPage5.Location = New System.Drawing.Point(4, 22)
+        Me.TabPage5.Name = "TabPage5"
+        Me.TabPage5.Padding = New System.Windows.Forms.Padding(3)
+        Me.TabPage5.Size = New System.Drawing.Size(550, 192)
+        Me.TabPage5.TabIndex = 4
+        Me.TabPage5.Text = "R5560SE"
+        Me.TabPage5.UseVisualStyleBackColor = True
+        '
+        'Remove_R5560SE
+        '
+        Me.Remove_R5560SE.Image = Global.DT5550ControlCenter.My.Resources.Resources.remove2
+        Me.Remove_R5560SE.Location = New System.Drawing.Point(478, 73)
+        Me.Remove_R5560SE.Name = "Remove_R5560SE"
+        Me.Remove_R5560SE.Size = New System.Drawing.Size(36, 31)
+        Me.Remove_R5560SE.TabIndex = 65
+        Me.Remove_R5560SE.UseVisualStyleBackColor = True
+        '
+        'DataGridView3
+        '
+        Me.DataGridView3.AllowUserToAddRows = False
+        Me.DataGridView3.AllowUserToDeleteRows = False
+        Me.DataGridView3.AllowUserToResizeColumns = False
+        Me.DataGridView3.AllowUserToResizeRows = False
+        Me.DataGridView3.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill
+        Me.DataGridView3.BackgroundColor = System.Drawing.Color.White
+        Me.DataGridView3.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
+        Me.DataGridView3.Location = New System.Drawing.Point(9, 6)
+        Me.DataGridView3.MultiSelect = False
+        Me.DataGridView3.Name = "DataGridView3"
+        Me.DataGridView3.Size = New System.Drawing.Size(436, 180)
+        Me.DataGridView3.TabIndex = 64
+        '
+        'Add_R5560SE
+        '
+        Me.Add_R5560SE.Image = Global.DT5550ControlCenter.My.Resources.Resources.add_icon
+        Me.Add_R5560SE.Location = New System.Drawing.Point(478, 18)
+        Me.Add_R5560SE.Name = "Add_R5560SE"
+        Me.Add_R5560SE.Size = New System.Drawing.Size(36, 32)
+        Me.Add_R5560SE.TabIndex = 63
+        Me.Add_R5560SE.Text = " "
+        Me.Add_R5560SE.UseVisualStyleBackColor = True
+        '
+        'Connect_R5560SE
+        '
+        Me.Connect_R5560SE.Font = New System.Drawing.Font("Microsoft Sans Serif", 9.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Connect_R5560SE.Location = New System.Drawing.Point(451, 154)
+        Me.Connect_R5560SE.Name = "Connect_R5560SE"
+        Me.Connect_R5560SE.Size = New System.Drawing.Size(91, 32)
+        Me.Connect_R5560SE.TabIndex = 62
+        Me.Connect_R5560SE.Text = "Connect"
+        Me.Connect_R5560SE.UseVisualStyleBackColor = True
+        '
+        'PictureBox1
+        '
+        Me.PictureBox1.Image = CType(resources.GetObject("PictureBox1.Image"), System.Drawing.Image)
+        Me.PictureBox1.Location = New System.Drawing.Point(-2, -1)
+        Me.PictureBox1.Name = "PictureBox1"
+        Me.PictureBox1.Size = New System.Drawing.Size(558, 110)
+        Me.PictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
+        Me.PictureBox1.TabIndex = 24
+        Me.PictureBox1.TabStop = False
+        '
         'Connection
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -451,9 +517,11 @@ Partial Class Connection
         CType(Me.DataGridView1, System.ComponentModel.ISupportInitialize).EndInit()
         Me.TabPage3.ResumeLayout(False)
         Me.TabPage3.PerformLayout()
-        CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).EndInit()
         Me.TabPage4.ResumeLayout(False)
         CType(Me.DataGridView2, System.ComponentModel.ISupportInitialize).EndInit()
+        Me.TabPage5.ResumeLayout(False)
+        CType(Me.DataGridView3, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -492,4 +560,9 @@ Partial Class Connection
     Friend WithEvents DataGridView2 As DataGridView
     Friend WithEvents Add_DT5560SE As Button
     Friend WithEvents Connect_DT5560SE As Button
+    Friend WithEvents TabPage5 As TabPage
+    Friend WithEvents Remove_R5560SE As Button
+    Friend WithEvents DataGridView3 As DataGridView
+    Friend WithEvents Add_R5560SE As Button
+    Friend WithEvents Connect_R5560SE As Button
 End Class
