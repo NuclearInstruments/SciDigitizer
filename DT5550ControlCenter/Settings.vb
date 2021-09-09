@@ -495,53 +495,54 @@ Public Class Settings
                 DataGridView1.Rows(e.RowIndex).Cells("Trigger Peaking").Style.BackColor = Color.White
                 DataGridView1.Rows(e.RowIndex).Cells("Trigger Flat").Style.BackColor = Color.White
             End If
-
-            If (CInt(DataGridView1.Rows(e.RowIndex).Cells("Oscilloscope Trigger Level").Value) > 16384) Then
-                DataGridView1.Rows(e.RowIndex).Cells("Oscilloscope Trigger Level").Style.BackColor = Color.Red
-                Apply.Enabled = False
-                Apply.BackColor = Color.LightGray
-                MainForm.plog.TextBox1.AppendText("Oscilloscope Trigger Level could not exceeds 16384 lsb!" & vbCrLf)
-            Else
-                DataGridView1.Rows(e.RowIndex).Cells("Oscilloscope Trigger Level").Style.BackColor = Color.White
+            If Connection.ComClass._boardModel = communication.tModel.DT5560SE Or Connection.ComClass._boardModel = communication.tModel.R5560SE Then
+                If (CInt(DataGridView1.Rows(e.RowIndex).Cells("Oscilloscope Trigger Level").Value) > 16384) Then
+                    DataGridView1.Rows(e.RowIndex).Cells("Oscilloscope Trigger Level").Style.BackColor = Color.Red
+                    Apply.Enabled = False
+                    Apply.BackColor = Color.LightGray
+                    MainForm.plog.TextBox1.AppendText("Oscilloscope Trigger Level could not exceeds 16384 lsb!" & vbCrLf)
+                Else
+                    DataGridView1.Rows(e.RowIndex).Cells("Oscilloscope Trigger Level").Style.BackColor = Color.White
+                End If
             End If
 
             If (CInt(DataGridView1.Rows(e.RowIndex).Cells("Offset").Value) > 16384) Then
-                DataGridView1.Rows(e.RowIndex).Cells("Offset").Style.BackColor = Color.Red
-                Apply.Enabled = False
-                Apply.BackColor = Color.LightGray
-                MainForm.plog.TextBox1.AppendText("Offset could not exceeds 16384 lsb!" & vbCrLf)
-            Else
-                DataGridView1.Rows(e.RowIndex).Cells("Offset").Style.BackColor = Color.White
-            End If
+                    DataGridView1.Rows(e.RowIndex).Cells("Offset").Style.BackColor = Color.Red
+                    Apply.Enabled = False
+                    Apply.BackColor = Color.LightGray
+                    MainForm.plog.TextBox1.AppendText("Offset could not exceeds 16384 lsb!" & vbCrLf)
+                Else
+                    DataGridView1.Rows(e.RowIndex).Cells("Offset").Style.BackColor = Color.White
+                End If
 
-            If (CInt(DataGridView1.Rows(e.RowIndex).Cells("Trigger Level").Value) > 16384) Then
-                DataGridView1.Rows(e.RowIndex).Cells("Trigger Level").Style.BackColor = Color.Red
-                Apply.Enabled = False
-                Apply.BackColor = Color.LightGray
-                MainForm.plog.TextBox1.AppendText("Trigger Level could not exceeds 16384 lsb!" & vbCrLf)
-            Else
-                DataGridView1.Rows(e.RowIndex).Cells("Trigger Level").Style.BackColor = Color.White
-            End If
+                If (CInt(DataGridView1.Rows(e.RowIndex).Cells("Trigger Level").Value) > 16384) Then
+                    DataGridView1.Rows(e.RowIndex).Cells("Trigger Level").Style.BackColor = Color.Red
+                    Apply.Enabled = False
+                    Apply.BackColor = Color.LightGray
+                    MainForm.plog.TextBox1.AppendText("Trigger Level could not exceeds 16384 lsb!" & vbCrLf)
+                Else
+                    DataGridView1.Rows(e.RowIndex).Cells("Trigger Level").Style.BackColor = Color.White
+                End If
 
-            If (CInt(DataGridView1.Rows(e.RowIndex).Cells("Energy Sample").Value) > 4096) Then
-                DataGridView1.Rows(e.RowIndex).Cells("Energy Sample").Style.BackColor = Color.Red
-                Apply.Enabled = False
-                Apply.BackColor = Color.LightGray
-                MainForm.plog.TextBox1.AppendText("Energy Sample could not exceeds 4096 ns!" & vbCrLf)
-            Else
-                DataGridView1.Rows(e.RowIndex).Cells("Energy Sample").Style.BackColor = Color.White
-            End If
+                If (CInt(DataGridView1.Rows(e.RowIndex).Cells("Energy Sample").Value) > 4096) Then
+                    DataGridView1.Rows(e.RowIndex).Cells("Energy Sample").Style.BackColor = Color.Red
+                    Apply.Enabled = False
+                    Apply.BackColor = Color.LightGray
+                    MainForm.plog.TextBox1.AppendText("Energy Sample could not exceeds 4096 ns!" & vbCrLf)
+                Else
+                    DataGridView1.Rows(e.RowIndex).Cells("Energy Sample").Style.BackColor = Color.White
+                End If
 
-            If (CInt(DataGridView1.Rows(e.RowIndex).Cells("Baseline Inhibit Time").Value) > 520000) Then
-                DataGridView1.Rows(e.RowIndex).Cells("Baseline Inhibit Time").Style.BackColor = Color.Red
-                Apply.Enabled = False
-                Apply.BackColor = Color.LightGray
-                MainForm.plog.TextBox1.AppendText("Baseline Inhibit Time could not exceeds 520000 ns!" & vbCrLf)
-            Else
-                DataGridView1.Rows(e.RowIndex).Cells("Baseline Inhibit Time").Style.BackColor = Color.White
-            End If
+                If (CInt(DataGridView1.Rows(e.RowIndex).Cells("Baseline Inhibit Time").Value) > 520000) Then
+                    DataGridView1.Rows(e.RowIndex).Cells("Baseline Inhibit Time").Style.BackColor = Color.Red
+                    Apply.Enabled = False
+                    Apply.BackColor = Color.LightGray
+                    MainForm.plog.TextBox1.AppendText("Baseline Inhibit Time could not exceeds 520000 ns!" & vbCrLf)
+                Else
+                    DataGridView1.Rows(e.RowIndex).Cells("Baseline Inhibit Time").Style.BackColor = Color.White
+                End If
 
-        End If
+            End If
     End Sub
 
     Private Sub DataGridView2_CellValueChanged(sender As Object, e As DataGridViewCellEventArgs)
