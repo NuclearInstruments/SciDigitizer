@@ -1155,7 +1155,7 @@ Public Class pOscilloscope
                 For qq = 0 To MainForm.acquisition.CHList.Count - 1
                     Connection.ComClass.GetRegister(addressStatus(MainForm.acquisition.CHList(qq).ch_id - 1), status, MainForm.acquisition.CHList(qq).board_number - 1)
                     gstatus(qq) = status
-                    Connection.ComClass.GetRegister(addressPosition(MainForm.acquisition.CHList(qq).ch_id - 1), position, 0)
+                    Connection.ComClass.GetRegister(addressPosition(MainForm.acquisition.CHList(qq).ch_id - 1), position, MainForm.acquisition.CHList(qq).board_number - 1)
                     gposition(qq) = position
                     Connection.ComClass.ReadData(addressData(MainForm.acquisition.CHList(qq).ch_id - 1), test, length, 0, 1000, read_data, valid_data, MainForm.acquisition.CHList(qq).board_number - 1)
                     For t = 0 To length - 1
