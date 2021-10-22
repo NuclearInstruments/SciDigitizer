@@ -1296,7 +1296,7 @@ Public Class Settings
                         MainForm.plog.TextBox1.AppendText("AFE Settings: Division Error!" & vbCrLf)
                     End If
 
-                    If Connection.ComClass.SetAfeParamR("Offset", "Gain", off, g, ch, ch_2, 1, b - 1) Then
+                    If Connection.ComClass.SetAfeParamR("Gain", "Offset", g, off, ch_2, ch, 1, b - 1) Then
                         MainForm.plog.TextBox1.AppendText("AFE Settings: Offset applied successfully!" & vbCrLf)
                         MainForm.plog.TextBox1.AppendText("AFE Settings: Gain applied successfully!" & vbCrLf)
                     Else

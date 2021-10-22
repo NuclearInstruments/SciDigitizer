@@ -509,21 +509,20 @@ Public Class pOscilloscope
 
     Public Sub setOscilloscopeParam()
 
-        Dim LevelTriggerValue_arr As Integer()
-        ReDim LevelTriggerValue_arr(n_osc)
-        For i = 0 To n_osc - 1
-            If Connection.ComClass._boardModel = communication.tModel.DT5560SE Or Connection.ComClass._boardModel = communication.tModel.R5560SE Then
-                LevelTriggerValue_arr(i) = MainForm.acquisition.CHList(i).TriggerOscilloscopeLevel
-            Else
-                LevelTriggerValue_arr(i) = LevelTriggerValue
-            End If
-        Next
-
         For j = 0 To Connection.ComClass._nBoard - 1
             For i = 0 To n_osc - 1
                 If Connection.ComClass.SetRegister(addressDecimator(i), DecimatorValue - 1, j) = 0 Then
                     If Connection.ComClass.SetRegister(addressPre(i), Math.Floor(PreTriggerValue * nsamples / 100), j) = 0 Then
                         If Connection.ComClass.SetRegister(addressMode(i), TriggerModeValue, j) = 0 Then
+
+                            Dim LevelTriggerValue_arr As Integer()
+                            ReDim LevelTriggerValue_arr(n_osc)
+                            If Connection.ComClass._boardModel = communication.tModel.DT5560SE Or Connection.ComClass._boardModel = communication.tModel.R5560SE Then
+                                LevelTriggerValue_arr(i) = MainForm.acquisition.CHList(i + j * n_osc).TriggerOscilloscopeLevel
+                            Else
+                                LevelTriggerValue_arr(i) = LevelTriggerValue
+                            End If
+
                             If Connection.ComClass.SetRegister(addressLevel(i), LevelTriggerValue_arr(i), j) = 0 Then
                                 If Connection.ComClass.SetRegister(addressArm(i), 0, j) = 0 Then
                                     If Connection.ComClass.SetRegister(addressArm(i), 1, j) = 0 Then
