@@ -507,10 +507,14 @@ Public Class Connection
         Dim nRow = DataGridView3.RowCount
         DataGridView3.Rows.Add()
         DataGridView3.Rows(nRow).Cells("ConnectionType").Value = "Ethernet"
-        If nRow = 0 Then
-            DataGridView3.Rows(nRow).Cells("IP").Value = My.Settings.IP1
-        ElseIf nRow > 0 Then
-            DataGridView3.Rows(nRow).Cells("IP").Value = DataGridView3.Rows(nRow - 1).Cells("IP").Value
+        'If nRow = 0 Then
+        '    DataGridView3.Rows(nRow).Cells("IP").Value = My.Settings.IP1
+        'Else
+        Dim ip_list = My.Settings.IPs.Split(";")
+        If (nRow < ip_list.Count() - 1) Then
+            DataGridView3.Rows(nRow).Cells("IP").Value = ip_list(nRow)
+        Else
+            DataGridView3.Rows(nRow).Cells("IP").Value = ip_list(0)
         End If
     End Sub
 
@@ -526,7 +530,7 @@ Public Class Connection
 
             selected_board = communication.tModel.R5560SE
             selected_connection = communication.tConnectionMode.ETHERNET2
-            Connect_DT5560SE.Enabled = False
+            Connect_R5560SE.Enabled = False
 
             ComClass.StartConnection(DataGridView3.RowCount, selected_board)
             Dim _connected_board = 0
@@ -555,10 +559,14 @@ Public Class Connection
                     ComClass.GetMessage(r)
                 End If
             Next
-            Connect_DT5560SE.Enabled = True
+            Connect_R5560SE.Enabled = True
 
             Jsonfile = My.Application.Info.DirectoryPath & "\RegisterFileR5560SE.json"
-            My.Settings.IP1 = DataGridView3.Rows(0).Cells("IP").Value
+            My.Settings.IPs = ""
+            For d = 0 To DataGridView3.RowCount - 1
+                ' My.Settings.IP1 = DataGridView3.Rows(0).Cells("IP").Value
+                My.Settings.IPs += DataGridView3.Rows(d).Cells("IP").Value + ";"
+            Next
             My.Settings.Save()
 
             If _connected_board = DataGridView3.RowCount And _connected_board <> 0 Then

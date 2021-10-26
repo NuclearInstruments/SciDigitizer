@@ -204,6 +204,9 @@ Public Class pSpectra
             For i = 1 To CheckedListBox1.Items.Count - 1
                 CheckedListBox1.SetItemChecked(i, state)
                 MainForm.acquisition.CHList(i - 1).spectra_checked = state
+                If state Then
+                    Checked_id.Add(MainForm.acquisition.CHList(i - 1).id)
+                End If
             Next
         Else
             MainForm.acquisition.CHList(CheckedListBox1.SelectedIndex - 1).spectra_checked = IIf(CheckedListBox1.GetItemCheckState(CheckedListBox1.SelectedIndex).ToString = "Checked", True, False)
@@ -212,21 +215,23 @@ Public Class pSpectra
             End If
             Dim all_checked = True
             For i = 1 To CheckedListBox1.Items.Count - 1
-                If CheckedListBox1.GetItemCheckState(i).ToString = "Checked" Then
+                Dim state = IIf(CheckedListBox1.GetItemCheckState(i).ToString = "Checked", True, False)
+                If state Then
+                    Checked_id.Add(MainForm.acquisition.CHList(i - 1).id)
                 Else
                     all_checked = False
-                    Exit For
+                    'Exit For
                 End If
             Next
             If all_checked Then
                 CheckedListBox1.SetItemChecked(0, True)
             End If
         End If
-        For Each scope_ch In MainForm.acquisition.CHList
-            If scope_ch.spectra_checked Then
-                Checked_id.Add(scope_ch.id)
-            End If
-        Next
+        'For Each scope_ch In MainForm.acquisition.CHList
+        '    If scope_ch.spectra_checked Then
+        '        Checked_id.Add(scope_ch.id)
+        '    End If
+        'Next
 
     End Sub
 

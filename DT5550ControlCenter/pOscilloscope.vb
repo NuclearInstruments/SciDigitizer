@@ -3,6 +3,7 @@ Imports System.Threading
 Imports System.ComponentModel
 Imports Gigasoft.ProEssentials
 Imports Gigasoft.ProEssentials.Enums
+Imports DT5550ControlCenter.AcquisitionClass
 
 Public Class pOscilloscope
 
@@ -406,41 +407,44 @@ Public Class pOscilloscope
             n_ch = CheckedListBox1.CheckedIndices.Count
         End If
 
-        If CheckedListBox1.SelectedIndex >= 0 Then
-            If CheckedListBox1.SelectedIndex = 0 Then
-                Dim state = IIf(CheckedListBox1.GetItemCheckState(0).ToString = "Checked", True, False)
-                For i = 1 To CheckedListBox1.Items.Count - 1
-                    CheckedListBox1.SetItemChecked(i, state)
-                    MainForm.acquisition.CHList(i - 1).scope_checked = state
-                Next
-            Else
-                MainForm.acquisition.CHList(CheckedListBox1.SelectedIndex - 1).scope_checked = IIf(CheckedListBox1.GetItemCheckState(CheckedListBox1.SelectedIndex).ToString = "Checked", True, False)
+        'If CheckedListBox1.SelectedIndex >= 0 Then
+        If CheckedListBox1.SelectedIndex = 0 Then
+            Dim state = IIf(CheckedListBox1.GetItemCheckState(0).ToString = "Checked", True, False)
+            For i = 1 To CheckedListBox1.Items.Count - 1
+                CheckedListBox1.SetItemChecked(i, state)
+                MainForm.acquisition.CHList(i - 1).scope_checked = state
+                If state Then
+                    Checked_id.Add(MainForm.acquisition.CHList(i - 1).id)
+                End If
+            Next
+        Else
+            MainForm.acquisition.CHList(CheckedListBox1.SelectedIndex - 1).scope_checked = IIf(CheckedListBox1.GetItemCheckState(CheckedListBox1.SelectedIndex).ToString = "Checked", True, False)
                 If CheckedListBox1.GetItemCheckState(0).ToString = "Checked" And CheckedListBox1.GetItemCheckState(CheckedListBox1.SelectedIndex).ToString = "Unchecked" Then
                     CheckedListBox1.SetItemChecked(0, False)
                 End If
-                Dim all_checked = True
-                For i = 1 To CheckedListBox1.Items.Count - 1
-                    If CheckedListBox1.GetItemCheckState(i).ToString = "Checked" Then
-                    Else
-                        all_checked = False
-                        Exit For
-                    End If
-                Next
-                If all_checked Then
-                    CheckedListBox1.SetItemChecked(0, True)
-                End If
-            End If
-        Else
+            Dim all_checked = True
             For i = 1 To CheckedListBox1.Items.Count - 1
                 Dim state = IIf(CheckedListBox1.GetItemCheckState(i).ToString = "Checked", True, False)
                 MainForm.acquisition.CHList(i - 1).scope_checked = state
+                If state Then
+                    Checked_id.Add(MainForm.acquisition.CHList(i - 1).id)
+                Else
+                    all_checked = False
+                    ' Exit For
+                End If
             Next
-        End If
-        For Each scope_ch In MainForm.acquisition.CHList
-            If scope_ch.scope_checked Then
-                Checked_id.Add(scope_ch.id)
+            If all_checked Then
+                    CheckedListBox1.SetItemChecked(0, True)
+                End If
             End If
-        Next
+        'Else
+
+        ' End If
+        'For Each scope_ch In MainForm.acquisition.CHList
+        '    If scope_ch.scope_checked Then
+        '        Checked_id.Add(scope_ch.id)
+        '    End If
+        'Next
         Pesgo1.PeData.Subsets = 5 * n_ch
         Pesgo1.PeLegend.SubsetsToLegend.Clear()
         Pesgo1.PeString.SubsetLabels.Clear()
@@ -456,11 +460,12 @@ Public Class pOscilloscope
             Pesgo1.PePlot.SubsetLineTypes(n_ch * 2 + n) = LineType.ThickSolid
             Pesgo1.PePlot.SubsetLineTypes(n_ch * 3 + n) = LineType.ThickSolid
             Pesgo1.PePlot.SubsetLineTypes(n_ch * 4 + n) = LineType.ThickSolid
-            If CheckedListBox1.CheckedItems.Contains("ALL") Then
-                Pesgo1.PeString.SubsetLabels(n) = CheckedListBox1.CheckedItems(n + 1)
-            Else
-                Pesgo1.PeString.SubsetLabels(n) = CheckedListBox1.CheckedItems(n)
-            End If
+            ' If CheckedListBox1.CheckedItems.Contains("ALL") Then
+            'Pesgo1.PeString.SubsetLabels(n) = CheckedListBox1.CheckedItems(n + 1)
+            Pesgo1.PeString.SubsetLabels(n) = MainForm.acquisition.CHList(Checked_id(n) - 1).name
+            'Else
+            'Pesgo1.PeString.SubsetLabels(n) = CheckedListBox1.CheckedItems(n)
+            'End If
             Pesgo1.PeString.SubsetLabels(n_ch * 1 + n) = ""
             Pesgo1.PeString.SubsetLabels(n_ch * 2 + n) = ""
             Pesgo1.PeString.SubsetLabels(n_ch * 3 + n) = ""
@@ -1236,39 +1241,42 @@ Public Class pOscilloscope
                             Next
                         End If
 
+                        If (MainForm.acquisition.CHList(ch_id).polarity = signal_polarity.NEGATIVE) Then
+                            AnalogArray(nsamples * n) = -AnalogArray(nsamples * n)
+                        End If
 
                         If fileEnable = True Then
-                            If EnabledChannel(ch_id) Then
-                                Dim A(nsamples), A2(nsamples), D0(nsamples), D1(nsamples), D2(nsamples) As Single
+                                If EnabledChannel(ch_id) Then
+                                    Dim A(nsamples), A2(nsamples), D0(nsamples), D1(nsamples), D2(nsamples) As Single
 
-                                Array.Copy(AnalogArray, nsamples * n, A, 0, nsamples)
+                                    Array.Copy(AnalogArray, nsamples * n, A, 0, nsamples)
 
-                                objRawWriter.WriteLine((Now - startTime).TotalMilliseconds / 1000.0 & ";" & ch_id & ";" & nsamples & ";" & 1 & ";" & String.Join(";", A)) ' & String.Join(";", A2) & String.Join(";", D0) & String.Join(";", D1) & String.Join(";", D2))
+                                    objRawWriter.WriteLine((Now - startTime).TotalMilliseconds / 1000.0 & ";" & ch_id & ";" & nsamples & ";" & 1 & ";" & String.Join(";", A)) ' & String.Join(";", A2) & String.Join(";", D0) & String.Join(";", D1) & String.Join(";", D2))
 
-                            End If
+                                End If
 
-                            If TargetMode = 1 Then
-                                Try
-                                    Me.Invoke(Sub()
-                                                  If totalACQ >= TargetEvent Then
-                                                      MainForm.ProgressBar.Value = 100
-                                                      StopDataCaptureOnFile()
-                                                      MainForm.SaveData.Enabled = True
-                                                      MainForm.StopSaveData.Enabled = False
-                                                  Else
-                                                      MainForm.ProgressBar.Value = totalACQ / TargetEvent * 100
-                                                  End If
-                                              End Sub)
-                                Catch ex As Exception
-                                    Console.WriteLine("Exception Invoke" & ex.Message)
+                                If TargetMode = 1 Then
+                                    Try
+                                        Me.Invoke(Sub()
+                                                      If totalACQ >= TargetEvent Then
+                                                          MainForm.ProgressBar.Value = 100
+                                                          StopDataCaptureOnFile()
+                                                          MainForm.SaveData.Enabled = True
+                                                          MainForm.StopSaveData.Enabled = False
+                                                      Else
+                                                          MainForm.ProgressBar.Value = totalACQ / TargetEvent * 100
+                                                      End If
+                                                  End Sub)
+                                    Catch ex As Exception
+                                        Console.WriteLine("Exception Invoke" & ex.Message)
 
 
-                                End Try
+                                    End Try
 
+                                End If
                             End If
                         End If
-                    End If
-                    n += 1
+                        n += 1
                 Next
 
                 'For Each ch In Checked_id
