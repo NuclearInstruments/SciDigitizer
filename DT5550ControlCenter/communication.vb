@@ -200,7 +200,7 @@ Public Class communication
                     Case tConnectionMode.VME
                         Return tError.ERROR_GENERIC
                 End Select
-            Case tModel.DT5560SE Or tModel.R5560SE
+            Case tModel.DT5560SE, tModel.R5560SE
 
                 Select Case ConnectionMode
                     Case tConnectionMode.USB
@@ -289,7 +289,7 @@ Public Class communication
                 Next
 
                 Return tError.OK
-            Case tModel.DT5560SE Or tModel.R5560SE
+            Case tModel.DT5560SE, tModel.R5560SE
                 mtx.WaitOne()
                 For r = 0 To DT5560SEHandle.Count - 1
                     R5560_CloseConnection(DT5560SEHandle(r).C_HANDLE)
@@ -506,7 +506,7 @@ Public Class communication
                 Else
                     Return tError.ERROR_FPGA
                 End If
-            Case tModel.DT5560SE Or tModel.R5560SE
+            Case tModel.DT5560SE, tModel.R5560SE
                 If _isconnected(Handle_indx) = False Then
                     Return tError.NOT_CONNECTED
                 End If
@@ -591,7 +591,7 @@ Public Class communication
                 Else
                     Return tError.ERROR_FPGA
                 End If
-            Case tModel.DT5560SE Or tModel.R5560SE
+            Case tModel.DT5560SE, tModel.R5560SE
                 If _isconnected(Handle_indx) = False Then
                     Return tError.NOT_CONNECTED
                 End If
@@ -750,7 +750,7 @@ Public Class communication
                 mtx.ReleaseMutex()
                 Dim _terror = IErrorDT5550ToNETError(ierror)
                 Return _terror
-            Case tModel.DT5560SE Or tModel.R5560SE
+            Case tModel.DT5560SE, tModel.R5560SE
                 If _isconnected(Handle_indx) = False Then
                     Return tError.NOT_CONNECTED
                 End If
@@ -788,7 +788,7 @@ Public Class communication
                 mtx.ReleaseMutex()
                 Dim _terror = IErrorDT5550ToNETError(ierror)
                 Return _terror
-            Case tModel.DT5560SE Or tModel.R5560SE
+            Case tModel.DT5560SE, tModel.R5560SE
                 If _isconnected(Handle_indx) = False Then
                     Return tError.NOT_CONNECTED
                 End If
