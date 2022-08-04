@@ -8,8 +8,8 @@ Public Class Connection
     Public Shared ComClass As New communication()
     Public CustomFirmware As Boolean = False
     Public Jsonfile As String
-
-
+    Dim register_version = 67108862
+    Dim version_threshold = 539100969
     Private Sub Connection_Load(sender As Object, e As EventArgs) Handles Me.Load
         sW.Text = "Software version: " & Application.ProductVersion
         Me.Text = "SCI-55X0 Readout Software"
@@ -347,20 +347,27 @@ Public Class Connection
             Next
             Connect_R5560.Enabled = True
 
-            Jsonfile = My.Application.Info.DirectoryPath & "\RegisterFileR5560.json"
+            Dim v As Integer
+            ComClass.GetRegister(register_version, v, 0)
+            If (v >= version_threshold) Then
+                Jsonfile = My.Application.Info.DirectoryPath & "\RegisterFileR5560_new.json"
+            Else
+                Jsonfile = My.Application.Info.DirectoryPath & "\RegisterFileR5560.json"
+            End If
+
             My.Settings.IP1 = DataGridView1.Rows(0).Cells("IP").Value
             My.Settings.Save()
 
-            If _connected_board = DataGridView1.RowCount And _connected_board <> 0 Then
-                ComClass._nBoard = _connected_board
-                ComClass._n_ch = 32
-                ComClass._n_ch_oscilloscope = 2
-                ComClass._n_oscilloscope = 32
-                MainForm.Show()
-                Me.Hide()
-            End If
-        Else
-            MsgBox("Please add a device!")
+                If _connected_board = DataGridView1.RowCount And _connected_board <> 0 Then
+                    ComClass._nBoard = _connected_board
+                    ComClass._n_ch = 32
+                    ComClass._n_ch_oscilloscope = 2
+                    ComClass._n_oscilloscope = 32
+                    MainForm.Show()
+                    Me.Hide()
+                End If
+            Else
+                MsgBox("Please add a device!")
         End If
     End Sub
 
