@@ -9,7 +9,9 @@ Public Class Connection
     Public CustomFirmware As Boolean = False
     Public Jsonfile As String
     Dim register_version = 67108862
-    Dim version_threshold = 539100969
+    Dim version_threshold_R5560 = 539100969
+    Dim version_threshold_DT5560SE = 539164977
+
     Private Sub Connection_Load(sender As Object, e As EventArgs) Handles Me.Load
         sW.Text = "Software version: " & Application.ProductVersion
         Me.Text = "SCI-55X0 Readout Software"
@@ -349,7 +351,7 @@ Public Class Connection
 
             Dim v As Integer
             ComClass.GetRegister(register_version, v, 0)
-            If (v >= version_threshold) Then
+            If (v >= version_threshold_R5560) Then
                 Jsonfile = My.Application.Info.DirectoryPath & "\RegisterFileR5560_new.json"
             Else
                 Jsonfile = My.Application.Info.DirectoryPath & "\RegisterFileR5560.json"
@@ -410,7 +412,15 @@ Public Class Connection
             Next
             Connect_DT5560SE.Enabled = True
 
-            Jsonfile = My.Application.Info.DirectoryPath & "\RegisterFileDT5560SE.json"
+            Dim v As Integer
+            ComClass.GetRegister(register_version, v, 0)
+            If (v >= version_threshold_DT5560SE) Then
+                Jsonfile = My.Application.Info.DirectoryPath & "\RegisterFileDT5560SE_new.json"
+            Else
+                Jsonfile = My.Application.Info.DirectoryPath & "\RegisterFileDT5560SE.json"
+            End If
+
+            'Jsonfile = My.Application.Info.DirectoryPath & "\RegisterFileDT5560SE.json"
             My.Settings.IP1 = DataGridView2.Rows(0).Cells("IP").Value
             My.Settings.Save()
 
