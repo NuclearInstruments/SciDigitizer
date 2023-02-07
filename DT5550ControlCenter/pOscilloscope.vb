@@ -3,7 +3,7 @@ Imports System.Threading
 Imports System.ComponentModel
 Imports Gigasoft.ProEssentials
 Imports Gigasoft.ProEssentials.Enums
-Imports DT5550ControlCenter.AcquisitionClass
+Imports OpenHardwareReadoutSoftware.AcquisitionClass
 
 Public Class pOscilloscope
 

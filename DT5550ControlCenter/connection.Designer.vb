@@ -275,7 +275,7 @@ Partial Class Connection
         '
         'RemoveButton
         '
-        Me.RemoveButton.Image = Global.DT5550ControlCenter.My.Resources.Resources.remove2
+        Me.RemoveButton.Image = Global.OpenHardwareReadoutSoftware.My.Resources.Resources.remove2
         Me.RemoveButton.Location = New System.Drawing.Point(477, 73)
         Me.RemoveButton.Name = "RemoveButton"
         Me.RemoveButton.Size = New System.Drawing.Size(36, 31)
@@ -299,7 +299,7 @@ Partial Class Connection
         '
         'AddButton
         '
-        Me.AddButton.Image = Global.DT5550ControlCenter.My.Resources.Resources.add_icon
+        Me.AddButton.Image = Global.OpenHardwareReadoutSoftware.My.Resources.Resources.add_icon
         Me.AddButton.Location = New System.Drawing.Point(477, 18)
         Me.AddButton.Name = "AddButton"
         Me.AddButton.Size = New System.Drawing.Size(36, 32)
@@ -385,7 +385,7 @@ Partial Class Connection
         '
         'Remove_DT5560SE
         '
-        Me.Remove_DT5560SE.Image = Global.DT5550ControlCenter.My.Resources.Resources.remove2
+        Me.Remove_DT5560SE.Image = Global.OpenHardwareReadoutSoftware.My.Resources.Resources.remove2
         Me.Remove_DT5560SE.Location = New System.Drawing.Point(478, 73)
         Me.Remove_DT5560SE.Name = "Remove_DT5560SE"
         Me.Remove_DT5560SE.Size = New System.Drawing.Size(36, 31)
@@ -409,7 +409,7 @@ Partial Class Connection
         '
         'Add_DT5560SE
         '
-        Me.Add_DT5560SE.Image = Global.DT5550ControlCenter.My.Resources.Resources.add_icon
+        Me.Add_DT5560SE.Image = Global.OpenHardwareReadoutSoftware.My.Resources.Resources.add_icon
         Me.Add_DT5560SE.Location = New System.Drawing.Point(478, 18)
         Me.Add_DT5560SE.Name = "Add_DT5560SE"
         Me.Add_DT5560SE.Size = New System.Drawing.Size(36, 32)
@@ -443,7 +443,7 @@ Partial Class Connection
         '
         'Remove_R5560SE
         '
-        Me.Remove_R5560SE.Image = Global.DT5550ControlCenter.My.Resources.Resources.remove2
+        Me.Remove_R5560SE.Image = Global.OpenHardwareReadoutSoftware.My.Resources.Resources.remove2
         Me.Remove_R5560SE.Location = New System.Drawing.Point(478, 73)
         Me.Remove_R5560SE.Name = "Remove_R5560SE"
         Me.Remove_R5560SE.Size = New System.Drawing.Size(36, 31)
@@ -467,7 +467,7 @@ Partial Class Connection
         '
         'Add_R5560SE
         '
-        Me.Add_R5560SE.Image = Global.DT5550ControlCenter.My.Resources.Resources.add_icon
+        Me.Add_R5560SE.Image = Global.OpenHardwareReadoutSoftware.My.Resources.Resources.add_icon
         Me.Add_R5560SE.Location = New System.Drawing.Point(478, 18)
         Me.Add_R5560SE.Name = "Add_R5560SE"
         Me.Add_R5560SE.Size = New System.Drawing.Size(36, 32)

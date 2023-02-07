@@ -2,7 +2,7 @@
 Imports System.Globalization
 Imports System.Reflection
 Imports System.Text.RegularExpressions
-Imports DT5550ControlCenter.AcquisitionClass
+Imports OpenHardwareReadoutSoftware.AcquisitionClass
 
 Public Class Settings
 
@@ -348,7 +348,7 @@ Public Class Settings
                 TriggerSourceOscilloscope.SelectedIndex = 0
         End If
 
-        If MainForm.acquisition.General_settings.TriggerOscilloscopeEdges = DT5550ControlCenter.AcquisitionClass.edge.RISING Then
+        If MainForm.acquisition.General_settings.TriggerOscilloscopeEdges = OpenHardwareReadoutSoftware.AcquisitionClass.edge.RISING Then
             TriggerEdge.SelectedIndex = 0
         Else
             TriggerEdge.SelectedIndex = 1

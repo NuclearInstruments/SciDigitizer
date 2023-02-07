@@ -6,7 +6,7 @@ Imports Newtonsoft.Json
 Imports System.Xml
 Imports Gigasoft.ProEssentials
 Imports Gigasoft.ProEssentials.Enums
-Imports DT5550ControlCenter.AcquisitionClass
+Imports OpenHardwareReadoutSoftware.AcquisitionClass
 Imports System.Globalization
 Imports System.Threading
 
@@ -48,7 +48,7 @@ Public Class MainForm
 
     Public Sub MDIParent_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         My.Application.ChangeCulture("en-US")
-        Me.Text = "SCI-55X0 Readout Software (NI - CAEN)"
+        Me.Text = "OpenHardware Readout Software (NI - CAEN) - " & Application.ProductVersion
         Dim file As String = Connection.Jsonfile
         Create(file)
 

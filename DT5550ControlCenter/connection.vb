@@ -14,7 +14,7 @@ Public Class Connection
 
     Private Sub Connection_Load(sender As Object, e As EventArgs) Handles Me.Load
         sW.Text = "Software version: " & Application.ProductVersion
-        Me.Text = "SCI-55X0 Readout Software"
+        Me.Text = "Open Hardware Readout Software"
         Dim t As New communication.tError
         t = ComClass.Disconnect()
         If t = communication.tError.OK Or t = communication.tError.NOT_CONNECTED Or t = communication.tError.ALREADY_DISCONNECTED Then
