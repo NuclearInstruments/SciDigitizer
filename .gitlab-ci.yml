@@ -49,7 +49,7 @@ digital_signature:
   dependencies: 
   - build_setup  
   script:
-    - sign_executable.cmd "INNOSETUP_BUILD/output/SciCompiler-setup.exe"
+    - sign_executable.cmd "INNOSETUP_BUILD/output/oh-readout-setup.exe"
   tags:
     - windows-signature
   artifacts:
