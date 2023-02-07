@@ -8,11 +8,13 @@ Public Class Connection
     Public Shared ComClass As New communication()
     Public CustomFirmware As Boolean = False
     Public Jsonfile As String
-
+    Dim register_version = 67108862
+    Dim version_threshold_R5560 = 539100969
+    Dim version_threshold_DT5560SE = 539164977
 
     Private Sub Connection_Load(sender As Object, e As EventArgs) Handles Me.Load
         sW.Text = "Software version: " & Application.ProductVersion
-        Me.Text = "SCI-55X0 Readout Software"
+        Me.Text = "Open Hardware Readout Software"
         Dim t As New communication.tError
         t = ComClass.Disconnect()
         If t = communication.tError.OK Or t = communication.tError.NOT_CONNECTED Or t = communication.tError.ALREADY_DISCONNECTED Then
@@ -71,6 +73,20 @@ Public Class Connection
 
         DataGridView2.Columns.Add("IP", "IP Address")
         DataGridView2.Columns.Add("Status", "Status")
+
+
+        Dim connect_column3 As New DataGridViewComboBoxColumn()
+        DataGridView3.Columns.Clear()
+        connect_column3.HeaderText = "Connection"
+        connect_column3.Name = "ConnectionType"
+        connect_column3.MaxDropDownItems = 2
+        connect_column3.Items.Add("Ethernet")
+        connect_column3.Items.Add("USB")
+        DataGridView3.Columns.Add(connect_column3)
+
+        DataGridView3.Columns.Add("IP", "IP Address")
+        DataGridView3.Columns.Add("Status", "Status")
+
 
     End Sub
     'Private Sub DataGridView1_EditingControlShowing(ByVal sender As System.Object, ByVal e As DataGridViewEditingControlShowingEventArgs) Handles DataGridView1.EditingControlShowing
@@ -333,20 +349,27 @@ Public Class Connection
             Next
             Connect_R5560.Enabled = True
 
-            Jsonfile = My.Application.Info.DirectoryPath & "\RegisterFileR5560.json"
+            Dim v As Integer
+            ComClass.GetRegister(register_version, v, 0)
+            If (v >= version_threshold_R5560) Then
+                Jsonfile = My.Application.Info.DirectoryPath & "\RegisterFileR5560_new.json"
+            Else
+                Jsonfile = My.Application.Info.DirectoryPath & "\RegisterFileR5560.json"
+            End If
+
             My.Settings.IP1 = DataGridView1.Rows(0).Cells("IP").Value
             My.Settings.Save()
 
-            If _connected_board = DataGridView1.RowCount And _connected_board <> 0 Then
-                ComClass._nBoard = _connected_board
-                ComClass._n_ch = 32
-                ComClass._n_ch_oscilloscope = 2
-                ComClass._n_oscilloscope = 32
-                MainForm.Show()
-                Me.Hide()
-            End If
-        Else
-            MsgBox("Please add a device!")
+                If _connected_board = DataGridView1.RowCount And _connected_board <> 0 Then
+                    ComClass._nBoard = _connected_board
+                    ComClass._n_ch = 32
+                    ComClass._n_ch_oscilloscope = 2
+                    ComClass._n_oscilloscope = 32
+                    MainForm.Show()
+                    Me.Hide()
+                End If
+            Else
+                MsgBox("Please add a device!")
         End If
     End Sub
 
@@ -361,10 +384,10 @@ Public Class Connection
             Dim _connected_board = 0
 
             For d = 0 To DataGridView2.RowCount - 1
-                If DataGridView2.Rows(d).Cells("ConnectionType").Value = "USB" Then
-                    MsgBox("USB Connection not supported yet")
-                    Exit For
-                End If
+                'If DataGridView2.Rows(d).Cells("ConnectionType").Value = "USB" Then
+                '    MsgBox("USB Connection not supported yet")
+                '    Exit For
+                'End If
                 Dim a As String() = DataGridView2.Rows(d).Cells("IP").Value.split(".")
                 If a.Length <> 4 Then
                     MsgBox("IP Not Valid")
@@ -389,7 +412,15 @@ Public Class Connection
             Next
             Connect_DT5560SE.Enabled = True
 
-            Jsonfile = My.Application.Info.DirectoryPath & "\RegisterFileDT5560SE.json"
+            Dim v As Integer
+            ComClass.GetRegister(register_version, v, 0)
+            If (v >= version_threshold_DT5560SE) Then
+                Jsonfile = My.Application.Info.DirectoryPath & "\RegisterFileDT5560SE_new.json"
+            Else
+                Jsonfile = My.Application.Info.DirectoryPath & "\RegisterFileDT5560SE.json"
+            End If
+
+            'Jsonfile = My.Application.Info.DirectoryPath & "\RegisterFileDT5560SE.json"
             My.Settings.IP1 = DataGridView2.Rows(0).Cells("IP").Value
             My.Settings.Save()
 
@@ -489,6 +520,86 @@ Public Class Connection
         End If
     End Sub
 
+    Private Sub Button4_Click(sender As Object, e As EventArgs) Handles Add_R5560SE.Click
+        Dim nRow = DataGridView3.RowCount
+        DataGridView3.Rows.Add()
+        DataGridView3.Rows(nRow).Cells("ConnectionType").Value = "Ethernet"
+        'If nRow = 0 Then
+        '    DataGridView3.Rows(nRow).Cells("IP").Value = My.Settings.IP1
+        'Else
+        Dim ip_list = My.Settings.IPs.Split(";")
+        If (nRow < ip_list.Count() - 1) Then
+            DataGridView3.Rows(nRow).Cells("IP").Value = ip_list(nRow)
+        Else
+            DataGridView3.Rows(nRow).Cells("IP").Value = ip_list(0)
+        End If
+    End Sub
 
+    Private Sub Remove_R5560SE_Click(sender As Object, e As EventArgs) Handles Remove_R5560SE.Click
+        If DataGridView3.SelectedCells.Count <> 0 Then
+            Dim nSel = DataGridView3.SelectedCells.Item(0)
+            DataGridView3.Rows.RemoveAt(nSel.RowIndex)
+        End If
+    End Sub
 
+    Private Sub Connect_R5560SE_Click(sender As Object, e As EventArgs) Handles Connect_R5560SE.Click
+        If DataGridView3.RowCount > 0 Then
+
+            selected_board = communication.tModel.R5560SE
+            selected_connection = communication.tConnectionMode.ETHERNET2
+            Connect_R5560SE.Enabled = False
+
+            ComClass.StartConnection(DataGridView3.RowCount, selected_board)
+            Dim _connected_board = 0
+
+            For d = 0 To DataGridView3.RowCount - 1
+
+                Dim a As String() = DataGridView3.Rows(d).Cells("IP").Value.split(".")
+                If a.Length <> 4 Then
+                    MsgBox("IP Not Valid")
+                    Exit For
+                End If
+                For i = 0 To 3
+                    If a(i) < 0 Or a(i) > 255 Then
+                        MsgBox("IP Not Valid")
+                        Exit For
+                    End If
+                Next
+
+                Dim r As New communication.tError
+                r = ComClass.Connect(selected_connection, selected_board, DataGridView3.Rows(d).Cells("IP").Value, d)
+                If r = communication.tError.OK Then
+                    _connected_board += 1
+                    DataGridView3.Rows(d).Cells("Status").Value = "OK"
+                Else
+                    DataGridView3.Rows(d).Cells("Status").Value = "ERROR"
+                    ComClass.GetMessage(r)
+                End If
+            Next
+            Connect_R5560SE.Enabled = True
+
+            Jsonfile = My.Application.Info.DirectoryPath & "\RegisterFileR5560SE.json"
+            My.Settings.IPs = ""
+            For d = 0 To DataGridView3.RowCount - 1
+                ' My.Settings.IP1 = DataGridView3.Rows(0).Cells("IP").Value
+                My.Settings.IPs += DataGridView3.Rows(d).Cells("IP").Value + ";"
+            Next
+            My.Settings.Save()
+
+            If _connected_board = DataGridView3.RowCount And _connected_board <> 0 Then
+                ComClass._nBoard = _connected_board
+                ComClass._n_ch = 32
+                ComClass._n_ch_oscilloscope = 2
+                ComClass._n_oscilloscope = 32
+                MainForm.Show()
+                Me.Hide()
+            End If
+        Else
+            MsgBox("Please add a device!")
+        End If
+    End Sub
+
+    Private Sub DataGridView2_CellContentClick(sender As Object, e As DataGridViewCellEventArgs) Handles DataGridView2.CellContentClick
+
+    End Sub
 End Class

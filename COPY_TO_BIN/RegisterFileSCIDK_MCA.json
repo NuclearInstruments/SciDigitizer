@@ -218,6 +218,14 @@
 }],
 "MMCComponents":[
 {
+  "Name": "RateMeter_0",
+  "Type": "MCRateMeter",
+  "Address": 196608,
+  "Version": "1.0.0.0",
+  "Channels": 5,
+  "Registers": []
+},
+{
   "Name": "CP_0",
   "Type": "CustomPacket",
   "Address": 131081,
@@ -249,14 +257,6 @@
   "UseDMA": false
 },
 {
-  "Name": "RateMeter_0",
-  "Type": "MCRateMeter",
-  "Address": 196608,
-  "Version": "1.0.0.0",
-  "Channels": 5,
-  "Registers": []
-},
-{
   "Name": "Oscilloscope_0",
   "Type": "Oscilloscope",
   "Address": 65536,
@@ -265,49 +265,49 @@
   "Registers": [
     {
       "Name": "READ_STATUS",
-      "Address": 131072,
+      "Address": 69632,
       "RegionSize": 1,
       "Description": "",
       "Category": "Undefined"
     },
     {
       "Name": "READ_POSITION",
-      "Address": 131073,
+      "Address": 69633,
       "RegionSize": 1,
       "Description": "",
       "Category": "Undefined"
     },
     {
       "Name": "CONFIG_TRIGGER_MODE",
-      "Address": 131074,
+      "Address": 69634,
       "RegionSize": 1,
       "Description": "",
       "Category": "Undefined"
     },
     {
       "Name": "CONFIG_PRETRIGGER",
-      "Address": 131075,
+      "Address": 69635,
       "RegionSize": 1,
       "Description": "",
       "Category": "Undefined"
     },
     {
       "Name": "CONFIG_TRIGGER_LEVEL",
-      "Address": 131076,
+      "Address": 69636,
       "RegionSize": 1,
       "Description": "",
       "Category": "Undefined"
     },
     {
       "Name": "CONFIG_ARM",
-      "Address": 131077,
+      "Address": 69637,
       "RegionSize": 1,
       "Description": "",
       "Category": "Undefined"
     },
     {
       "Name": "CONFIG_DECIMATOR",
-      "Address": 131078,
+      "Address": 69638,
       "RegionSize": 1,
       "Description": "",
       "Category": "Undefined"

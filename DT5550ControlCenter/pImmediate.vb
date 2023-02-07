@@ -37,14 +37,14 @@ Public Class pImmediate
         Dim xlabel(c - 1) As String
         Dim ylabel(r - 1) As String
         For i = 0 To c - 1
-            If Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
+            If Connection.ComClass._boardModel = communication.tModel.DT5560SE Or Connection.ComClass._boardModel = communication.tModel.R5560SE Then
                 xlabel(i) = (i).ToString
             Else
                 xlabel(i) = (i + 1).ToString
             End If
         Next
         For j = 0 To r - 1
-            If Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
+            If Connection.ComClass._boardModel = communication.tModel.DT5560SE Or Connection.ComClass._boardModel = communication.tModel.R5560SE Then
                 ylabel(j) = (j).ToString
             Else
                 ylabel(j) = (j + 1).ToString
@@ -114,7 +114,7 @@ Public Class pImmediate
 
     End Sub
 
-    Private Sub Timer1_Tick(sender As Object, e As EventArgs) Handles Timer1.Tick
+    Public Sub Timer1_Tick(sender As Object, e As EventArgs) Handles Timer1.Tick
         If Connection.ComClass._boardModel = communication.tModel.SCIDK Then
             Exit Sub
         End If
@@ -138,6 +138,9 @@ Public Class pImmediate
                 '  q += 1
                 '  End If
             Next
+            If Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.DT5560SE Or Connection.ComClass._boardModel = communication.tModel.R5560SE Then
+                MainForm.spect.ClearRealtime()
+            End If
 
         Else
             Dim tmp() = MainForm.spect.integralimage
@@ -169,6 +172,65 @@ Public Class pImmediate
         plot1.InvalidatePlot(True)
 
         Timer1.Enabled = True
+
+    End Sub
+
+    Public Sub Reload_Image()
+        If Connection.ComClass._boardModel = communication.tModel.SCIDK Then
+            Exit Sub
+        End If
+        Dim tempdata() As Double
+        Dim scale As Double = 1
+        Dim max As Double = 1
+        Dim rescale As Boolean = True
+        If immediateCumulative = True Then
+
+            Dim tmp = MainForm.spect.realtimeimage
+
+            Array.Resize(tmp, MainForm.acquisition.CHList.Count)
+            tempdata = tmp
+            rescale = False
+            ' Dim q = 0
+
+            For Each ch In MainForm.acquisition.CHList
+                ' If q = ch.id - 1 Then
+                data(ch.x_position, ch.y_position) = tempdata(ch.id - 1)
+                '  q += 1
+                '  End If
+            Next
+            If Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.DT5560SE Or Connection.ComClass._boardModel = communication.tModel.R5560SE Then
+                MainForm.spect.ClearRealtime()
+            End If
+
+        Else
+            Dim tmp() = MainForm.spect.integralimage
+            Array.Resize(tmp, MainForm.acquisition.CHList.Count)
+            tempdata = tmp
+            rescale = True
+            'Dim q = 0
+
+            For Each ch In MainForm.acquisition.CHList
+                '   If q = ch.id - 1 Then
+                data(ch.x_position, ch.y_position) = tempdata(ch.id - 1)
+                '      q += 1
+                ' End If
+            Next
+        End If
+
+        '  For q = 0 To MainForm.oscilloscope.CHList.Count - 1
+        ' max = Math.Max(tempdata(q), max)
+        'Next
+        '
+        'q = 0
+
+        '   For i = 0 To MainForm.oscilloscope.currentMAP.cols - 1
+        '  For j = 0 To MainForm.oscilloscope.currentMAP.rows - 1
+
+
+        '   Next
+        'Next
+        plot1.InvalidatePlot(True)
+
     End Sub
 
     Private Sub plot1_Click(sender As Object, e As EventArgs) Handles plot1.Click

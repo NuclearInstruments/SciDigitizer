@@ -22,6 +22,7 @@ Public Class communication
         R5560 = 2
         SCIDK = 3
         DT5560SE = 4
+        R5560SE = 5
     End Enum
 
     Public Enum tError
@@ -49,6 +50,11 @@ Public Class communication
         WRITE_FAILED = 21
     End Enum
 
+    Public Structure DT5560VBHandle
+        Dim C_HANDLE As IntPtr
+        Dim IP As String
+    End Structure
+
     Public _boardModel As tModel
     Private _isconnected As New List(Of Boolean)
     Public _nBoard As Integer
@@ -58,7 +64,8 @@ Public Class communication
     Private V2495Handle As UInt32
     Private DT5550Handle As New IntPtr
     Private R5560Handle As New List(Of IntPtr)
-    Private DT5560SEHandle As New List(Of IntPtr)
+    Private DT5560SEHandle As New List(Of DT5560VBHandle)
+
     Private SCIDKHandle As New IntPtr
 
     Dim mtx As New Threading.Mutex
@@ -83,6 +90,8 @@ Public Class communication
             modelcode = tModel.SCIDK
         ElseIf model = "DT5560" Then
             modelcode = tModel.DT5560SE
+        ElseIf model = "R5560SE" Then
+            modelcode = tModel.R5560SE
         End If
         If modelcode = _boardModel Then
             Return True
@@ -100,8 +109,11 @@ Public Class communication
             If model = tModel.R5560 Then
                 R5560Handle.Add(0)
             End If
-            If model = tModel.DT5560SE Then
-                DT5560SEHandle.Add(0)
+            If model = tModel.DT5560SE Or model = tModel.R5560SE Then
+                Dim a = New DT5560VBHandle
+                a.C_HANDLE = 0
+                a.IP = ""
+                DT5560SEHandle.Add(a)
             End If
         Next
     End Sub
@@ -188,7 +200,7 @@ Public Class communication
                     Case tConnectionMode.VME
                         Return tError.ERROR_GENERIC
                 End Select
-            Case tModel.DT5560SE
+            Case tModel.DT5560SE, tModel.R5560SE
 
                 Select Case ConnectionMode
                     Case tConnectionMode.USB
@@ -198,12 +210,14 @@ Public Class communication
 
                         R5560_Init()
                         mtx.WaitOne()
-                        Dim DT5560SE_Handle As IntPtr
-                        Dim ierror = R5560_ConnectDevice(param0, 8888, DT5560SE_Handle)
+                        Dim a = New DT5560VBHandle
+                        a.IP = param0
+
+                        Dim ierror = R5560_ConnectDevice(param0, 8888, a.C_HANDLE)
                         mtx.ReleaseMutex()
                         Dim error_t = IErrorDT5550ToNETError(ierror)
                         If error_t = tError.OK Then
-                            DT5560SEHandle(ind) = DT5560SE_Handle
+                            DT5560SEHandle(ind) = a
                             _boardModel = model
                             _isconnected(ind) = True
                         Else
@@ -275,10 +289,10 @@ Public Class communication
                 Next
 
                 Return tError.OK
-            Case tModel.DT5560SE
+            Case tModel.DT5560SE, tModel.R5560SE
                 mtx.WaitOne()
                 For r = 0 To DT5560SEHandle.Count - 1
-                    R5560_CloseConnection(DT5560SEHandle(r))
+                    R5560_CloseConnection(DT5560SEHandle(r).C_HANDLE)
                     _isconnected(r) = False
                 Next
 
@@ -475,8 +489,8 @@ Public Class communication
                 mtx.WaitOne()
                 Dim ierror = USB3_WriteReg(value, address, DT5550Handle)
                 mtx.ReleaseMutex()
-                If ierror < &HFFFFFFFF& Then
-                    Return ierror
+                If ierror = 0 Then
+                    Return tError.OK
                 Else
                     Return tError.ERROR_FPGA
                 End If
@@ -487,20 +501,20 @@ Public Class communication
                 mtx.WaitOne()
                 Dim ierror = R5560_WriteReg(value, address, R5560Handle(Handle_indx))
                 mtx.ReleaseMutex()
-                If ierror < &HFFFFFFFF& Then
-                    Return ierror
+                If ierror = 0 Then
+                    Return tError.OK
                 Else
                     Return tError.ERROR_FPGA
                 End If
-            Case tModel.DT5560SE
+            Case tModel.DT5560SE, tModel.R5560SE
                 If _isconnected(Handle_indx) = False Then
                     Return tError.NOT_CONNECTED
                 End If
                 mtx.WaitOne()
-                Dim ierror = R5560_WriteReg(value, address, DT5560SEHandle(Handle_indx))
+                Dim ierror = R5560_WriteReg(value, address, DT5560SEHandle(Handle_indx).C_HANDLE)
                 mtx.ReleaseMutex()
-                If ierror < &HFFFFFFFF& Then
-                    Return ierror
+                If ierror = 0 Then
+                    Return tError.OK
                 Else
                     Return tError.ERROR_FPGA
                 End If
@@ -511,8 +525,8 @@ Public Class communication
                 mtx.WaitOne()
                 Dim ierror = USB2_WriteReg(value, address, SCIDKHandle)
                 mtx.ReleaseMutex()
-                If ierror < &HFFFFFFFF& Then
-                    Return ierror
+                If ierror = 0 Then
+                    Return tError.OK
                 Else
                     Return tError.ERROR_FPGA
                 End If
@@ -560,8 +574,8 @@ Public Class communication
                 mtx.WaitOne()
                 Dim ierror = USB3_ReadReg(value, address, DT5550Handle)
                 mtx.ReleaseMutex()
-                If ierror < &HFFFFFFFF& Then
-                    Return ierror
+                If ierror = 0 Then
+                    Return tError.OK
                 Else
                     Return tError.ERROR_FPGA
                 End If
@@ -572,20 +586,20 @@ Public Class communication
                 mtx.WaitOne()
                 Dim ierror = R5560_ReadReg(value, address, R5560Handle(Handle_indx))
                 mtx.ReleaseMutex()
-                If ierror < &HFFFFFFFF& Then
-                    Return ierror
+                If ierror = 0 Then
+                    Return tError.OK
                 Else
                     Return tError.ERROR_FPGA
                 End If
-            Case tModel.DT5560SE
+            Case tModel.DT5560SE, tModel.R5560SE
                 If _isconnected(Handle_indx) = False Then
                     Return tError.NOT_CONNECTED
                 End If
                 mtx.WaitOne()
-                Dim ierror = R5560_ReadReg(value, address, DT5560SEHandle(Handle_indx))
+                Dim ierror = R5560_ReadReg(value, address, DT5560SEHandle(Handle_indx).C_HANDLE)
                 mtx.ReleaseMutex()
-                If ierror < &HFFFFFFFF& Then
-                    Return ierror
+                If ierror = 0 Then
+                    Return tError.OK
                 Else
                     Return tError.ERROR_FPGA
                 End If
@@ -596,8 +610,8 @@ Public Class communication
                 mtx.WaitOne()
                 Dim ierror = USB2_ReadReg(value, address, SCIDKHandle)
                 mtx.ReleaseMutex()
-                If ierror < &HFFFFFFFF& Then
-                    Return ierror
+                If ierror = 0 Then
+                    Return tError.OK
                 Else
                     Return tError.ERROR_FPGA
                 End If
@@ -736,12 +750,12 @@ Public Class communication
                 mtx.ReleaseMutex()
                 Dim _terror = IErrorDT5550ToNETError(ierror)
                 Return _terror
-            Case tModel.DT5560SE
+            Case tModel.DT5560SE, tModel.R5560SE
                 If _isconnected(Handle_indx) = False Then
                     Return tError.NOT_CONNECTED
                 End If
                 mtx.WaitOne()
-                Dim ierror = R5560_ReadData(value, lenght, address, DT5560SEHandle(Handle_indx), read_data)
+                Dim ierror = R5560_ReadData(value, lenght, address, DT5560SEHandle(Handle_indx).C_HANDLE, read_data)
                 mtx.ReleaseMutex()
                 Dim _terror = IErrorDT5550ToNETError(ierror)
                 Return _terror
@@ -774,12 +788,12 @@ Public Class communication
                 mtx.ReleaseMutex()
                 Dim _terror = IErrorDT5550ToNETError(ierror)
                 Return _terror
-            Case tModel.DT5560SE
+            Case tModel.DT5560SE, tModel.R5560SE
                 If _isconnected(Handle_indx) = False Then
                     Return tError.NOT_CONNECTED
                 End If
                 mtx.WaitOne()
-                Dim ierror = R5560_ReadFifo(value, lenght, address, address_status, bus_mode, timeout_ms, DT5560SEHandle(Handle_indx), read_data)
+                Dim ierror = R5560_ReadFifo(value, lenght, address, address_status, bus_mode, timeout_ms, DT5560SEHandle(Handle_indx).C_HANDLE, read_data)
                 mtx.ReleaseMutex()
                 Dim _terror = IErrorDT5550ToNETError(ierror)
                 Return _terror
@@ -872,8 +886,8 @@ Public Class communication
 
     End Sub
 
-    Public Function SetShaper(ByVal shaper As String) As Boolean
-        Dim url As String = "http://" & My.Settings.IP1 & ":80/afe_settings"
+    Public Function SetShaper(ByVal shaper As String, ByVal Handle_indx As Integer) As Boolean
+        Dim url As String = "http://" & DT5560SEHandle(Handle_indx).IP & ":80/afe_settings"
         Dim response As String = ""
         Dim _json As String = "{""shaper"": """ & shaper & """}"
         Dim JsonPost As String = "{""command"":""set_afe"", ""params"":" & _json & "}"
@@ -887,8 +901,41 @@ Public Class communication
         End If
     End Function
 
-    Public Function SetAfeParam(ByVal param As String, ByVal param2 As String, ByVal values As Integer(), ByVal values2 As Integer(), ByVal ch As Integer(), ByVal ch2 As Integer(), ByVal N_Sections As Integer) As Boolean
-        Dim url As String = "http://" & My.Settings.IP1 & ":80/afe_settings"
+    Public Function SetAfeParam(ByVal param As String, ByVal param2 As String, ByVal values As Integer(), ByVal values2 As Integer(), ByVal ch As Integer(), ByVal ch2 As Integer(), ByVal N_Sections As Integer, ByVal Handle_indx As Integer) As Boolean
+        Dim url As String = "http://" & DT5560SEHandle(Handle_indx).IP & ":80/afe_settings"
+        Dim response As String = ""
+        Dim _json As String = ""
+        Dim JsonPost As String = ""
+        CreateJsonString(_json, param, param2, values, values2, ch, ch2, N_Sections)
+        JsonPost = "{""command"":""set_afe"", ""params"":" & _json & "}"
+        HttpRequest(url, JsonPost, response)
+        Dim w_response As WResponse = JsonConvert.DeserializeObject(Of WResponse)(response)
+
+        If w_response.Result = True Then
+            Return True
+        Else
+            Return False
+        End If
+    End Function
+
+
+    Public Function SetShaperR(ByVal shaper As String, ByVal Handle_indx As Integer) As Boolean
+        Dim url As String = "http://" & DT5560SEHandle(Handle_indx).IP & ":80/daq_settings"
+        Dim response As String = ""
+        Dim _json As String = "{""shaper"": """ & shaper & """}"
+        Dim JsonPost As String = "{""command"":""set_afe"", ""params"":" & _json & "}"
+        HttpRequest(url, JsonPost, response)
+        Dim w_response As WResponse = JsonConvert.DeserializeObject(Of WResponse)(response)
+
+        If w_response.Result = True Then
+            Return True
+        Else
+            Return False
+        End If
+    End Function
+
+    Public Function SetAfeParamR(ByVal param As String, ByVal param2 As String, ByVal values As Integer(), ByVal values2 As Integer(), ByVal ch As Integer(), ByVal ch2 As Integer(), ByVal N_Sections As Integer, ByVal Handle_indx As Integer) As Boolean
+        Dim url As String = "http://" & DT5560SEHandle(Handle_indx).IP & ":80/daq_settings"
         Dim response As String = ""
         Dim _json As String = ""
         Dim JsonPost As String = ""

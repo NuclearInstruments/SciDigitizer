@@ -32,12 +32,12 @@ Namespace My
         
         <Global.System.Diagnostics.DebuggerStepThroughAttribute()>  _
         Protected Overrides Sub OnCreateMainForm()
-            Me.MainForm = Global.DT5550ControlCenter.Connection
+            Me.MainForm = Global.OpenHardwareReadoutSoftware.Connection
         End Sub
         
         <Global.System.Diagnostics.DebuggerStepThroughAttribute()>  _
         Protected Overrides Sub OnCreateSplashScreen()
-            Me.SplashScreen = Global.DT5550ControlCenter.splash
+            Me.SplashScreen = Global.OpenHardwareReadoutSoftware.splash
         End Sub
     End Class
 End Namespace

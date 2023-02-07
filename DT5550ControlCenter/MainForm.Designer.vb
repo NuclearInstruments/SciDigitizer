@@ -492,7 +492,7 @@ Partial Class MainForm
         '
         Me.ExportToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.OscilloscopeImageToolStripMenuItem, Me.SpectrumImageToolStripMenuItem})
         Me.ExportToolStripMenuItem.Name = "ExportToolStripMenuItem"
-        Me.ExportToolStripMenuItem.Size = New System.Drawing.Size(193, 22)
+        Me.ExportToolStripMenuItem.Size = New System.Drawing.Size(192, 22)
         Me.ExportToolStripMenuItem.Text = "Export"
         '
         'OscilloscopeImageToolStripMenuItem
@@ -511,7 +511,7 @@ Partial Class MainForm
         '
         Me.PrintToolStripMenuItem1.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.OscilloscopeToolStripMenuItem, Me.SpectrumToolStripMenuItem1})
         Me.PrintToolStripMenuItem1.Name = "PrintToolStripMenuItem1"
-        Me.PrintToolStripMenuItem1.Size = New System.Drawing.Size(193, 22)
+        Me.PrintToolStripMenuItem1.Size = New System.Drawing.Size(192, 22)
         Me.PrintToolStripMenuItem1.Text = "Print"
         '
         'OscilloscopeToolStripMenuItem
@@ -529,7 +529,7 @@ Partial Class MainForm
         'OffsetCalibrationToolToolStripMenuItem
         '
         Me.OffsetCalibrationToolToolStripMenuItem.Name = "OffsetCalibrationToolToolStripMenuItem"
-        Me.OffsetCalibrationToolToolStripMenuItem.Size = New System.Drawing.Size(193, 22)
+        Me.OffsetCalibrationToolToolStripMenuItem.Size = New System.Drawing.Size(192, 22)
         Me.OffsetCalibrationToolToolStripMenuItem.Text = "Offset Calibration Tool"
         '
         'ToolStripSeparator6
@@ -742,7 +742,7 @@ Partial Class MainForm
         Me.IsMdiContainer = True
         Me.MainMenuStrip = Me.MenuStrip
         Me.Name = "MainForm"
-        Me.Text = "Nuclear Instruments DT5550 AFE Readout System"
+        Me.Text = "OpenHardware Readout Software"
         Me.MenuStrip.ResumeLayout(False)
         Me.MenuStrip.PerformLayout()
         Me.ToolStrip.ResumeLayout(False)

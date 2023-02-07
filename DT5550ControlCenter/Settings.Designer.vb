@@ -138,7 +138,7 @@ Partial Class Settings
         Me.Horizontal.BackColor = System.Drawing.Color.White
         Me.Horizontal.DecimalPlaces = 1
         Me.Horizontal.Increment = New Decimal(New Integer() {125, 0, 0, 65536})
-        Me.Horizontal.Location = New System.Drawing.Point(106, 44)
+        Me.Horizontal.Location = New System.Drawing.Point(123, 44)
         Me.Horizontal.Maximum = New Decimal(New Integer() {10000, 0, 0, 0})
         Me.Horizontal.Name = "Horizontal"
         Me.Horizontal.Size = New System.Drawing.Size(96, 20)
@@ -172,7 +172,7 @@ Partial Class Settings
         Me.TriggerSourceOscilloscope.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
         Me.TriggerSourceOscilloscope.FormattingEnabled = True
         Me.TriggerSourceOscilloscope.IntegralHeight = False
-        Me.TriggerSourceOscilloscope.Location = New System.Drawing.Point(106, 9)
+        Me.TriggerSourceOscilloscope.Location = New System.Drawing.Point(123, 9)
         Me.TriggerSourceOscilloscope.Name = "TriggerSourceOscilloscope"
         Me.TriggerSourceOscilloscope.Size = New System.Drawing.Size(96, 21)
         Me.TriggerSourceOscilloscope.TabIndex = 57
@@ -221,9 +221,9 @@ Partial Class Settings
         Me.Label11.AutoSize = True
         Me.Label11.Location = New System.Drawing.Point(8, 46)
         Me.Label11.Name = "Label11"
-        Me.Label11.Size = New System.Drawing.Size(93, 13)
+        Me.Label11.Size = New System.Drawing.Size(112, 13)
         Me.Label11.TabIndex = 49
-        Me.Label11.Text = "Horizontal (ns/div)"
+        Me.Label11.Text = "Horizontal (ns/sample)"
         '
         'Label14
         '

@@ -83,7 +83,7 @@ Public Class pSpectra
         n_ch = MainForm.acquisition.CHList.Count
         If Connection.ComClass._boardModel = communication.tModel.DT5550 Then
             addressData = MainForm.CurrentMCA.Address
-        ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.SCIDK Or Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
+        ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.SCIDK Or Connection.ComClass._boardModel = communication.tModel.DT5560SE Or Connection.ComClass._boardModel = communication.tModel.R5560SE Then
             addressData = (MainForm.CurrentCP.Address)
             MaxNumberOfChannel = _n_ch * Connection.ComClass._nBoard
             ReDim spectra(MaxNumberOfChannel, MaxSpectrumLength)
@@ -135,7 +135,7 @@ Public Class pSpectra
                     End If
                 End If
 
-            ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
+            ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.DT5560SE Or Connection.ComClass._boardModel = communication.tModel.R5560SE Then
                 Dim lenght = (_n_ch + 3) * npacket
                 Dim data(lenght) As UInt32
                 For cp = 0 To Connection.ComClass._nBoard - 1
@@ -204,6 +204,9 @@ Public Class pSpectra
             For i = 1 To CheckedListBox1.Items.Count - 1
                 CheckedListBox1.SetItemChecked(i, state)
                 MainForm.acquisition.CHList(i - 1).spectra_checked = state
+                If state Then
+                    Checked_id.Add(MainForm.acquisition.CHList(i - 1).id)
+                End If
             Next
         Else
             MainForm.acquisition.CHList(CheckedListBox1.SelectedIndex - 1).spectra_checked = IIf(CheckedListBox1.GetItemCheckState(CheckedListBox1.SelectedIndex).ToString = "Checked", True, False)
@@ -212,21 +215,23 @@ Public Class pSpectra
             End If
             Dim all_checked = True
             For i = 1 To CheckedListBox1.Items.Count - 1
-                If CheckedListBox1.GetItemCheckState(i).ToString = "Checked" Then
+                Dim state = IIf(CheckedListBox1.GetItemCheckState(i).ToString = "Checked", True, False)
+                If state Then
+                    Checked_id.Add(MainForm.acquisition.CHList(i - 1).id)
                 Else
                     all_checked = False
-                    Exit For
+                    'Exit For
                 End If
             Next
             If all_checked Then
                 CheckedListBox1.SetItemChecked(0, True)
             End If
         End If
-        For Each scope_ch In MainForm.acquisition.CHList
-            If scope_ch.spectra_checked Then
-                Checked_id.Add(scope_ch.id)
-            End If
-        Next
+        'For Each scope_ch In MainForm.acquisition.CHList
+        '    If scope_ch.spectra_checked Then
+        '        Checked_id.Add(scope_ch.id)
+        '    End If
+        'Next
 
     End Sub
 
@@ -273,6 +278,10 @@ Public Class pSpectra
         For k = 0 To n_ch - 1
             integralimage(k) = 0
         Next
+
+        For k = 0 To n_ch - 1
+            realtimeimage(k) = 0
+        Next
         MainForm.plog.TextBox1.AppendText("Reset Spectrum" & vbCrLf)
         MutexCumulative.ReleaseMutex()
 
@@ -297,7 +306,7 @@ Public Class pSpectra
             Else
                 MainForm.plog.TextBox1.AppendText("Error on CONFIG_ARM" & vbCrLf)
             End If
-        ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.SCIDK Or Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
+        ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.SCIDK Or Connection.ComClass._boardModel = communication.tModel.DT5560SE Or Connection.ComClass._boardModel = communication.tModel.R5560SE Then
             For cp = 0 To Connection.ComClass._nBoard - 1
                 If Connection.ComClass.SetRegister(addressRUN, 0, cp) = 0 Then
 
@@ -370,7 +379,7 @@ Public Class pSpectra
 
                 End If
             Next
-        ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.SCIDK Or Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
+        ElseIf Connection.ComClass._boardModel = communication.tModel.R5560 Or Connection.ComClass._boardModel = communication.tModel.SCIDK Or Connection.ComClass._boardModel = communication.tModel.DT5560SE Or Connection.ComClass._boardModel = communication.tModel.R5560SE Then
 
             For cp = 0 To Connection.ComClass._nBoard - 1
                 If Connection.ComClass.SetRegister(addressRUN, 0, cp) = 0 Then
@@ -602,7 +611,7 @@ Public Class pSpectra
                     Dim dataCorretto As Double
                     Dim selected_ch, selected_ch_id As Integer
                     selected_ch = CInt(MainForm.fit.DataGridView1.Rows(k).Cells("Channel").Value.ToString.Replace("CHANNEL ", ""))
-                    If Connection.ComClass._boardModel = communication.tModel.DT5560SE Then
+                    If Connection.ComClass._boardModel = communication.tModel.DT5560SE Or Connection.ComClass._boardModel = communication.tModel.R5560SE Then
                         selected_ch_id = MainForm.acquisition.CHList(selected_ch - 1).id
                     Else
                         selected_ch_id = MainForm.acquisition.CHList(selected_ch - 1).id - 1
@@ -848,6 +857,11 @@ Public Class pSpectra
 
     End Sub
 
+    Public Sub ClearRealtime()
+        For k = 0 To n_ch - 1
+            realtimeimage(k) = 0
+        Next
+    End Sub
 
     Public Sub UnpackDataPacketR(ByRef data As Queue(Of UInt32), cp As Integer)
 
@@ -905,12 +919,16 @@ Public Class pSpectra
                         ev.valid = False
                     End If
 
+                    'For k = 0 To n_ch - 1
+                    ' realtimeimage(k) = 0
+                    ' Next
+
                     If (trigger_id < 32) Then
                         MutexSpe.WaitOne()
                         spectra(trigger_id + (cp * _n_ch), ev.energy(0)) += 1
                         MutexSpe.ReleaseMutex()
                         MutexCumulative.WaitOne()
-                        realtimeimage(trigger_id + (cp * _n_ch)) = ev.energy(0)
+                        realtimeimage(trigger_id + (cp * _n_ch)) += ev.energy(0)
                         integralimage(trigger_id + (cp * _n_ch)) += ev.energy(0)
                         T = ev.timecode
                         MutexCumulative.ReleaseMutex()
