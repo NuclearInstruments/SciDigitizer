@@ -84,7 +84,7 @@ ni_release:
     - release-cli create --description "./latestChanges.md" --tag-name "$CI_COMMIT_TAG" --assets-link "[{\"url\":\"$URLNR\",\"name\":\"OpenHardwareReadout-Setup-$CI_COMMIT_TAG\"}]"
 
     # upload file to nidrive and get shared link
-    - mv INNOSETUP_BUILD/output/SciCompiler-setup.exe SciCompiler-setup-${CI_COMMIT_TAG}.exe
+    - mv INNOSETUP_BUILD/output/oh-readout-setup.exe oh-readout-setup-${CI_COMMIT_TAG}.exe
     - nidrive upload --file oh-readout-setup-${CI_COMMIT_TAG}.exe --destination releases/
     - nidrive share_link --path releases/oh-readout-setup-${CI_COMMIT_TAG}.exe > shared_link.txt
 
