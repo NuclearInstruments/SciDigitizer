@@ -91,11 +91,11 @@ ni_release:
     # send email with the shared link
     - export LINK=`cat shared_link.txt`
     - export APP_NAME=`basename $(git rev-parse --show-toplevel)`
-    - cp email/email-template.json email/email-message.json
-    - sed -i "s,{{ app }},${APP_NAME},g" email/email-message.json
-    - sed -i "s,{{ shared_link }},${LINK},g" "email/email-message.json"
-    - sed -i "s,{{ version }},${CI_COMMIT_TAG},g" "email/email-message.json"
-    - nimailsender send-template --file email/email-message.json
+    - cp .ni/email/email-template.json .ni/email/email-message.json
+    - sed -i "s,{{ app }},${APP_NAME},g" .ni/email/email-message.json
+    - sed -i "s,{{ shared_link }},${LINK},g" ".ni/email/email-message.json"
+    - sed -i "s,{{ version }},${CI_COMMIT_TAG},g" ".ni/email/email-message.json"
+    - nimailsender send-template --file .ni/email/email-message.json
 
   rules:
     - if: $CI_COMMIT_TAG
