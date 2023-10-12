@@ -4,9 +4,9 @@
 #define MyAppName "Open Hardware Readout Software"
 //#define MyAppVersion "2022.12.0.1"
 #define MyAppPublisher "Nuclear Instruments"
-#define MyAppURL "https://www.scicompiler.cloud"
+#define MyAppURL "https://www.nuclearinstruments.eu"
 #define BuildDir "INNOSETUP_BUILD\"
-#define MyAppExeName "OK-Readout-Setup.exe"
+#define MyAppExeName "OH-Readout-Setup.exe"
 
 #ifndef MyAppVersion
 #define MyAppVersion "0.0.0.0"
@@ -60,7 +60,7 @@ Name: "{group}\Open Hardware Readout Software"; Filename:"{app}\OpenHardwareRead
 [Run]
 
 
-Filename: "{tmp}\VC_redist_2012_.x86.exe"; Parameters: "/q /norestart"; \
+Filename: "{tmp}\VC_redist_2012.x86.exe"; Parameters: "/q /norestart"; \
     Check: VCRedistNeedsInstall_x86(); \
     Flags: waituntilterminated; \
     StatusMsg: "Installing VC++ 2012 (x86) redistributables..."
@@ -70,9 +70,9 @@ Filename: "{tmp}\VC_redist.x86.exe"; Parameters: "/q /norestart"; \
     StatusMsg: "Installing VC++ 2022 (x86) redistributables..."
 
 Filename: "{tmp}\d2xx_setup.exe"; Description: "Install DT1260 Drivers (FTDI D2XX)"; \
-  Flags: postinstall runascurrentuser      
+  Flags: waituntilterminated postinstall runascurrentuser      
 Filename: "{tmp}\d3xx_setup.exe"; Description: "Install DT5550X Drivers (FTDI D3XX)"; \
-  Flags: postinstall runascurrentuser
+  Flags: waituntilterminated postinstall runascurrentuser
 
 
 
@@ -172,7 +172,7 @@ begin
   sUnInstallString := GetUninstallString();
   if sUnInstallString <> '' then begin
   
-    V := MsgBox(ExpandConstant('Setup detected a previous version of SciCompiler installed on this machine. Do you want to uninstall it?'), mbInformation, MB_YESNO); { Custom Message if App installed }
+    V := MsgBox(ExpandConstant('Setup detected a previous version of Readout Software installed on this machine. Do you want to uninstall it?'), mbInformation, MB_YESNO); { Custom Message if App installed }
     if V = IDYES then
     begin    
       sUnInstallString := RemoveQuotes(sUnInstallString);
